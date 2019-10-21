@@ -18,12 +18,20 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="{{ url_for('main.index') }}">Flasky</a>
+            <a class="navbar-brand" href="{{ url_for('main.index') }}">电信工具Web版</a>
         </div>
         <div class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
-                <li><a href="{{ url_for('main.index') }}">Home</a></li>
-                <li><a href="{{ url_for('main.report') }}">统计报表</a></li>
+                <li><a href="{{ url_for('main.report') }}">Home</a></li>
+                <li role="presentation" class="dropdown">
+                    <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
+                        统计报表<span class="caret"></span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a href="{{ url_for('main.report_port') }}">端口明细</a></li>
+                        <li><a href="{{ url_for('main.report_port') }}">端口光功率</a></li>
+                    </ul>
+                </li>
                 <li><a href="{{ url_for('main.xunjian') }}">巡检</a></li>
                 <li><a href="{{ url_for('main.check_config') }}">配置检查</a></li>
             </ul>
@@ -33,7 +41,7 @@
 {% endblock %}
 
 {% block content %}
-<div class="container">
+<div class="container-fluid">
     {% for message in get_flashed_messages() %}
     <div class="alert alert-warning">
         <button type="button" class="close" data-dismiss="alert">&times;</button>
