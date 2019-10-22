@@ -1,0 +1,62 @@
+检查说明
+
+
+1.地址池和业务安全配置检查
+
+#检查subnet地址分配范围
+#检查网关是否包含pool中的subnet
+#检查l2-aware是否包含pool中的subnet
+#检查arp-populate，anti-spoof ip
+#安全检查
+
+2. ipv6检查
+
+#pool 检测  nd 对应 48 wan-host， pd 对应 44 pd
+#interface "system" 下必须有 local-dhcp-server "server1-ipv6"
+#isis0 下必须有 ipv6-routing mt 、ipv6-unicast
+#prefix 对比三个地方一致 dhcp6 local-dhcp-server，isis 0 policy-options prefix-list，ies 3000 ipv6
+# config = open('周家村（跨区域）.txt').read()
+#ipv6-slaac-prefix-pool，ipv6-delegated-prefix-pool 与名称对应 slaac 对应 nd，delegated 对应 pd
+#dhcp6 relay server的地址和interface "system"下的ipv6地址一致
+
+3. ipv6配置规范
+
+#pool 检测  nd 对应 48 wan-host， pd 对应 44 pd
+#prefix 对比 
+#ipv6-slaac-prefix-pool，ipv6-delegated-prefix-pool 与名称对应 slaac 对应 nd，delegated 对应 pd
+#检查server 是否与 ipv6 address 匹配
+#检查 group-interface 配置是否 完整
+#判断 group-interface pppoe 中是否有 python-policy "qu-port"
+
+4. nat地址池及拨号配置检查
+#nat公网地址要求有汇总黑洞配置
+#nat私网地址要求地址范围准确
+#pool "nat-pppoe" nat-group 1 type l2-aware create下能查到该段地址
+#nat私网地址要求配置在inside l2-aware下 ，要求在pool "pppoe" create/subscriber-interface "pppoe" create下查到该段地址
+#检查ludb-m，配置group-interface "mhsi-" suffix port-id是正确，不一样出告警
+#检查ludb-s，配置group-interface "shsi-" suffix port-id是正确，不一样出告警
+#私网地址基于地址池核查，地址池有的，黑洞路由、路由发布、ies3000下应该有
+
+5. 文件对比功能
+#对比两次执行结果，如果第一次有数据，第二次也必须有数据
+
+6. fc策略检查
+#对3010下的所有fc策略检查，是policer 1 通过；不是policer 1，则报错，fc xx policer 策略错误
+
+7. ftp检查
+#对display搜索ftp-server  ，如果有，则报错ftp服务被打开
+
+8. user admin检查
+#检查user用户是否为admin
+
+9. iptv主备接口地址校验
+#ies 1000 interface中的address 和pim interface 中的 priority 对比 如果address是奇数， priority必须为150，如果address是偶数，priority必须为100
+
+10. iptv的subnet地址校验
+#subnet 地址与subscriber-interface "iptv"中的address对比，要保持一致，gi-address必须在subnet中
+
+11. iptv策略校验
+#subscriber-mgmt配置要与模板一致
+
+12. nat outsdie 地址池检查
+#nat outside 中的地址池范围必须包含在黑洞路由中

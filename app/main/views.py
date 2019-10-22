@@ -1,6 +1,9 @@
 import os, sys
 from flask import render_template, session, redirect, url_for, current_app, request
 from . import main
+from ..check_pool import all_check
+from ..inspection import mobile
+sys.path.append('../')
 # from . report import get_report_data
 # from . import report
 # from .forms import NameForm, UploadForm
@@ -10,9 +13,6 @@ def index():
 
     return redirect(url_for('main.report_port'))
 
-@main.route('/xunjian')
-def xunjian():
-    return render_template('index.html', title = '巡检')
 
 @main.route('/report')
 def report():
@@ -39,7 +39,6 @@ def report():
 def report_port():
     '''统计报表-端口明细'''
 
-    sys.path.append('../')
     from .report import get_report_data, get_device_name
 
     with open(os.path.join('app', 'static', 'uploads', 'config.log')) as f:
@@ -51,4 +50,19 @@ def report_port():
 
 @main.route('/check_config')
 def check_config():
-    return render_template('index.html', title = '配置检查')
+
+    with open(os.path.join('app', 'static', 'uploads', 'config.log')) as f:
+        config = f.read()
+
+    check_res = all_check.all_check(config)
+    return render_template('check.html', check_res=check_res)
+
+@main.route('/xunjian')
+def xunjian():
+    '''巡检'''
+
+    xunjian_res = mobile.xunjian()
+    xunjian_text = ''
+    for item in xunjian_res:
+        xunjian_text += '{}\n{}\n{}\n\n'.format(item[0], item[1], item[2])
+    return render_template('xunjian.html', xunjian_res=xunjian_text)

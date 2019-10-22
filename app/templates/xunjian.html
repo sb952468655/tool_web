@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}设备巡检{% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+    <h1>设备巡检</h1>
+</div>
+
+{% if xunjian_res %}
+<div class="col-md-8">
+    <div class="panel panel-default">
+        <div class="panel-heading">巡检结果</div>
+        <div class="panel-body">
+            <pre class="pre-scrollable">{{ xunjian_res }}</pre>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
