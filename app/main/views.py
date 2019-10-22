@@ -39,13 +39,35 @@ def report():
 def report_port():
     '''统计报表-端口明细'''
 
-    from .report import get_report_data, get_device_name
+    from .report import get_report_data, get_device_name, get_port_ggl
 
-    with open(os.path.join('app', 'static', 'uploads', 'config.log')) as f:
+    with open(os.path.join('app', 'static', '1.log')) as f:
         config = f.read()
 
     report_data = get_report_data(config)
-    return render_template('report.html', report_data = report_data)
+    ggl_port = []
+    res = []
+
+
+    ggl_data = get_port_ggl(config)
+
+    i = 0
+    for item in report_data:
+        if item[-1] != 'MDX GIGE-T ' or item[-1] != 'MDI GIGE-T ':
+            ggl_port.append(item[0])
+
+            try:
+                res.append(item + [ggl_data[i][0]] + [ggl_data[i][1]])
+            except Exception:
+                print(i)
+            
+            i += 1
+        else:
+            res.append(item)
+
+
+    
+    return render_template('report.html', report_data = res)
 
 
 @main.route('/check_config')
@@ -66,3 +88,9 @@ def xunjian():
     for item in xunjian_res:
         xunjian_text += '{}\n{}\n{}\n\n'.format(item[0], item[1], item[2])
     return render_template('xunjian.html', xunjian_res=xunjian_text)
+
+@main.route('/auto_config')
+def auto_config():
+    '''脚本自动配置'''
+
+    return render_template('auto_config.html')

@@ -10,7 +10,8 @@ def get_port(config):
     '''show port'''
 
     '''2/2/6         Down  No   Down    9212 9212    - netw null xcme   GIGE-LX  20KM'''
-    p_port = r'''(\d{1,2}/\d{1,2}/\d{1,2}) {6,9}(Up|Down) {2,4}(Yes|No) {2,3}(Up|Down) {4,6}(\d{4}) (\d{4}) {4}(-|\d) (accs|netw) (null|qinq) (xgige|xcme) {2,3}((10GBASE-LR|GIGE-LX) {2}(\d{2}KM|\*))?'''
+    p_port = r'''(\d{1,2}/\d{1,2}/\d{1,2}) {6,9}(Up|Down) {2,4}(Yes|No) {2,3}(Up|Down) {4,6}(\d{4}) (\d{4}) {2,4}(-|\d{1,3}) (accs|netw) (null|qinq) (xgige|xcme) {2,3}((10GBASE-（L|E）R|GIGE-LX|MDX GIGE-T |MDI GIGE-T )( {2}(\d{2}KM|\*))?)?'''
+    # p_port = r'''(\d{1,2}/\d{1,2}/\d{1,2}) {6,9}(Up|Down) {2,4}(Yes|No) {2,3}(Up|Down) {4,6}(\d{4}) (\d{4}) {2,4}(-|\d{1,3}) (accs|netw) (null|qinq) (xgige|xcme) {2,3}((10GBASE-（L|E）R|GIGE-LX|MDX GIGE-T |MDI GIGE-T )( {2}(\d{2}KM|\*))?)?'''
     port_data = []
     res = re.findall(p_port, config)
     device_name = get_device_name(config)
@@ -31,7 +32,23 @@ def get_port(config):
         row.append(item[10])
 
         port_data.append(row)
+
+        print(' '.join(row))
     return port_data
+
+def get_port_ggl(config):
+    p_output = r'Tx Output Power \(dBm\) {8,10}([\-\.0-9]{4,6}).*?\nRx Optical Power \(avg dBm\) {3,5}([\-\.0-9]{4,6})'
+    # p_optical = r'Rx Optical Power \(avg dBm\) {3,4}([\-\.0-9]{3,4}).*?([\-\.0-9]{3,4}).*?[\-\.0-9]{3,4}.*?[\-\.0-9]{3,4}.*?[\-\.0-9]{3,4} '
+
+    res_output = re.findall(p_output, config)
+    # res_optical = re.findall(p_optical, config)
+
+    # print(len(res_output))
+    # print(len(res_optical))
+
+    return res_output
+
+
 
 def get_port_detail(config):
     '''show port detail'''

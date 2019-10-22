@@ -18,7 +18,7 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="{{ url_for('main.index') }}">电信工具Web版</a>
+            <a class="navbar-brand" href="{{ url_for('main.index') }}"></a>
         </div>
         <div class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
@@ -32,8 +32,9 @@
                         <li><a href="{{ url_for('main.report_port') }}">端口光功率</a></li>
                     </ul>
                 </li>
-                <li><a href="{{ url_for('main.xunjian') }}">巡检</a></li>
+                <li><a href="{{ url_for('main.xunjian') }}">设备巡检</a></li>
                 <li><a href="{{ url_for('main.check_config') }}">配置检查</a></li>
+                <li><a href="{{ url_for('main.auto_config') }}">脚本自动配置</a></li>
             </ul>
         </div>
     </div>

@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}脚本自动配置{% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+    <h1>脚本自动配置</h1>
+</div>
+
+
+<div class="col-md-8">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                    <tr>
+                        <th>{{ item[0] }}</th>
+                        <th>{{ item[1] }}</th>
+                        <th>{{ item[2] }}</th>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    <div class="btn-group" role="group" aria-label="...">
+        <button type="button" class="btn btn-default" data-toggle="modal" data-target="#myModal">制作</button>
+        <button type="button" class="btn btn-default">另存为</button>
+    </div>
+</div>
+
+
+{% endblock %}
