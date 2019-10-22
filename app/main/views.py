@@ -1,5 +1,7 @@
 import os, sys
 from flask import render_template, session, redirect, url_for, current_app, request
+import openpyxl
+from openpyxl.styles import Alignment
 from . import main
 from ..check_pool import all_check
 from ..inspection import mobile
@@ -94,3 +96,34 @@ def auto_config():
     '''脚本自动配置'''
 
     return render_template('auto_config.html')
+
+
+@main.route('/generate_excel')
+def generate_excel():
+    '''生成表格'''
+
+    excel = openpyxl.Workbook()
+    sheet = excel.active
+    sheet['A1'] = '设备名'
+    sheet['B1'] = '设备IP'
+    sheet['C1'] = 'port'
+    sheet['D1'] = '端口带宽'
+    sheet['E1'] = 'Admin State'
+    sheet['F1'] = 'Link State'
+    sheet['G1'] = 'Port State'
+    sheet['H1'] = 'CfgMTU'
+    sheet['I1'] = 'OperMTU'
+    sheet['J1'] = 'LAG'
+    sheet['K1'] = 'PortMode'
+    sheet['L1'] = 'PortEncp'
+    sheet['M1'] = 'PortType'
+    sheet['N1'] = 'C/QS/S/XFP/MDIMDX'
+    sheet['O1'] = '收光功率'
+    sheet['P1'] = '发光功率'
+    sheet['Q1'] = '收光门限'
+    sheet['R1'] = '发光门限'
+    sheet['S1'] = '是否存在异常'
+
+    cur_row = 2
+
+

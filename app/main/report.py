@@ -10,7 +10,7 @@ def get_port(config):
     '''show port'''
 
     '''2/2/6         Down  No   Down    9212 9212    - netw null xcme   GIGE-LX  20KM'''
-    p_port = r'''(\d{1,2}/\d{1,2}/\d{1,2}) {6,9}(Up|Down) {2,4}(Yes|No) {2,3}(Up|Down) {4,6}(\d{4}) (\d{4}) {2,4}(-|\d{1,3}) (accs|netw) (null|qinq) (xgige|xcme) {2,3}((10GBASE-（L|E）R|GIGE-LX|MDX GIGE-T |MDI GIGE-T )( {2}(\d{2}KM|\*))?)?'''
+    p_port = r'''(\d{1,2}/\d{1,2}/\d{1,2}) {6,9}(Up|Down) {2,4}(Yes|No) {2,3}(Up|Down) {4,6}(\d{4}) (\d{4}) {2,4}(-|\d{1,3}) (accs|netw) (null|qinq) (xgige|xcme) {2,3}((10GBASE-LR|10GBASE-ER|GIGE-LX|MDX GIGE-T |MDI GIGE-T )( {2}(\d{2}KM|\*))?)?'''
     # p_port = r'''(\d{1,2}/\d{1,2}/\d{1,2}) {6,9}(Up|Down) {2,4}(Yes|No) {2,3}(Up|Down) {4,6}(\d{4}) (\d{4}) {2,4}(-|\d{1,3}) (accs|netw) (null|qinq) (xgige|xcme) {2,3}((10GBASE-（L|E）R|GIGE-LX|MDX GIGE-T |MDI GIGE-T )( {2}(\d{2}KM|\*))?)?'''
     port_data = []
     res = re.findall(p_port, config)

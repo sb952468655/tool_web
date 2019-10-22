@@ -8,61 +8,75 @@
     <h1>端口明细</h1>
 </div>
 
-<table class="table table-condensed table-bordered table-striped">
-    <thead>
-        <tr>
-            <th>设备名</th>
-            <th>设备IP</th>
-            <th>port</th>
-            <th>端口带宽</th>
-            <th>Admin State</th>
-            <th>Link State</th>
-            <th>Port State</th>
-            <th>CfgMTU</th>
-            <th>OperMTU</th>
-            <th>LAG</th>
-            <th>PortMode</th>
-            <th>PortEncp</th>
-            <th>PortType</th>
-            <th>C/QS/S/XFP/MDIMDX</th>
-            <th>收光功率</th>
-            <th>发光功率</th>
-            <th>收光门限</th>
-            <th>发光门限</th>
-            <th>是否存在异常</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for item in report_data %}
-            <tr>
-                <th>{{ item[0] }}</th>
-                <th></th>
-                <th>{{ item[1] }}</th>
-                <th>
-                    {% if item[11].startswith('10') %}
-                        10GE
-                    {% else %}
-                        GE
-                    {% endif %}
-                </th>
-                <th>{{ item[2] }}</th>
-                <th>{{ item[3] }}</th>
-                <th>{{ item[4] }}</th>
-                <th>{{ item[5] }}</th>
-                <th>{{ item[6] }}</th>
-                <th>{{ item[7] }}</th>
-                <th>{{ item[8] }}</th>
-                <th>{{ item[9] }}</th>
-                <th>{{ item[10] }}</th>
-                <th>{{ item[11] }}</th>
-                <th></th>
-                <th></th>
-                <th></th>
-                <th></th>
-                <th></th>
-            </tr>
-        {% endfor %}
-    </tbody>
-</table>
+
+<div class="row">
+        <div class="col-md-1">
+            <ul class="nav nav-pills nav-stacked">
+                <li role="presentation" class="active"><a href="#">端口明细</a></li>
+                <li role="presentation"><a href="#">端口统计</a></li>
+                <li role="presentation"><a href="#">mda明细</a></li>
+                <li role="presentation"><a href="#">mda统计</a></li>
+                <li role="presentation"><a href="#">生成表格</a></li>
+            </ul>
+        </div>
+        <div class="col-md-11">
+            <table class="table table-condensed table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>设备名</th>
+                        <th>设备IP</th>
+                        <th>port</th>
+                        <th>端口带宽</th>
+                        <th>Admin State</th>
+                        <th>Link State</th>
+                        <th>Port State</th>
+                        <th>CfgMTU</th>
+                        <th>OperMTU</th>
+                        <th>LAG</th>
+                        <th>PortMode</th>
+                        <th>PortEncp</th>
+                        <th>PortType</th>
+                        <th>C/QS/S/XFP/MDIMDX</th>
+                        <th>收光功率</th>
+                        <th>发光功率</th>
+                        <th>收光门限</th>
+                        <th>发光门限</th>
+                        <th>是否存在异常</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in report_data %}
+                        <tr>
+                            <th>{{ item[0] }}</th>
+                            <th></th>
+                            <th>{{ item[1] }}</th>
+                            <th>
+                                {% if item[11].startswith('10') %}
+                                    10GE
+                                {% else %}
+                                    GE
+                                {% endif %}
+                            </th>
+                            <th>{{ item[2] }}</th>
+                            <th>{{ item[3] }}</th>
+                            <th>{{ item[4] }}</th>
+                            <th>{{ item[5] }}</th>
+                            <th>{{ item[6] }}</th>
+                            <th>{{ item[7] }}</th>
+                            <th>{{ item[8] }}</th>
+                            <th>{{ item[9] }}</th>
+                            <th>{{ item[10] }}</th>
+                            <th>{{ item[11] }}</th>
+                            <th>{{ item[12] }}</th>
+                            <th>{{ item[13] }}</th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+      </div>
 
 {% endblock %}
