@@ -46,11 +46,13 @@ def report():
 def report_port():
     '''统计报表-端口明细'''
 
-    from .report import get_report_data, get_device_name, get_port_ggl
+
+    from .report import get_report_data, get_device_name, get_port_ggl, get_ip
 
     with open(os.path.join('app', 'static', '1.log')) as f:
         config = f.read()
 
+    ip = get_ip(config)
     report_data = get_report_data(config)
     ggl_port = []
     res = []
@@ -64,16 +66,20 @@ def report_port():
             ggl_port.append(item[0])
 
             try:
-                res.append(item + [ggl_data[i][0]] + [ggl_data[i][1]])
+                res.append(item + [ggl_data[i][0]] + [ggl_data[i][1]] + [ip])
             except Exception:
                 print('端口数和光功率数量不匹配')
             
             i += 1
         else:
-            res.append(item + [''] + [''])
+            res.append(item + [''] + [''] + [ip])
+    
 
 
     session['report'] = res
+
+    # request.args.get('page', 1, type=int)
+
     return render_template('report.html', report_data = res)
 
 
@@ -135,7 +141,7 @@ def generate_excel():
     cur_row = 2
     for item in session.get('report'):
         sheet['A'+ str(cur_row)] = item[0]
-        # sheet['B'+ str(cur_row)] = item[1]
+        sheet['B'+ str(cur_row)] = item[14]
         sheet['C'+ str(cur_row)] = item[1]
         if '10' in item[11]:
             sheet['D'+ str(cur_row)] = '10GE'
@@ -155,7 +161,10 @@ def generate_excel():
         sheet['P'+ str(cur_row)] = item[13]
         # sheet['Q'+ str(cur_row)] = item[0]
         # sheet['R'+ str(cur_row)] = item[0]
-        # sheet['S'+ str(cur_row)] = item[0]
+        if item[2] == 'Up' and item[3] == 'No' and item[4] != 'Up':
+            sheet['S'+ str(cur_row)] = '是'
+        else:
+            sheet['S'+ str(cur_row)] = '否'
 
         cur_row += 1
     
@@ -171,24 +180,28 @@ def xj_report():
 
     doc = docx.Document(os.path.join('app','static','xunjian.docx'))
     area =  '常州移动' 
-    doc.add_paragraph(area + '巡检报告', style='report-head')
-    doc.add_paragraph('上海贝尔7750设备巡检报告', style='report-head')
+    # doc.add_paragraph(area + '巡检报告', style='report-head')
+    doc.add_paragraph(area + '巡检报告')
+    # doc.add_paragraph('上海贝尔7750设备巡检报告', style='report-head')
+    doc.add_paragraph('上海贝尔7750设备巡检报告3333333')
     doc.add_paragraph()
     doc.add_paragraph()
     today_obj = datetime.datetime.now()
     today = '%d年%d月%d日' % (today_obj.year, today_obj.month, today_obj.day)
-    doc.add_paragraph(today, style='report-date')
+    # doc.add_paragraph(today, style='report-date')
+    doc.add_paragraph(today)
     doc.add_page_break()
-    doc.add_heading('巡检情况汇总', 4)
+    # doc.add_heading('巡检情况汇总', 4)
     
     for line in session.get('xunjian'):
-        p_name = doc.add_paragraph(line[0], style='report-info')
-
+        # p_name = doc.add_paragraph(line[0], style='report-info')
+        p_name = doc.add_paragraph(line[0])
         if line[1]:
-            p_info = doc.add_paragraph(line[1], style='report-info')
+            # p_info = doc.add_paragraph(line[1], style='report-info')
+            p_info = doc.add_paragraph(line[1])
         if line[2]:
-            p_warn = doc.add_paragraph('注：' + line[2], style='report-normal')
-
+            # p_warn = doc.add_paragraph('注：' + line[2], style='report-normal')
+            p_warn = doc.add_paragraph('注：' + line[2])
         if not line[1] and not line[2]:
             print('not a line 1, 2')
         doc.add_paragraph()
@@ -203,17 +216,22 @@ def xj_report():
         font.color.rgb = RGBColor(255, 0, 255)
 
 
-    doc.add_heading('总结', 4)
-    doc.add_paragraph('1，为了保障%s移动城域网7750设备正常运行，请定期清理过滤网。' % '常州',
-        style='report-normal')
+    # doc.add_heading('总结', 4)
+
+    # doc.add_paragraph('1，为了保障%s移动城域网7750设备正常运行，请定期清理过滤网。' % '常州',
+    #     style='report-normal')
+
+    doc.add_paragraph('1，为了保障%s移动城域网7750设备正常运行，请定期清理过滤网。' % '常州')
 
     for item in session.get('xunjian'):
         if 'Temperature' in item:
-            doc.add_paragraph('2，板卡温度高建议清洗防尘网。',
-            style='report-normal')
+            # doc.add_paragraph('2，板卡温度高建议清洗防尘网。',
+            # style='report-normal')
+            doc.add_paragraph('2，板卡温度高建议清洗防尘网。')
         break
     
     report_name = '%s移动巡检报告-%s.docx' % ('常州', today)
     doc.save( os.path.join('app', 'static', report_name))
 
+    url = url_for('static', filename = report_name)
     return redirect(url_for('static', filename = report_name))

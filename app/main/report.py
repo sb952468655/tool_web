@@ -48,6 +48,14 @@ def get_port_ggl(config):
 
     return res_output
 
+def get_ip(config):
+
+    p_ip = r'''interface "system"\n {12}address (\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})/32'''
+    res_ip = re.search(p_ip, config)
+    if res_ip:
+        return res_ip.group(1)
+    else:
+        return ''
 
 
 def get_port_detail(config):
