@@ -3,7 +3,7 @@
 
 {% block title %} 端口明细 {% endblock %}
 
-{% block body %}
+{% block page_content %}
 <div class="page-header">
     <h1>端口明细</h1>
 </div>
@@ -15,8 +15,8 @@
             <li role="presentation"><a href="{{ url_for('main.generate_excel') }}">生成表格</a></li>
         </ul>
     </div>
-    <div class="col-md-10" style="overflow:scroll;height:500px;">
-        <table class="table table-striped table-condensed" style="min-width:2500px;" >
+    <div class="col-md-10" style="overflow:scroll;height:450px;">
+        <table class="table table-striped table-condensed" style="min-width:2000px;" >
             <thead>
                 <tr>
                     <th>设备名</th>
@@ -80,7 +80,6 @@
         </table>
     </div>
 </div>
-
 
 {% endblock %}
 
