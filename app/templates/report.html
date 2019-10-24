@@ -44,7 +44,7 @@
                 {% for item in report_data %}
                     <tr>
                         <th>{{ item[0] }}</th>
-                        <th>{{ item[14] }}</th>
+                        <th>{{ item[16] }}</th>
                         <th>{{ item[1] }}</th>
                         <th>
                             {% if item[11].startswith('10') %}
@@ -65,8 +65,8 @@
                         <th>{{ item[11] }}</th>
                         <th>{{ item[12] }}</th>
                         <th>{{ item[13] }}</th>
-                        <th></th>
-                        <th></th>
+                        <th>{{ item[14] }}</th>
+                        <th>{{ item[15] }}</th>
                         <th> 
                             {% if item[2] == 'Up' and item[3] == 'No' and item[4] != 'Up' %}
                                 是

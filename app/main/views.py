@@ -66,13 +66,13 @@ def report_port():
             ggl_port.append(item[0])
 
             try:
-                res.append(item + [ggl_data[i][0]] + [ggl_data[i][1]] + [ip])
+                res.append(item + [ggl_data[i][0], ggl_data[i][5], ggl_data[i][3]+'|'+ ggl_data[i][4], ggl_data[i][8]+'|'+ ggl_data[i][9]] + [ip])
             except Exception:
                 print('端口数和光功率数量不匹配')
             
             i += 1
         else:
-            res.append(item + [''] + [''] + [ip])
+            res.append(item + ['','','',''] + [ip])
     
 
 
@@ -141,7 +141,7 @@ def generate_excel():
     cur_row = 2
     for item in session.get('report'):
         sheet['A'+ str(cur_row)] = item[0]
-        sheet['B'+ str(cur_row)] = item[14]
+        sheet['B'+ str(cur_row)] = item[16]
         sheet['C'+ str(cur_row)] = item[1]
         if '10' in item[11]:
             sheet['D'+ str(cur_row)] = '10GE'
@@ -159,8 +159,8 @@ def generate_excel():
         sheet['N'+ str(cur_row)] = item[11]
         sheet['O'+ str(cur_row)] = item[12]
         sheet['P'+ str(cur_row)] = item[13]
-        # sheet['Q'+ str(cur_row)] = item[0]
-        # sheet['R'+ str(cur_row)] = item[0]
+        sheet['Q'+ str(cur_row)] = item[14]
+        sheet['R'+ str(cur_row)] = item[15]
         if item[2] == 'Up' and item[3] == 'No' and item[4] != 'Up':
             sheet['S'+ str(cur_row)] = '是'
         else:
