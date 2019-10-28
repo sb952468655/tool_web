@@ -1,7 +1,7 @@
 import os, sys
 from flask import render_template, session, redirect, url_for, current_app, request
 import openpyxl
-from openpyxl.styles import Alignment
+from openpyxl.styles import Alignment, PatternFill
 import docx
 from docx.shared import Pt
 from docx.shared import RGBColor
@@ -64,16 +64,18 @@ def report_port():
     for item in report_data:
         if item[-1] != 'MDX GIGE-T ' and item[-1] != 'MDI GIGE-T ':
             ggl_port.append(item[0])
-
+            port_is_ok = '否'
+            #判断端口是否有异常
+            if item[2] == 'Up' and item[3] == 'No' and item[4] != 'Up':
+                port_is_ok = '是'
             try:
-                res.append(item + [ggl_data[i][0], ggl_data[i][5], ggl_data[i][3]+'|'+ ggl_data[i][4], ggl_data[i][8]+'|'+ ggl_data[i][9]] + [ip])
+                res.append(item + [ggl_data[i][0], ggl_data[i][5], ggl_data[i][2]+'|'+ ggl_data[i][3], ggl_data[i][7]+'|'+ ggl_data[i][8], ip, port_is_ok])
             except Exception:
                 print('端口数和光功率数量不匹配')
             
             i += 1
         else:
-            res.append(item + ['','','',''] + [ip])
-    
+            res.append(item + ['','','','', ip, '' ])
 
 
     session['report'] = res
@@ -137,7 +139,10 @@ def generate_excel():
     sheet['S1'] = '是否存在异常'
 
     sheet.column_dimensions['A'].width = 40.0
+    sheet.column_dimensions['B'].width = 20.0
     sheet.column_dimensions['N'].width = 20.0
+    sheet.column_dimensions['Q'].width = 15.0
+    sheet.column_dimensions['R'].width = 15.0
     cur_row = 2
     for item in session.get('report'):
         sheet['A'+ str(cur_row)] = item[0]
@@ -157,12 +162,25 @@ def generate_excel():
         sheet['L'+ str(cur_row)] = item[9]
         sheet['M'+ str(cur_row)] = item[10]
         sheet['N'+ str(cur_row)] = item[11]
-        sheet['O'+ str(cur_row)] = item[12]
-        sheet['P'+ str(cur_row)] = item[13]
-        sheet['Q'+ str(cur_row)] = item[14]
-        sheet['R'+ str(cur_row)] = item[15]
+        sheet['O'+ str(cur_row)] = item[13]
+
+        if item[13] and (float(item[13]) < float(item[15].split('|')[1]) or float(item[13]) > float(item[15].split('|')[0])):
+            fill = PatternFill("solid", fgColor="FF0000")
+            sheet['O'+ str(cur_row)].fill = fill
+
+
+        sheet['P'+ str(cur_row)] = item[12]
+
+        if item[12] and (float(item[12]) < float(item[14].split('|')[1]) or float(item[12]) > float(item[14].split('|')[0])):
+            fill = PatternFill("solid", fgColor="FF0000")
+            sheet['P'+ str(cur_row)].fill = fill
+
+        sheet['Q'+ str(cur_row)] = item[15]
+        sheet['R'+ str(cur_row)] = item[14]
         if item[2] == 'Up' and item[3] == 'No' and item[4] != 'Up':
             sheet['S'+ str(cur_row)] = '是'
+            fill = PatternFill("solid", fgColor="FF0000")
+            sheet['S'+ str(cur_row)].fill = fill
         else:
             sheet['S'+ str(cur_row)] = '否'
 

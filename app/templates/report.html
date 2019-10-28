@@ -63,17 +63,23 @@
                         <th>{{ item[9] }}</th>
                         <th>{{ item[10] }}</th>
                         <th>{{ item[11] }}</th>
-                        <th>{{ item[12] }}</th>
-                        <th>{{ item[13] }}</th>
-                        <th>{{ item[14] }}</th>
+                        {% if item[13] == '' or (item[13]|float >= item[15].split('|')[1]|float and item[13]|float <= item[15].split('|')[0]|float) %}
+                            <th>{{ item[13] }}</th>
+                        {% else %}
+                            <th bgcolor="#FF0000">{{ item[13] }}</th>
+                        {% endif %}
+                        {% if item[12] == '' or (item[12]|float >= item[14].split('|')[1]|float and item[12]|float <= item[14].split('|')[0]|float) %}
+                            <th>{{ item[12] }}</th>
+                        {% else %}
+                            <th bgcolor="#FF0000">{{ item[12] }}</th>
+                        {% endif %}
                         <th>{{ item[15] }}</th>
-                        <th> 
-                            {% if item[2] == 'Up' and item[3] == 'No' and item[4] != 'Up' %}
-                                是
-                            {% else %}
-                                否
-                            {% endif %}
-                        </th>
+                        <th>{{ item[14] }}</th>
+                        {% if item[17] == '否' or item[17] == '' %}
+                            <th>否</th>
+                        {% else %}
+                            <th bgcolor="#FF0000">是</th>
+                        {% endif %}
                     </tr>
                 {% endfor %}
             </tbody>
