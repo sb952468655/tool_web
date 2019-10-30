@@ -33,7 +33,6 @@ def get_port(config):
 
         port_data.append(row)
 
-        print(' '.join(row))
     return port_data
 
 def get_port_ggl(config):

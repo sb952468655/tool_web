@@ -10,6 +10,7 @@ import datetime
 from . import main
 from ..check_pool import all_check
 from ..inspection import mobile
+from .config import CITY
 sys.path.append('../')
 # from . report import get_report_data
 # from . import report
@@ -164,14 +165,14 @@ def generate_excel():
         sheet['N'+ str(cur_row)] = item[11]
         sheet['O'+ str(cur_row)] = item[13]
 
-        if item[13] and (float(item[13]) < float(item[15].split('|')[1]) or float(item[13]) > float(item[15].split('|')[0])):
+        if item[2] == 'Up' and item[3] == 'Yes' and item[4] == 'Up' and item[13] and (float(item[13]) < float(item[15].split('|')[1]) or float(item[13]) > float(item[15].split('|')[0])):
             fill = PatternFill("solid", fgColor="FF0000")
             sheet['O'+ str(cur_row)].fill = fill
 
 
         sheet['P'+ str(cur_row)] = item[12]
 
-        if item[12] and (float(item[12]) < float(item[14].split('|')[1]) or float(item[12]) > float(item[14].split('|')[0])):
+        if item[2] == 'Up' and item[3] == 'Yes' and item[4] == 'Up' and item[12] and (float(item[12]) < float(item[14].split('|')[1]) or float(item[12]) > float(item[14].split('|')[0])):
             fill = PatternFill("solid", fgColor="FF0000")
             sheet['P'+ str(cur_row)].fill = fill
 
@@ -253,3 +254,13 @@ def xj_report():
 
     url = url_for('static', filename = report_name)
     return redirect(url_for('static', filename = report_name))
+
+
+@main.route('/node_list')
+def node_list():
+    node_data = []
+    for root,dirs,files in os.walk(os.path.join('app','static','logs', CITY)):
+        node_data = dirs
+        break
+                
+    return render_template('node_list.html', node_data = node_data)
