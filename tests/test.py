@@ -1,65 +1,55 @@
 import re
+import os
 
-text = r'''===============================================================================
-Ports on Slot 1
-===============================================================================
-Port          Admin Link Port    Cfg  Oper LAG/ Port Port Port   C/QS/S/XFP/
-Id            State      State   MTU  MTU  Bndl Mode Encp Type   MDIMDX
--------------------------------------------------------------------------------
-1/1/1         Up    Yes  Up      1614 1614    - netw null xgige  10GBASE-LR  *
-1/1/2         Down  No   Down    9212 9212    - netw null xgige  
-1/2/1         Up    Yes  Up      1522 1522    - accs qinq xcme   GIGE-LX  20KM
-1/2/2         Up    Yes  Up      1522 1522    2 accs qinq xcme   GIGE-LX  20KM
-1/2/3         Down  No   Down    1522 1522    - accs qinq xcme   GIGE-LX  20KM
-1/2/4         Down  No   Down    1522 1522    - accs qinq xcme   GIGE-LX  20KM
-1/2/5         Down  No   Down    1522 1522    - accs qinq xcme   GIGE-LX  20KM
-1/2/6         Down  No   Down    1522 1522    - accs qinq xcme   GIGE-LX  20KM
-1/2/7         Down  No   Down    1522 1522    - accs qinq xcme   GIGE-LX  20KM
-1/2/8         Down  No   Down    1522 1522    - accs qinq xcme   GIGE-LX  20KM
-1/2/9         Up    No   Down    1522 1522    - accs qinq xcme   GIGE-LX  20KM
-1/2/10        Down  No   Down    1522 1522    - accs qinq xcme   GIGE-LX  20KM
-1/2/11        Down  No   Down    1522 1522    - accs qinq xcme   GIGE-LX  20KM
-1/2/12        Down  No   Down    9212 9212    - netw null xcme   GIGE-LX  20KM
-1/2/13        Down  No   Down    9212 9212    - netw null xcme   GIGE-LX  20KM
-1/2/14        Down  No   Down    9212 9212    - netw null xcme   GIGE-LX  20KM
-1/2/15        Down  No   Down    9212 9212    - netw null xcme   GIGE-LX  20KM
-1/2/16        Down  No   Down    9212 9212    - netw null xcme   GIGE-LX  20KM
-1/2/17        Down  No   Down    9212 9212    - netw null xcme   GIGE-LX  20KM
-1/2/18        Down  No   Down    9212 9212    - netw null xcme   GIGE-LX  20KM
-1/2/19        Down  No   Down    9212 9212    - netw null xcme   GIGE-LX  20KM
-1/2/20        Down  No   Down    9212 9212    - netw null xcme   GIGE-LX  20KM
+c = r'''ies 3000 name "3000" customer 1 create
+            subscriber-interface "pppoe" create
+                address 100.126.112.1/22
+                address 10.132.60.1/22
+                address 10.222.128.1/21
+                address 10.32.80.1/21
+                address 100.72.72.1/21
+                address 100.74.112.1/22
+                address 10.222.192.1/20
+                address 100.77.96.1/21
+                address 100.77.160.1/20
+                address 100.72.32.1/20
+                address 100.78.112.1/20
+                address 183.211.68.201/29
+                address 100.79.16.1/20
+                address 100.79.112.1/20
+                address 183.206.225.129/28
+                address 183.206.228.129/28
+                address 10.133.126.1/23
+                address 10.132.196.1/22
+                address 10.162.76.1/22
+                address 10.162.188.1/22
+                address 10.162.192.1/22
+                address 10.162.196.1/22
+                address 10.162.200.1/22
+                address 100.96.128.1/18
+                address 100.96.192.1/18
+                ipv6
+                    delegated-prefix-len 60
+                    subscriber-prefixes
+                        prefix 2409:8a20:5607::/48 wan-host
+                        prefix 2409:8a20:5670::/44 pd
+                        prefix 2409:8a22:5607::/48 wan-host
+                        prefix 2409:8a22:5670::/44 pd
+                    exit
+                exit'''
 
-===============================================================================
-Ports on Slot 2
-===============================================================================
-Port          Admin Link Port    Cfg  Oper LAG/ Port Port Port   C/QS/S/XFP/
-Id            State      State   MTU  MTU  Bndl Mode Encp Type   MDIMDX
--------------------------------------------------------------------------------
-2/1/1         Up    No   Down    1614 1614    - netw null xgige  
-2/1/2         Down  No   Down    9212 9212    - netw null xgige  
-2/2/1         Down  No   Down    9212 9212    - netw null xcme   GIGE-LX  20KM
-2/2/2         Up    Yes  Up      1522 1522    2 accs qinq xcme   GIGE-LX  20KM
-2/2/3         Down  No   Down    1522 1522    - accs qinq xcme   GIGE-LX  20KM
-2/2/4         Down  No   Down    9212 9212    - netw null xcme   GIGE-LX  20KM
-2/2/5         Down  No   Down    9212 9212    - netw null xcme   GIGE-LX  20KM
-2/2/6         Down  No   Down    9212 9212    - netw null xcme   GIGE-LX  20KM
-2/2/7         Down  No   Down    9212 9212    - netw null xcme   GIGE-LX  20KM
-2/2/8         Down  No   Down    9212 9212    - netw null xcme   GIGE-LX  20KM
-2/2/9         Down  No   Down    9212 9212    - netw null xcme   GIGE-LX  20KM
-2/2/10        Down  No   Down    9212 9212    - netw null xcme   GIGE-LX  20KM
-2/2/11        Down  No   Down    9212 9212    - netw null xcme   GIGE-LX  20KM
-2/2/12        Down  No   Down    9212 9212    - netw null xcme   GIGE-LX  20KM
-2/2/13        Down  No   Down    9212 9212    - netw null xcme   GIGE-LX  20KM
-2/2/14        Down  No   Down    9212 9212    - netw null xcme   GIGE-LX  20KM
-2/2/15        Down  No   Down    9212 9212    - netw null xcme   GIGE-LX  20KM
-2/2/16        Down  No   Down    9212 9212    - netw null xcme   GIGE-LX  20KM
-2/2/17        Down  No   Down    9212 9212    - netw null xcme   GIGE-LX  20KM
-2/2/18        Down  No   Down    9212 9212    - netw null xcme   GIGE-LX  20KM
-2/2/19        Down  No   Down    9212 9212    - netw null xcme   GIGE-LX  20KM
-2/2/20        Down  No   Down    9212 9212    - netw null xcme   GIGE-LX  20KM'''
+with open(os.path.join('app','static','1.log')) as f:
+    c = f.read()
 
-p_port = r'''(\d{1,2}/\d{1,2}/\d{1,2}) {6,9}(Up|Down) {2,4}(Yes|No) {2,3}(Up|Down) {4,6}(\d{4}) (\d{4}) {4}(-|\d) (accs|netw) (null|qinq) (xgige|xcme) {2,3}((10GBASE-LR|GIGE-LX) {2}(\d{2}KM|\*))?'''
+p = r'address (\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})/(\d\d)'
+interface = r'(?s)(interface "(.*?)" create.*?\n {12}exit)'
+ies = r'(?s)(ies (\d{2,6})( name "\d{2,6}")? customer \d{1,2} create.*?\n {8}exit)'
 
-res = re.findall(p_port, text)
-
-print(res)
+res_ies = re.findall(ies, c)
+for item in res_ies:
+    res_interface = re.findall(interface, item[0])
+    for item2 in res_interface:
+        res_address = re.findall(p, item2[0])
+        if res_address:
+            for item3 in res_address:
+                print(item3[0] + '/' + item3[1])
