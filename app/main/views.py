@@ -11,6 +11,8 @@ from . import main
 from ..check_pool import all_check
 from ..inspection import mobile
 from .config import CITY
+from .address import get_address_data
+
 sys.path.append('../')
 # from . report import get_report_data
 # from . import report
@@ -281,11 +283,14 @@ def host_list(node_name):
 @main.route('/address_collect/<node_name>/<host_name>')
 def address_collect(node_name, host_name):
     '''三层接口和静态用户IP地址采集'''
+    address_data = []
 
-    address_data = [
-        ['JSXZH-MC-CMNET-SR-JWDWSC_7750', '218.206.138.45', 'interfaceip（三层用户接口）', '接口', '是', '223.113.78.61', '', '30'
-            , '三层接口名称', 'sap接口编号', '', '', '', '', 'XuZhouXuGongWaJueJiXieYouXianGongSi']
-    ]
+    with open(os.path.join('app', 'static', 'logs', CITY, node_name, host_name)) as f:
+        config = f.read()
+    res = get_address_data(config)
+    for item in res:
+        address_data.append([host_name] + item)
+    
 
     return render_template('address_collect.html', address_data = address_data, action = 'address_collect')
 
