@@ -19,7 +19,7 @@ sys.path.append('../')
 @main.route('/')
 def index():
 
-    return redirect(url_for('main.report_port'))
+    return redirect(url_for('main.node_list', action = 'report_port'))
 
 
 @main.route('/report')
@@ -43,14 +43,13 @@ def report():
 
     return render_template('index.html', items = items)
 
-@main.route('/report_port')
-def report_port():
+@main.route('/report_port/<node_name>/<host_name>')
+def report_port(node_name, host_name):
     '''统计报表-端口明细'''
-
 
     from .report import get_report_data, get_device_name, get_port_ggl, get_ip
 
-    with open(os.path.join('app', 'static', '1.log')) as f:
+    with open(os.path.join('app', 'static', 'logs', CITY, node_name, host_name)) as f:
         config = f.read()
 
     ip = get_ip(config)
@@ -83,7 +82,7 @@ def report_port():
 
     # request.args.get('page', 1, type=int)
 
-    return render_template('report.html', report_data = res)
+    return render_template('report.html', report_data = res, action = 'report_port')
 
 
 @main.route('/check_config')
@@ -256,11 +255,42 @@ def xj_report():
     return redirect(url_for('static', filename = report_name))
 
 
-@main.route('/node_list')
-def node_list():
+@main.route('/node_list/<action>')
+def node_list(action):
+    session['action'] = action
     node_data = []
     for root,dirs,files in os.walk(os.path.join('app','static','logs', CITY)):
         node_data = dirs
         break
                 
-    return render_template('node_list.html', node_data = node_data)
+    return render_template('node_list.html', node_data = node_data, action = action)
+
+
+@main.route('/host_list/<node_name>')
+def host_list(node_name):
+    host_data = []
+
+    for root,dirs,files in os.walk(os.path.join('app','static','logs', CITY, node_name)):
+        host_data = files
+        break
+    # host_data = [ item.split('.')[0] for item in host_data ]
+    action = session.get('action')
+    return render_template('host_list.html', host_data = host_data, node_name = node_name, action = action)
+
+
+@main.route('/address_collect/<node_name>/<host_name>')
+def address_collect(node_name, host_name):
+    '''三层接口和静态用户IP地址采集'''
+
+    address_data = [
+        ['JSXZH-MC-CMNET-SR-JWDWSC_7750', '218.206.138.45', 'interfaceip（三层用户接口）', '接口', '是', '223.113.78.61', '', '30'
+            , '三层接口名称', 'sap接口编号', '', '', '', '', 'XuZhouXuGongWaJueJiXieYouXianGongSi']
+    ]
+
+    return render_template('address_collect.html', address_data = address_data, action = 'address_collect')
+
+
+@main.route('/address_mk_excel')
+def address_mk_excel():
+    '''地址采集生成 excel 表格'''
+    pass

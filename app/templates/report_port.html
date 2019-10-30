@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %} 端口明细 {% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+    <h1>{% block page_header %} 端口明细 {% endblock %}</h1>
+</div>
+
+<div class="row">
+    <div class="col-md-2">
+        <ul class="nav nav-pills nav-stacked">
+            {% if action == 'report_port' %}
+                <li role="presentation" class="active"><a href="{{ url_for('main.node_list', action = 'report_port') }}">端口明细</a></li>
+            {% else %}
+            <li role="presentation" ><a href="{{ url_for('main.node_list', action = 'report_port') }}">端口明细</a></li>
+            {% endif %}
+            {% if action == 'address_collect' %}
+                <li role="presentation" class="active"><a href="{{ url_for('main.node_list', action = 'address_collect') }}">地址采集</a></li>
+            {% else %}
+                <li role="presentation" ><a href="{{ url_for('main.node_list', action = 'address_collect') }}">地址采集</a></li>
+            {% endif %}
+        </ul>
+    </div>
+    <div class="col-md-10" style="overflow:scroll;height:450px;">
+        {% block report_content %}
+        {% endblock %}
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<style>
+    td { word-wrap:break-word; }
+</style>
+{% endblock %}
