@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %} 业务负载统计 {% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+    <h1>{% block page_header %} 业务负载统计 {% endblock %}</h1>
+</div>
+
+<div class="row">
+    <div class="col-md-2">
+        <ul class="nav nav-pills nav-stacked">
+            {% if action == 'report_port' %}
+                <li role="presentation" class="active"><a href="{{ url_for('main.load_statistic', node_name = node_name, host_name = host_name ) }}">按端口统计用户数量</a></li>
+            {% else %}
+            <li role="presentation" ><a href="{{ url_for('main.load_statistic', node_name = node_name, host_name = host_name ) }}">按端口统计用户数量</a></li>
+            {% endif %}
+            {% if action == 'address_collect' %}
+                <li role="presentation" class="active"><a href="{{ url_for('main.load_statistic_host', node_name = node_name, host_name = host_name ) }}">按设备统计用户数量</a></li>
+            {% else %}
+                <li role="presentation" ><a href="{{ url_for('main.load_statistic_host', node_name = node_name, host_name = host_name ) }}">按设备统计用户数量</a></li>
+            {% endif %}
+        </ul>
+    </div>
+    <div class="col-md-10" style="overflow:scroll;height:450px;">
+        {% block report_content %}
+        {% endblock %}
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<style>
+    td { word-wrap:break-word; }
+</style>
+{% endblock %}

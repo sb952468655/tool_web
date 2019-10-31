@@ -12,6 +12,7 @@ from ..check_pool import all_check
 from ..inspection import mobile
 from .config import CITY
 from .address import get_address_data
+from .statistic import get_statistic_data
 from urllib.request import quote, unquote
 
 sys.path.append('../')
@@ -312,3 +313,25 @@ def config_backup(host_name):
     url = url_for('static', filename = 'logs/{}/{}/{}'.format(CITY, session.get('node_name'), host_name))
     url2 = unquote(url, encoding='utf-8')
     return redirect(url2)
+
+
+@main.route('/load_statistic/<node_name>/<host_name>')
+def load_statistic(node_name, host_name):
+    '''业务负荷统计'''
+
+    config_path = os.path.join('app', 'static', 'logs', CITY, node_name, host_name)
+    with open(config_path) as f:
+        config = f.read()
+
+    res_utilization = get_statistic_data(config)
+
+
+
+
+@main.route('/load_statistic_host/<node_name>/<host_name>')
+def load_statistic_host(node_name, host_name):
+    '''按设备统计用户数量'''
+
+    return 'hello'
+    
+

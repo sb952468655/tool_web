@@ -7,7 +7,7 @@ def get_address_data(config):
     '''获取地址采集数据'''
     address_data = []
     address_data = get_interface_address(config)
-    # address_data += get_sub_inter_address(config)
+    address_data += get_sub_inter_address(config)
 
     return address_data
 

@@ -242,7 +242,7 @@ def mobile_warn13(res):
 
 def mobile_warn14(res):
     if 'no user "admin"' not in res:
-        return (' ', 'user 账号是 admin')
+        return (' ', '设备存在admin账号')
 
     return ('', '')
 

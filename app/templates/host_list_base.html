@@ -24,6 +24,7 @@
                             <a class="btn btn-link" href="{{ url_for('main.xunjian', node_name = node_name, host_name = item ) }}">巡检</a>
                             <a class="btn btn-link" href="{{ url_for('main.check_config', node_name = node_name, host_name = item ) }}">配置检查</a>
                             <a class="btn btn-link" href="{{ url_for('main.config_backup', node_name = node_name, host_name = item ) }}">config备份</a>
+                            <a class="btn btn-link" href="{{ url_for('main.load_statistic', node_name = node_name, host_name = item ) }}">业务负载</a>
                         </th>
                     </tr>
                 {% endfor %}
