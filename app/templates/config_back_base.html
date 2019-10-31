@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %} config备份 {% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+    <h1>{% block page_header %} config备份 {% endblock %}</h1>
+</div>
+
+<div class="row">
+    <div class="col-md-10" style="overflow:scroll;height:450px;">
+        {% block backup_content %}
+        {% endblock %}
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<style>
+    td { word-wrap:break-word; }
+</style>
+{% endblock %}

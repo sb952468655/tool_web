@@ -12,6 +12,7 @@ from ..check_pool import all_check
 from ..inspection import mobile
 from .config import CITY
 from .address import get_address_data
+from urllib.request import quote, unquote
 
 sys.path.append('../')
 # from . report import get_report_data
@@ -84,11 +85,12 @@ def report_port(node_name, host_name):
 
     # request.args.get('page', 1, type=int)
 
-    return render_template('report.html', report_data = res, action = 'report_port')
+    return render_template('report.html', report_data = res, action = 'report_port', node_name=node_name, host_name=host_name)
 
 
 @main.route('/check_config')
 def check_config():
+    '''配置检查'''
 
     with open(os.path.join('app', 'static', 'uploads', 'config.log')) as f:
         config = f.read()
@@ -265,11 +267,13 @@ def node_list(action):
         node_data = dirs
         break
                 
-    return render_template('node_list.html', node_data = node_data, action = action)
+    return render_template('node_list_base.html', node_data = node_data, action = action)
 
 
 @main.route('/host_list/<node_name>')
 def host_list(node_name):
+
+    session['node_name'] = node_name
     host_data = []
 
     for root,dirs,files in os.walk(os.path.join('app','static','logs', CITY, node_name)):
@@ -277,7 +281,7 @@ def host_list(node_name):
         break
     # host_data = [ item.split('.')[0] for item in host_data ]
     action = session.get('action')
-    return render_template('host_list.html', host_data = host_data, node_name = node_name, action = action)
+    return render_template('host_list_base.html', host_data = host_data, node_name = node_name, action = action)
 
 
 @main.route('/address_collect/<node_name>/<host_name>')
@@ -292,10 +296,19 @@ def address_collect(node_name, host_name):
         address_data.append([host_name] + item)
     
 
-    return render_template('address_collect.html', address_data = address_data, action = 'address_collect')
+    return render_template('address_collect.html', address_data = address_data, action = 'address_collect', node_name=node_name, host_name=host_name)
 
 
 @main.route('/address_mk_excel')
 def address_mk_excel():
     '''地址采集生成 excel 表格'''
     pass
+
+
+@main.route('/config_backup/<host_name>')
+def config_backup(host_name):
+    '''config备份（下载到本地）'''
+
+    url = url_for('static', filename = 'logs/{}/{}/{}'.format(CITY, session.get('node_name'), host_name))
+    url2 = unquote(url, encoding='utf-8')
+    return redirect(url2)

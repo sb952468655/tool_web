@@ -12,14 +12,14 @@
     <div class="col-md-2">
         <ul class="nav nav-pills nav-stacked">
             {% if action == 'report_port' %}
-                <li role="presentation" class="active"><a href="{{ url_for('main.node_list', action = 'report_port') }}">端口明细</a></li>
+                <li role="presentation" class="active"><a href="{{ url_for('main.report_port', node_name = node_name, host_name = host_name ) }}">端口明细</a></li>
             {% else %}
-            <li role="presentation" ><a href="{{ url_for('main.node_list', action = 'report_port') }}">端口明细</a></li>
+            <li role="presentation" ><a href="{{ url_for('main.report_port', node_name = node_name, host_name = host_name ) }}">端口明细</a></li>
             {% endif %}
             {% if action == 'address_collect' %}
-                <li role="presentation" class="active"><a href="{{ url_for('main.node_list', action = 'address_collect') }}">地址采集</a></li>
+                <li role="presentation" class="active"><a href="{{ url_for('main.address_collect', node_name = node_name, host_name = host_name ) }}">地址采集</a></li>
             {% else %}
-                <li role="presentation" ><a href="{{ url_for('main.node_list', action = 'address_collect') }}">地址采集</a></li>
+                <li role="presentation" ><a href="{{ url_for('main.address_collect', node_name = node_name, host_name = host_name ) }}">地址采集</a></li>
             {% endif %}
         </ul>
     </div>
