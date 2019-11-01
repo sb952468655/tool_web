@@ -32,7 +32,7 @@ def get_statistic_data(config):
             continue
 
         #查找ies 3000 用户数
-        user_num = None
+        user_num = ''
         index = -1
         try:
             index = res_subscriber_management_statistics.index(item[1])
@@ -43,17 +43,17 @@ def get_statistic_data(config):
             user_num = res_ppp[index]
 
         #地址池总数
-        pool_num = None
+        pool_num = ''
         p_provisioned_addresses = r'Provisioned Addresses {3,8}(\d{1,6}) '
         res_provisioned_addresses = re.search(p_provisioned_addresses, config)
         if res_provisioned_addresses:
             pool_num = res_provisioned_addresses.group(1)
 
-        utilization = None
+        utilization = ''
         if user_num and pool_num:
             utilization = str(round(int(user_num)/int(pool_num),2) * 10) + ' %'
         statistic_data.append(
             [item[0], item[1], res_ip, port_type, res_utilization[i][0], res_utilization[i][1], user_num, utilization, '', '']
         )
 
-    return res_utilization
+    return statistic_data

@@ -23,8 +23,12 @@
             {% endif %}
         </ul>
     </div>
-    <div class="col-md-10" style="overflow:scroll;height:450px;">
-        {% block report_content %}
+    <div class="col-md-10">
+        <div style="overflow:scroll">
+            {% block report_content %}
+            {% endblock %}
+        </div>
+        {% block pageination %}
         {% endblock %}
     </div>
 </div>

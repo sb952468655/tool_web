@@ -11,23 +11,26 @@
 <div class="row">
     <div class="col-md-2">
         <ul class="nav nav-pills nav-stacked">
-            {% if action == 'report_port' %}
+            {% if action == 'load_statistic' %}
                 <li role="presentation" class="active"><a href="{{ url_for('main.load_statistic', node_name = node_name, host_name = host_name ) }}">按端口统计用户数量</a></li>
             {% else %}
             <li role="presentation" ><a href="{{ url_for('main.load_statistic', node_name = node_name, host_name = host_name ) }}">按端口统计用户数量</a></li>
             {% endif %}
-            {% if action == 'address_collect' %}
+            {% if action == 'load_statistic_host' %}
                 <li role="presentation" class="active"><a href="{{ url_for('main.load_statistic_host', node_name = node_name, host_name = host_name ) }}">按设备统计用户数量</a></li>
             {% else %}
                 <li role="presentation" ><a href="{{ url_for('main.load_statistic_host', node_name = node_name, host_name = host_name ) }}">按设备统计用户数量</a></li>
             {% endif %}
         </ul>
     </div>
-    <div class="col-md-10" style="overflow:scroll;height:450px;">
-        {% block report_content %}
+    <div class="col-md-10">
+        <div style="overflow:scroll">
+            {% block data_content %}
+            {% endblock %}
+        </div>
+        {% block pageination %}
         {% endblock %}
     </div>
-</div>
 
 {% endblock %}
 

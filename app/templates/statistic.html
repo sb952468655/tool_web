@@ -1,0 +1,46 @@
+{% extends "statistic_base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% import "_macros.html" as macros %}
+
+{% block data_content %}
+    <table class="table table-striped table-condensed" style="min-width:2000px;" >
+        <thead>
+            <tr>
+                <th>设备名</th>
+                <th>设备IP</th>
+                <th>port</th>
+                <th>端口带宽</th>
+                <th>带宽in利用率</th>
+                <th>带宽out利用率</th>
+                <th>ies 3000用户数量</th>
+                <th>ies 3000地址池利用率</th>
+                <th>vprn 4015用户数量</th>
+                <th>vprn 4015地址池利用率</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in statistic_data %}
+                <tr>
+                    <th>{{ item.host_name }}</th>
+                    <th>{{ item.host_ip }}</th>
+                    <th>{{ item.port }}</th>
+                    <th>{{ item.port_dk }}</th>
+                    <th>{{ item.in_utilization }}</th>
+                    <th>{{ item.out_utilization }}</th>
+                    <th>{{ item.ies_3000_user_num }}</th>
+                    <th>{{ item.ies_3000_utilization }}</th>
+                    <th>{{ item.vprn_4015_user_num }}</th>
+                    <th>{{ item.vprn_4015_utilization }}</th>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
+
+{% block pageination %}
+    {% if pageination %}
+    <div class="pagination">
+        {{ macros.pagination_widget(pageination, 'main.load_statistic', host_name=host_name, node_name=node_name) }}
+    </div>
+    {% endif %}
+{% endblock %}

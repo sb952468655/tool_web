@@ -10,10 +10,12 @@ import datetime
 from . import main
 from ..check_pool import all_check
 from ..inspection import mobile
+from ..models import AddressCollect, LoadStatistic
 from .config import CITY
 from .address import get_address_data
 from .statistic import get_statistic_data
 from urllib.request import quote, unquote
+from .. import db
 
 sys.path.append('../')
 # from . report import get_report_data
@@ -288,16 +290,58 @@ def host_list(node_name):
 @main.route('/address_collect/<node_name>/<host_name>')
 def address_collect(node_name, host_name):
     '''三层接口和静态用户IP地址采集'''
-    address_data = []
+    address_data = None
+    # pageination = None
+    page = request.args.get('page', 1, type=int)
+    count = AddressCollect.query.count()
+    if count == 0:
+        with open(os.path.join('app', 'static', 'logs', CITY, node_name, host_name)) as f:
+            config = f.read()
+        res = get_address_data(config)
+        for item in res:
+            address_data.append([host_name] + item)
 
-    with open(os.path.join('app', 'static', 'logs', CITY, node_name, host_name)) as f:
-        config = f.read()
-    res = get_address_data(config)
-    for item in res:
-        address_data.append([host_name] + item)
-    
+            #存入数据库
+            address_collect = AddressCollect(
+                host_name = host_name,
+                host_ip = item[0],
+                ip_type = item[1],
+                function_type = item[2],
+                is_use = item[3],
+                ip = item[4].strNormal(0),
+                gateway = item[5],
+                mask = item[6],
+                interface_name = item[7],
+                sap_id = item[8],
+                next_hop = item[9],
+                ies_vprn_id = item[10],
+                vpn_rd = item[11],
+                vpn_rt = item[12],
+                description = item[13]
+            )
 
-    return render_template('address_collect.html', address_data = address_data, action = 'address_collect', node_name=node_name, host_name=host_name)
+            db.session.add(address_collect)
+        db.session.commit()
+
+        pageination = AddressCollect.query.filter_by(host_name = host_name).order_by(AddressCollect.date_time.desc()).paginate(
+            page, per_page = current_app.config['FLASKY_POSTS_PER_PAGE'],
+            error_out = False
+        )
+        address_data = pageination.items
+    else:
+
+        pageination = AddressCollect.query.order_by(AddressCollect.date_time.desc()).paginate(
+            page, per_page = current_app.config['FLASKY_POSTS_PER_PAGE'],
+            error_out = False
+        )
+        address_data = pageination.items
+
+    return render_template('address_collect.html', 
+        address_data = address_data, 
+        action = 'address_collect', 
+        node_name=node_name, 
+        host_name=host_name,
+        pageination = pageination)
 
 
 @main.route('/address_mk_excel')
@@ -318,12 +362,51 @@ def config_backup(host_name):
 @main.route('/load_statistic/<node_name>/<host_name>')
 def load_statistic(node_name, host_name):
     '''业务负荷统计'''
+    statistic_data = None
+    page = request.args.get('page', 1, type=int)
+    count = LoadStatistic.query.count()
+    if count == 0:
+        with open(os.path.join('app', 'static', 'logs', CITY, node_name, host_name)) as f:
+            config = f.read()
+        res = get_statistic_data(config)
+        for item in res:
 
-    config_path = os.path.join('app', 'static', 'logs', CITY, node_name, host_name)
-    with open(config_path) as f:
-        config = f.read()
+            #存入数据库
+            load_statistic = LoadStatistic(
+                host_name = item[0],
+                host_ip = item[1],
+                port = item[2],
+                port_dk = item[3],
+                in_utilization = item[4],
+                out_utilization = item[5],
+                ies_3000_user_num = item[6],
+                ies_3000_utilization = item[7],
+                vprn_4015_user_num = item[8],
+                vprn_4015_utilization = item[9]
+            )
 
-    res_utilization = get_statistic_data(config)
+            db.session.add(load_statistic)
+        db.session.commit()
+
+        pageination = LoadStatistic.query.filter_by(host_name = host_name).order_by(LoadStatistic.date_time.desc()).paginate(
+            page, per_page = current_app.config['FLASKY_POSTS_PER_PAGE'],
+            error_out = False
+        )
+        statistic_data = pageination.items
+    else:
+
+        pageination = LoadStatistic.query.order_by(LoadStatistic.date_time.desc()).paginate(
+            page, per_page = current_app.config['FLASKY_POSTS_PER_PAGE'],
+            error_out = False
+        )
+        statistic_data = pageination.items
+
+    return render_template('statistic.html',
+        statistic_data = statistic_data, 
+        action = 'load_statistic', 
+        node_name=node_name, 
+        host_name=host_name,
+        pageination = pageination)
 
 
 
@@ -334,4 +417,34 @@ def load_statistic_host(node_name, host_name):
 
     return 'hello'
     
+
+@main.route('/db_test')
+def db_test():
+    '''数据库测试'''
+    address_collect = AddressCollect(
+        host_name = 'aaaa',
+        host_ip = 'sdsd',
+        ip_type = 'sd',
+        function_type = 'sd',
+        is_use = 's',
+        ip = 'sss',
+        gateway = 'sss',
+        mask = 'sds',
+        interface_name = 'sds',
+        sap_id = 'sdsd',
+        next_hop = 'sdwd',
+        ies_vprn_id = 'sdsd',
+        vpn_rd = 'sdsds',
+        vpn_rt = 'sdsxcc',
+        description = 'sdasd'
+    )
+
+
+    db.session.add(address_collect)
+    db.session.commit()
+
+
+    a = AddressCollect.query.first()
+
+    return a.host_name
 
