@@ -4,11 +4,11 @@
 {% block title %} 设备 {% endblock %}
 
 {% block page_content %}
-<div class="page-header">
-    <h1>{% block page_header %} 设备 {% endblock %}</h1>
-</div>
 <div class="row">
-    <div class="col-md-10">
+    <div class="col-md-6">
+        <div class="page-header">
+            <h1>设备</h1>
+        </div>
         <table class="table table-striped table-condensed" >
             <thead>
                 <tr>
@@ -20,11 +20,13 @@
                     <tr>
                         <th>{{ item }}</th>
                         <th>
-                            <a class="btn btn-link" href="{{ url_for('main.report_port', node_name = node_name, host_name = item ) }}">报表统计</a>
-                            <a class="btn btn-link" href="{{ url_for('main.xunjian', node_name = node_name, host_name = item ) }}">巡检</a>
-                            <a class="btn btn-link" href="{{ url_for('main.check_config', node_name = node_name, host_name = item ) }}">配置检查</a>
-                            <a class="btn btn-link" href="{{ url_for('main.config_backup', node_name = node_name, host_name = item ) }}">config备份</a>
-                            <a class="btn btn-link" href="{{ url_for('main.load_statistic', node_name = node_name, host_name = item ) }}">业务负载</a>
+                            <div class="btn-group" role="group" aria-label="...">
+                                <a class="btn btn-default btn-sm" href="{{ url_for('main.report_port', node_name = node_name, host_name = item ) }}">报表统计</a>
+                                <a class="btn btn-default btn-sm" href="{{ url_for('main.xunjian', node_name = node_name, host_name = item ) }}">巡检</a>
+                                <a class="btn btn-default btn-sm" href="{{ url_for('main.check_config', node_name = node_name, host_name = item ) }}">配置检查</a>
+                                <a class="btn btn-default btn-sm" href="{{ url_for('main.config_backup', node_name = node_name, host_name = item ) }}">config备份</a>
+                                <a class="btn btn-default btn-sm" href="{{ url_for('main.load_statistic', node_name = node_name, host_name = item ) }}">业务负荷统计</a>
+                            </div>
                         </th>
                     </tr>
                 {% endfor %}
