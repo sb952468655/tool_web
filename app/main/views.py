@@ -290,7 +290,7 @@ def host_list(node_name):
 @main.route('/address_collect/<node_name>/<host_name>')
 def address_collect(node_name, host_name):
     '''三层接口和静态用户IP地址采集'''
-    address_data = None
+    address_data = []
     # pageination = None
     page = request.args.get('page', 1, type=int)
     count = AddressCollect.query.count()
