@@ -150,16 +150,17 @@ def check_config():
     check_res = all_check.all_check(config)
     return render_template('check.html', check_res=check_res)
 
-@main.route('/xunjian')
-def xunjian():
+@main.route('/xunjian/<node_name>/<host_name>')
+def xunjian(node_name, host_name):
     '''巡检'''
 
-    xunjian_res = mobile.xunjian()
-    xunjian_text = ''
-    session['xunjian'] = xunjian_res
-    for item in xunjian_res:
-        xunjian_text += '{}\n{}\n{}\n\n'.format(item[0], item[1], item[2])
-    return render_template('xunjian.html', xunjian_res=xunjian_text)
+    with open(os.path.join('app', 'static', 'logs', CITY, node_name, host_name)) as f:
+        config = f.read()
+
+    xunjian_data = mobile.xunjian(config)
+    session['xunjian_data'] = xunjian_data
+    
+    return render_template('xunjian.html', xunjian_data=xunjian_data, host_name = host_name)
 
 @main.route('/auto_config')
 def auto_config():
@@ -247,37 +248,32 @@ def generate_excel():
     return redirect(url_for('static', filename='port.xlsx'))
 
 
-@main.route('/xj_report')
-def xj_report():
+@main.route('/xj_report/<host_name>')
+def xj_report(host_name):
     '''生成巡检报告'''
-
 
     doc = docx.Document(os.path.join('app','static','xunjian.docx'))
     area =  '常州移动' 
-    # doc.add_paragraph(area + '巡检报告', style='report-head')
-    doc.add_paragraph(area + '巡检报告')
-    # doc.add_paragraph('上海贝尔7750设备巡检报告', style='report-head')
-    doc.add_paragraph('上海贝尔7750设备巡检报告3333333')
+    doc.add_paragraph(area + '巡检报告', style='report-head')
+    # doc.add_paragraph(area + '巡检报告')
+    doc.add_paragraph('上海贝尔7750设备巡检报告', style='report-head')
+    # doc.add_paragraph('上海贝尔7750设备巡检报告3333333')
     doc.add_paragraph()
     doc.add_paragraph()
     today_obj = datetime.datetime.now()
     today = '%d年%d月%d日' % (today_obj.year, today_obj.month, today_obj.day)
-    # doc.add_paragraph(today, style='report-date')
+    doc.add_paragraph(today, style='report-date')
     doc.add_paragraph(today)
     doc.add_page_break()
-    # doc.add_heading('巡检情况汇总', 4)
+    doc.add_heading('巡检情况汇总', 4)
     
-    for line in session.get('xunjian'):
-        # p_name = doc.add_paragraph(line[0], style='report-info')
-        p_name = doc.add_paragraph(line[0])
+    for line in session.get('xunjian_data'):
+        p_name = doc.add_paragraph(host_name, style='report-info')
+        if line[0]:
+            p_info = doc.add_paragraph(line[0], style='report-info')
         if line[1]:
-            # p_info = doc.add_paragraph(line[1], style='report-info')
-            p_info = doc.add_paragraph(line[1])
-        if line[2]:
-            # p_warn = doc.add_paragraph('注：' + line[2], style='report-normal')
-            p_warn = doc.add_paragraph('注：' + line[2])
-        if not line[1] and not line[2]:
-            print('not a line 1, 2')
+            p_warn = doc.add_paragraph('注：' + line[1], style='report-normal')
+
         doc.add_paragraph()
         
         font = p_name.runs[0].font
@@ -290,24 +286,22 @@ def xj_report():
         font.color.rgb = RGBColor(255, 0, 255)
 
 
-    # doc.add_heading('总结', 4)
+    doc.add_heading('总结', 4)
 
-    # doc.add_paragraph('1，为了保障%s移动城域网7750设备正常运行，请定期清理过滤网。' % '常州',
-    #     style='report-normal')
+    doc.add_paragraph('1，为了保障%s移动城域网7750设备正常运行，请定期清理过滤网。' % '常州',
+        style='report-normal')
 
-    doc.add_paragraph('1，为了保障%s移动城域网7750设备正常运行，请定期清理过滤网。' % '常州')
-
-    for item in session.get('xunjian'):
+    for item in session.get('xunjian_data'):
         if 'Temperature' in item:
-            # doc.add_paragraph('2，板卡温度高建议清洗防尘网。',
-            # style='report-normal')
-            doc.add_paragraph('2，板卡温度高建议清洗防尘网。')
+            doc.add_paragraph('2，板卡温度高建议清洗防尘网。',
+            style='report-normal')
+            # doc.add_paragraph('2，板卡温度高建议清洗防尘网。')
         break
     
     report_name = '%s移动巡检报告-%s.docx' % ('常州', today)
     doc.save( os.path.join('app', 'static', report_name))
 
-    url = url_for('static', filename = report_name)
+    # url = url_for('static', filename = report_name)
     return redirect(url_for('static', filename = report_name))
 
 
@@ -422,25 +416,24 @@ def address_mk_excel(host_name):
         sheet['A'+ str(cur_row)] = item.host_name
         sheet['B'+ str(cur_row)] = item.host_ip
         sheet['C'+ str(cur_row)] = item.ip_type
-        sheet['D'+ str(cur_row)] = item.ip_type
-        sheet['E'+ str(cur_row)] = item.function_type
-        sheet['F'+ str(cur_row)] = item.is_use
-        sheet['G'+ str(cur_row)] = item.ip
-        sheet['H'+ str(cur_row)] = item.gateway
-        sheet['I'+ str(cur_row)] = item.mask
-        sheet['J'+ str(cur_row)] = item.interface_name
-        sheet['K'+ str(cur_row)] = item.sap_id
-        sheet['L'+ str(cur_row)] = item.next_hop
-        sheet['M'+ str(cur_row)] = item.ies_vprn_id
-        sheet['N'+ str(cur_row)] = item.vpn_rd
-        sheet['O'+ str(cur_row)] = item.vpn_rt
-
+        sheet['D'+ str(cur_row)] = item.function_type
+        sheet['E'+ str(cur_row)] = item.is_use
+        sheet['F'+ str(cur_row)] = item.ip
+        sheet['G'+ str(cur_row)] = item.gateway
+        sheet['H'+ str(cur_row)] = item.mask
+        sheet['I'+ str(cur_row)] = item.interface_name
+        sheet['J'+ str(cur_row)] = item.sap_id
+        sheet['K'+ str(cur_row)] = item.next_hop
+        sheet['L'+ str(cur_row)] = item.ies_vprn_id
+        sheet['M'+ str(cur_row)] = item.vpn_rd
+        sheet['N'+ str(cur_row)] = item.vpn_rt
+        sheet['O'+ str(cur_row)] = item.description
 
         cur_row += 1
     
-    excel.save(os.path.join('app','static', 'port.xlsx'))
+    excel.save(os.path.join('app','static', 'address.xlsx'))
 
-    return redirect(url_for('static', filename='port.xlsx'))
+    return redirect(url_for('static', filename='address.xlsx'))
 
 
 @main.route('/config_backup/<host_name>')
@@ -457,7 +450,7 @@ def load_statistic(node_name, host_name):
     '''业务负荷统计'''
     statistic_data = None
     page = request.args.get('page', 1, type=int)
-    count = LoadStatistic.query.count()
+    count = LoadStatistic.query.filter_by(host_name = host_name).count()
     if count == 0:
         with open(os.path.join('app', 'static', 'logs', CITY, node_name, host_name)) as f:
             config = f.read()
@@ -466,9 +459,9 @@ def load_statistic(node_name, host_name):
 
             #存入数据库
             load_statistic = LoadStatistic(
-                host_name = item[0],
-                host_ip = item[1],
-                port = item[2],
+                host_name = host_name,
+                host_ip = item[2],
+                port = item[1],
                 port_dk = item[3],
                 in_utilization = item[4],
                 out_utilization = item[5],
@@ -481,18 +474,12 @@ def load_statistic(node_name, host_name):
             db.session.add(load_statistic)
         db.session.commit()
 
-        pageination = LoadStatistic.query.order_by(LoadStatistic.date_time.desc()).paginate(
-            page, per_page = current_app.config['FLASKY_POSTS_PER_PAGE'],
-            error_out = False
-        )
-        statistic_data = pageination.items
-    else:
+    pageination = LoadStatistic.query.filter_by(host_name = host_name).order_by(LoadStatistic.date_time.desc()).paginate(
+        page, per_page = current_app.config['FLASKY_POSTS_PER_PAGE'],
+        error_out = False
+    )
+    statistic_data = pageination.items
 
-        pageination = LoadStatistic.query.order_by(LoadStatistic.date_time.desc()).paginate(
-            page, per_page = current_app.config['FLASKY_POSTS_PER_PAGE'],
-            error_out = False
-        )
-        statistic_data = pageination.items
 
     return render_template('statistic.html',
         statistic_data = statistic_data, 

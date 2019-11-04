@@ -54,28 +54,17 @@ warn_check = (mobile_warn1, mobile_warn2, mobile_warn3, mobile_warn4
 #     logging.debug('工具运行结束')
 #     input()
 
-def xunjian():
-    log_directory_path = os.path.join('app', 'static', 'uploads', 'log')
-    if not os.path.exists(log_directory_path):
-        logging.error('没有发现目录：' + log_directory_path)
-        return
+def xunjian(config):
     warn_res = []
-    log_list = os.listdir(log_directory_path)
-    for log in log_list:
+    for func in warn_check:
+        info, warn = func(config)
+        if info and warn:
+            logging.debug('发现告警：' + warn)
+            warn_item = [info, warn]
+            warn_res.append(warn_item)
+        info = ''
+        warn = ''
 
-        log_path = os.path.join(log_directory_path,log)
-                
-        f = open(log_path)
-        f_result = f.read()
-        for func in warn_check:
-            info, warn = func(f_result)
-            if info and warn:
-                logging.debug('发现告警：' + warn)
-                warn_item = [log, info, warn]
-                warn_res.append(warn_item)
-            info = ''
-            warn = ''
-        f.close()
 
     return warn_res
 

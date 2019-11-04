@@ -6,7 +6,7 @@
 {% block title %} 地址采集 {% endblock %}
 {% block page_header %} 地址采集 {% endblock %}
 {% block report_content %}
-    <a class="btn btn-default" href="{{ url_for('main.address_mk_excel') }}" role="button">生成表格</a>
+    <a class="btn btn-default" href="{{ url_for('main.address_mk_excel', host_name = host_name) }}" role="button">生成表格</a>
     <table class="table table-striped table-condensed" style="min-width:2000px;">
         <thead>
             <tr>

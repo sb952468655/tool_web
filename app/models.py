@@ -73,3 +73,6 @@ class LoadStatistic(db.Model):
     vprn_4015_user_num = db.Column(db.String(64)) #vprn 4015用户数量
     vprn_4015_utilization = db.Column(db.String(64)) #vprn 4015地址池利用率
     date_time = db.Column(db.DateTime, default = datetime.now()) #采集时间
+
+    def __repr__(self):
+        return '<LoadStatistic %r>' % self.host_name
