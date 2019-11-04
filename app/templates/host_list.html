@@ -14,7 +14,7 @@
         <tbody>
             {% for item in host_data %}
                 <tr>
-                    <th><a href="{{ url_for('main.' + action, node_name = node_name, host_name = item ) }}">{{ item }}</a></th>
+                    <th><a href="{{ url_for('main.' + action, node_name = node_name, host_name = item ) }}">{{ item.split('.')[0] }}</a></th>
                 </tr>
             {% endfor %}
         </tbody>

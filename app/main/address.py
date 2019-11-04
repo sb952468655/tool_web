@@ -34,7 +34,6 @@ def get_interface_address(config):
             res_sap = re.search(p_sap, item2.config)
             if res_sap:
                 sap_name = res_sap.group(2)
-                print(sap_name)
             
             #获取描述
             res_description = re.search(PAT['description'], item2.config)

@@ -18,7 +18,7 @@
             <tbody>
                 {% for item in host_data %}
                     <tr>
-                        <th>{{ item }}</th>
+                        <th>{{ item.split('.')[0] }}</th>
                         <th>
                             <div class="btn-group" role="group" aria-label="...">
                                 <a class="btn btn-default btn-sm" href="{{ url_for('main.report_port', node_name = node_name, host_name = item ) }}">报表统计</a>

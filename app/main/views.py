@@ -16,6 +16,7 @@ from .address import get_address_data
 from .statistic import get_statistic_data
 from urllib.request import quote, unquote
 from .. import db
+from ..models import CardPort1
 
 sys.path.append('../')
 # from . report import get_report_data
@@ -53,43 +54,91 @@ def report():
 def report_port(node_name, host_name):
     '''统计报表-端口明细'''
 
+    card_data = []
     from .report import get_report_data, get_device_name, get_port_ggl, get_ip
 
-    with open(os.path.join('app', 'static', 'logs', CITY, node_name, host_name)) as f:
-        config = f.read()
+    page = request.args.get('page', 1, type=int)
+    count = CardPort1.query.filter_by(host_name = host_name).count()
+    if count == 0:
 
-    ip = get_ip(config)
-    report_data = get_report_data(config)
-    ggl_port = []
-    res = []
+        with open(os.path.join('app', 'static', 'logs', CITY, node_name, host_name)) as f:
+            config = f.read()
 
-
-    ggl_data = get_port_ggl(config)
-
-    i = 0
-    for item in report_data:
-        if item[-1] != 'MDX GIGE-T ' and item[-1] != 'MDI GIGE-T ':
-            ggl_port.append(item[0])
-            port_is_ok = '否'
-            #判断端口是否有异常
-            if item[2] == 'Up' and item[3] == 'No' and item[4] != 'Up':
-                port_is_ok = '是'
-            try:
-                res.append(item + [ggl_data[i][0], ggl_data[i][5], ggl_data[i][2]+'|'+ ggl_data[i][3], ggl_data[i][7]+'|'+ ggl_data[i][8], ip, port_is_ok])
-            except Exception:
-                print('端口数和光功率数量不匹配')
-            
-            i += 1
-        else:
-            res.append(item + ['','','','', ip, '' ])
+        ip = get_ip(config)
+        report_data = get_report_data(config)
+        ggl_port = []
+        res = []
 
 
-    session['report'] = res
+        ggl_data = get_port_ggl(config)
 
-    # request.args.get('page', 1, type=int)
+        i = 0
+        for item in report_data:
+            if item[-1] != 'MDX GIGE-T ' and item[-1] != 'MDI GIGE-T ':
+                ggl_port.append(item[0])
+                port_is_ok = '否'
+                #判断端口是否有异常
+                if item[2] == 'Up' and item[3] == 'No' and item[4] != 'Up':
+                    port_is_ok = '是'
 
-    return render_template('report.html', report_data = res, action = 'report_port', node_name=node_name, host_name=host_name)
+                #判断端口ge或者10ge
+                dk = ''
+                if item[-1].startswith('10'):
+                    dk = '10GE'
+                elif item[-1].startswith('GIGE'):
+                    dk = 'GE'
+                try:
+                    res.append(item + [ggl_data[i][0], ggl_data[i][5], ggl_data[i][2]+'|'+ ggl_data[i][3], ggl_data[i][7]+'|'+ ggl_data[i][8], ip, port_is_ok, dk])
+                except Exception:
+                    print('端口数和光功率数量不匹配')
+                
+                i += 1
+            else:
+                res.append(item + ['','','','', ip, '', ''])
 
+        for item in res:
+
+            #存入数据库
+            card_port = CardPort1(
+                host_name = host_name,
+                host_ip = item[16],
+                port = item[1],
+                port_dk = item[18],
+                admin_state = item[2],
+                link_state = item[3],
+                port_state = item[4],
+                cfg_mtu = item[5],
+                oper_mtu = item[6],
+                lag = item[7],
+                port_mode = item[8],
+                port_encp = item[9],
+                port_type = item[10],
+                c_qs_s_xfp_mdimdx = item[11],
+                optical_power = item[12],
+                output_power = item[13],
+                optical_warn = item[14],
+                output_warn = item[15],
+                is_abnormal = item[17]
+            )
+
+            db.session.add(card_port)
+
+        db.session.commit()
+        session['report'] = res
+
+        
+    pageination = CardPort1.query.filter_by(host_name = host_name).order_by(CardPort1.date_time.desc()).paginate(
+        page, per_page = current_app.config['FLASKY_POSTS_PER_PAGE'],
+        error_out = False
+    )
+    card_data = pageination.items
+
+    return render_template('report.html', 
+        card_data = card_data, 
+        action = 'report_port', 
+        node_name=node_name, 
+        host_name=host_name,
+        pageination = pageination)
 
 @main.route('/check_config')
 def check_config():
@@ -293,7 +342,7 @@ def address_collect(node_name, host_name):
     address_data = []
     # pageination = None
     page = request.args.get('page', 1, type=int)
-    count = AddressCollect.query.count()
+    count = AddressCollect.query.filter_by(host_name = host_name).count()
     if count == 0:
         with open(os.path.join('app', 'static', 'logs', CITY, node_name, host_name)) as f:
             config = f.read()
@@ -323,18 +372,13 @@ def address_collect(node_name, host_name):
             db.session.add(address_collect)
         db.session.commit()
 
-        pageination = AddressCollect.query.filter_by(host_name = host_name).order_by(AddressCollect.date_time.desc()).paginate(
-            page, per_page = current_app.config['FLASKY_POSTS_PER_PAGE'],
-            error_out = False
-        )
-        address_data = pageination.items
-    else:
 
-        pageination = AddressCollect.query.order_by(AddressCollect.date_time.desc()).paginate(
-            page, per_page = current_app.config['FLASKY_POSTS_PER_PAGE'],
-            error_out = False
-        )
-        address_data = pageination.items
+    pageination = AddressCollect.query.filter_by(host_name = host_name).order_by(AddressCollect.date_time.desc()).paginate(
+        page, per_page = current_app.config['FLASKY_POSTS_PER_PAGE'],
+        error_out = False
+    )
+    address_data = pageination.items
+
 
     return render_template('address_collect.html', 
         address_data = address_data, 
@@ -344,10 +388,59 @@ def address_collect(node_name, host_name):
         pageination = pageination)
 
 
-@main.route('/address_mk_excel')
-def address_mk_excel():
+@main.route('/address_mk_excel/<host_name>')
+def address_mk_excel(host_name):
     '''地址采集生成 excel 表格'''
-    pass
+    excel = openpyxl.Workbook()
+    sheet = excel.active
+    sheet['A1'] = '设备名'
+    sheet['B1'] = '设备IP'
+    sheet['C1'] = 'IP类型'
+    sheet['D1'] = '网络功能类型'
+    sheet['E1'] = '是否已分配'
+    sheet['F1'] = 'IP'
+    sheet['G1'] = '网关'
+    sheet['H1'] = '掩码'
+    sheet['I1'] = '逻辑接口编号'
+    sheet['J1'] = 'sap-ID'
+    sheet['K1'] = '下一跳IP'
+    sheet['L1'] = 'IES/VPRN编号'
+    sheet['M1'] = 'VPN-RD'
+    sheet['N1'] = 'VPN-RT'
+    sheet['O1'] = '接口或用户描述'
+
+
+    sheet.column_dimensions['A'].width = 40.0
+    sheet.column_dimensions['B'].width = 20.0
+    # sheet.column_dimensions['N'].width = 20.0
+    # sheet.column_dimensions['Q'].width = 15.0
+    # sheet.column_dimensions['R'].width = 15.0
+    cur_row = 2
+
+    address_data = AddressCollect.query.filter_by(host_name = host_name).order_by(AddressCollect.date_time.desc()).all()
+    for item in address_data:
+        sheet['A'+ str(cur_row)] = item.host_name
+        sheet['B'+ str(cur_row)] = item.host_ip
+        sheet['C'+ str(cur_row)] = item.ip_type
+        sheet['D'+ str(cur_row)] = item.ip_type
+        sheet['E'+ str(cur_row)] = item.function_type
+        sheet['F'+ str(cur_row)] = item.is_use
+        sheet['G'+ str(cur_row)] = item.ip
+        sheet['H'+ str(cur_row)] = item.gateway
+        sheet['I'+ str(cur_row)] = item.mask
+        sheet['J'+ str(cur_row)] = item.interface_name
+        sheet['K'+ str(cur_row)] = item.sap_id
+        sheet['L'+ str(cur_row)] = item.next_hop
+        sheet['M'+ str(cur_row)] = item.ies_vprn_id
+        sheet['N'+ str(cur_row)] = item.vpn_rd
+        sheet['O'+ str(cur_row)] = item.vpn_rt
+
+
+        cur_row += 1
+    
+    excel.save(os.path.join('app','static', 'port.xlsx'))
+
+    return redirect(url_for('static', filename='port.xlsx'))
 
 
 @main.route('/config_backup/<host_name>')
@@ -388,7 +481,7 @@ def load_statistic(node_name, host_name):
             db.session.add(load_statistic)
         db.session.commit()
 
-        pageination = LoadStatistic.query.filter_by(host_name = host_name).order_by(LoadStatistic.date_time.desc()).paginate(
+        pageination = LoadStatistic.query.order_by(LoadStatistic.date_time.desc()).paginate(
             page, per_page = current_app.config['FLASKY_POSTS_PER_PAGE'],
             error_out = False
         )

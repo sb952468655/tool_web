@@ -37,8 +37,7 @@ def get_statistic_data(config):
         try:
             index = res_subscriber_management_statistics.index(item[1])
         except ValueError:
-            print('{} is not in list'.format(item[1]))
-        
+            pass
         if index != -1:
             user_num = res_ppp[index]
 
@@ -86,6 +85,7 @@ def get_statistic_data(config):
                     for item3 in item1[1]:
                         port_user_num.append((item3, int(int(item2[1])/len(item1[1]))))
 
+
         user_num_4015 = ''
         for item1 in port_user_num:
             if item1[0] == item[1]:
@@ -95,8 +95,9 @@ def get_statistic_data(config):
         p_stable_leases = r'(?s)(Stable Leases *?(\d{1,10}) *?(\d{1,10}).*?Provisioned Addresses *?(\d{1,10}) )'
         res_stable_leases = re.search(p_stable_leases, config)
         lyl_4015 = ''
-        if res_stable_leases:
-            lyl_4015 = str(round(int(res_stable_leases.group(3))/int(res_stable_leases.group(4)),2) * 100) + ' %'
+        if res_stable_leases and user_num_4015:
+            a = res_stable_leases.group(4)
+            lyl_4015 = str(round(int(user_num_4015)/int(res_stable_leases.group(4)),4) * 100) + ' %'
         statistic_data.append(
             [item[0], item[1], res_ip, port_type, res_utilization[i][0], res_utilization[i][1], user_num, utilization, user_num_4015, lyl_4015]
         )

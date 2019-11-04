@@ -1,5 +1,6 @@
 {% extends "report_port.html" %}
 {% import "bootstrap/wtf.html" as wtf %}
+{% import "_macros.html" as macros %}
 
 {% block report_content %}
     <a class="btn btn-default" href="{{ url_for('main.generate_excel') }}" role="button">生成表格</a>
@@ -28,41 +29,35 @@
             </tr>
         </thead>
         <tbody>
-            {% for item in report_data %}
+            {% for item in card_data %}
                 <tr>
-                    <th>{{ item[0] }}</th>
-                    <th>{{ item[16] }}</th>
-                    <th>{{ item[1] }}</th>
-                    <th>
-                        {% if item[11].startswith('10') %}
-                            10GE
-                        {% else %}
-                            GE
-                        {% endif %}
-                    </th>
-                    <th>{{ item[2] }}</th>
-                    <th>{{ item[3] }}</th>
-                    <th>{{ item[4] }}</th>
-                    <th>{{ item[5] }}</th>
-                    <th>{{ item[6] }}</th>
-                    <th>{{ item[7] }}</th>
-                    <th>{{ item[8] }}</th>
-                    <th>{{ item[9] }}</th>
-                    <th>{{ item[10] }}</th>
-                    <th>{{ item[11] }}</th>
-                    {% if item[2] != 'Up' or item[3] != 'Yes' or item[4] != 'Up' or item[13] == '' or (item[13]|float >= item[15].split('|')[1]|float and item[13]|float <= item[15].split('|')[0]|float) %}
-                        <th>{{ item[13] }}</th>
+                    <th>{{ item.host_name }}</th>
+                    <th>{{ item.host_ip }}</th>
+                    <th>{{ item.port }}</th>
+                    <th>{{ item.port_dk }}</th>
+                    <th>{{ item.admin_state }}</th>
+                    <th>{{ item.link_state }}</th>
+                    <th>{{ item.port_state }}</th>
+                    <th>{{ item.cfg_mtu }}</th>
+                    <th>{{ item.oper_mtu }}</th>
+                    <th>{{ item.lag }}</th>
+                    <th>{{ item.port_mode }}</th>
+                    <th>{{ item.port_encp }}</th>
+                    <th>{{ item.port_type }}</th>
+                    <th>{{ item.c_qs_s_xfp_mdimdx }}</th>
+                    {% if item.admin_state != 'Up' or item.link_state != 'Yes' or item.port_state != 'Up' or item.output_power == '' or (item.output_power|float >= item.output_warn.split('|')[1]|float and item.output_power|float <= item.output_warn.split('|')[0]|float) %}
+                        <th>{{ item.output_power }}</th>
                     {% else %}
-                        <th bgcolor="#FF0000">{{ item[13] }}</th>
+                        <th bgcolor="#FF0000">{{ item.output_power }}</th>
                     {% endif %}
-                    {% if item[2] != 'Up' or item[3] != 'Yes' or item[4] != 'Up' or item[12] == '' or (item[12]|float >= item[14].split('|')[1]|float and item[12]|float <= item[14].split('|')[0]|float) %}
-                        <th>{{ item[12] }}</th>
+                    {% if item.admin_state != 'Up' or item.link_state != 'Yes' or item.port_state != 'Up' or item.optical_power == '' or (item.optical_power|float >= item.optical_warn.split('|')[1]|float and item.optical_power|float <= item.optical_warn.split('|')[0]|float) %}
+                        <th>{{ item.optical_power }}</th>
                     {% else %}
-                        <th bgcolor="#FF0000">{{ item[12] }}</th>
+                        <th bgcolor="#FF0000">{{ item.optical_power }}</th>
                     {% endif %}
-                    <th>{{ item[15] }}</th>
-                    <th>{{ item[14] }}</th>
-                    {% if item[17] == '否' or item[17] == '' %}
+                    <th>{{ item.output_warn }}</th>
+                    <th>{{ item.optical_warn }}</th>
+                    {% if item.is_abnormal == '否' or item.is_abnormal == '' %}
                         <th>否</th>
                     {% else %}
                         <th bgcolor="#FF0000">是</th>
@@ -73,9 +68,11 @@
     </table>
 {% endblock %}
 
-{% block scripts %}
-{{ super() }}
-<style>
-    td { word-wrap:break-word; }
-</style>
+{% block pageination %}
+    {% if pageination %}
+    <div class="pagination">
+        {{ macros.pagination_widget(pageination, 'main.report_port', host_name=host_name, node_name=node_name) }}
+    </div>
+    {% endif %}
 {% endblock %}
+

@@ -2,7 +2,7 @@ import os
 from flask import Flask
 from flask_migrate import Migrate, MigrateCommand
 from app import create_app, db
-from app.models import AddressCollect
+from app.models import AddressCollect, CardPort1, LoadStatistic
 from flask_script import Manager, Shell
 
 app = create_app('default')
@@ -12,7 +12,7 @@ manager = Manager(app)
 
 @app.shell_context_processor
 def make_shell_context():
-    return dict(db=db, AddressCollect=AddressCollect)
+    return dict(db=db, AddressCollect=AddressCollect, CardPort1=CardPort1, LoadStatistic=LoadStatistic)
 
 manager.add_command("shell", Shell(make_context=make_shell_context))
 manager.add_command("db", MigrateCommand)

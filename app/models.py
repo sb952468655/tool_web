@@ -4,7 +4,7 @@ from datetime import datetime
 class AddressCollect(db.Model):
     '''地址采集表'''
     __tablename__ = 'address_collects'
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     host_name = db.Column(db.String(64)) #设备名
     host_ip = db.Column(db.String(64)) #设备ip
     ip_type = db.Column(db.String(64))
@@ -22,6 +22,9 @@ class AddressCollect(db.Model):
     description = db.Column(db.String(128)) #接口或用户描述
     date_time = db.Column(db.DateTime, default = datetime.now()) #采集时间
 
+    def count_table():
+        return AddressCollect.query.count()
+
     def __repr__(self):
         return '<AddressCollect %r>' % self.host_name
 
@@ -29,7 +32,7 @@ class AddressCollect(db.Model):
 class CardPort1(db.Model):
     '''板卡端口统计表'''
     __tablename__ = 'card_port1'
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     host_name = db.Column(db.String(64)) #设备名
     host_ip = db.Column(db.String(64)) #设备ip
     port = db.Column(db.String(64)) #端口号
@@ -58,7 +61,7 @@ class CardPort1(db.Model):
 class LoadStatistic(db.Model):
     '''业务负荷统计表-按端口统计用户数量'''
     __tablename__ = 'card_port'
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     host_name = db.Column(db.String(64)) #设备名
     host_ip = db.Column(db.String(64)) #设备ip
     port = db.Column(db.String(64)) #端口号
