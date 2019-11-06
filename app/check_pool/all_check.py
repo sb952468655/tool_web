@@ -24,23 +24,13 @@ def all_check(config):
 
     err = []
 
-    err += address_range_check(config)
-    err += address_is_include_pool(config)
-    err += ies_3000_inside_check(config)
-    err += pool_address_prefix_list(config)
-    err += prefix_list_include_black_hole(config)
-    err += black_hole_address_range_check(config)
-    err += inside_subnet_address_check(config)
-    err += outside_pool_check(config)
+    err.append(('检查 address-range 范围是否正确', address_range_check(config)))
+    err.append(('检查 address 是否在 pool 的网段中',address_is_include_pool(config)))
+    err.append(('检查 ies 3000 sub interface下的私网地址是否与 Nat 中 inside 地址一致',ies_3000_inside_check(config)))
+    err.append(('检查 dhcp pool, 网关地址, 路由发布地址是否一致',pool_address_prefix_list(config)))
+    err.append(('检查 prefix-list 中是否包含 黑洞路由地址',prefix_list_include_black_hole(config)))
+    err.append(('检查黑洞路由与pool "nat-pppoe" 中的address-range 是否匹配',black_hole_address_range_check(config)))
+    err.append(('检查 inside subnet address 地址是否正确',inside_subnet_address_check(config)))
+    err.append(('检查outside pool 中的地址是否在黑洞路由中',outside_pool_check(config)))
 
-    num = 1
-    err_str = ''
-    if err == []:
-        err_str = '\n  检查未见异常！'
-    else:
-        for item in err:
-            if item:
-                err_str += str(num) + '. ' + item + '\n'
-                num += 1
-
-    return err_str
+    return err

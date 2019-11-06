@@ -1,31 +1,39 @@
 {% extends "base.html" %}
 {% import "bootstrap/wtf.html" as wtf %}
 
-{% block title %}配置检查{% endblock %}
+{% block title %} 配置检查 {% endblock %}
 
 {% block page_content %}
 <div class="page-header">
-    <h1>配置检查</h1>
+    <h1>{% block page_header %} 配置检查 {% endblock %}</h1>
 </div>
 
 <div class="row">
-    <div class="col-md-2">
-        <ul class="nav nav-pills nav-stacked">
-            <li role="presentation" class="active"><a href="#">配置检查</a></li>
-            <li role="presentation"><a href="#">待定</a></li>
-        </ul>
-    </div>
-    {% if check_res %}
-    <div class="col-md-10">
-        <div class="panel panel-default">
-            <div class="panel-heading">检查结果</div>
-            <div class="panel-body">
-                <pre class="pre-scrollable">{{ check_res }}</pre>
-            </div>
+    <div class="col-md-11">
+        <a class="btn btn-default" href="{{ url_for('main.check_excel', host_name = host_name) }}" role="button">生成表格</a>
+        <div style="overflow:scroll;height:500px">
+            <table class="table table-striped table-condensed">
+                <thead>
+                    <tr>
+                        <th>设备名</th>
+                        <th>错误信息</th>
+                        <th>检查项</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in check_data %}
+                        {% for item2 in item[1] %}
+                        <tr>
+                            <th>{{ host_name.split('.')[0] }}</th>
+                            <th>{{ item2 }}</th>
+                            <th>{{ item[0] }}</th>
+                        </tr>
+                        {% endfor %}
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
-    {% endif %}
 </div>
-
 
 {% endblock %}

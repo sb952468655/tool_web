@@ -140,15 +140,52 @@ def report_port(node_name, host_name):
         host_name=host_name,
         pageination = pageination)
 
-@main.route('/check_config')
-def check_config():
+@main.route('/check_config/<node_name>/<host_name>')
+def check_config(node_name, host_name):
     '''配置检查'''
 
-    with open(os.path.join('app', 'static', 'uploads', 'config.log')) as f:
+    with open(os.path.join('app', 'static', 'logs', CITY, node_name, host_name)) as f:
         config = f.read()
 
     check_res = all_check.all_check(config)
-    return render_template('check.html', check_res=check_res)
+
+    session['node_name'] = node_name
+    session['host_name'] = host_name
+    return render_template('check.html', check_data=check_res, host_name=host_name)
+
+@main.route('/check_excel/<host_name>')
+def check_excel(host_name):
+    '''配置检查生成表格'''
+
+    #先获取检查结果
+    node_name = session['node_name']
+    with open(os.path.join('app', 'static', 'logs', CITY, node_name, host_name)) as f:
+        config = f.read()
+
+    check_res = all_check.all_check(config)
+
+    excel = openpyxl.Workbook()
+    sheet = excel.active
+    sheet['A1'] = '设备名'
+    sheet['B1'] = '错误信息'
+    sheet['C1'] = '检查项'
+
+    sheet.column_dimensions['A'].width = 40.0
+    sheet.column_dimensions['B'].width = 70.0
+    sheet.column_dimensions['C'].width = 110.0
+    cur_row = 2
+    for item in check_res:
+        for item2 in item[1]:
+            sheet['A'+ str(cur_row)] = host_name.split('.')[0]
+            sheet['B'+ str(cur_row)] = item[0]
+            sheet['C'+ str(cur_row)] = item2
+
+            cur_row += 1
+    
+    excel.save(os.path.join('app','static', 'check.xlsx'))
+
+    return redirect(url_for('static', filename='check.xlsx'))
+
 
 @main.route('/xunjian/<node_name>/<host_name>')
 def xunjian(node_name, host_name):
