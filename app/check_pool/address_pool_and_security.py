@@ -312,10 +312,16 @@ def ies_3000_inside_check(config):
     '''检查 ies 3000 sub interface下的私网地址是否与 Nat 中 inside 地址一致'''
 
     err = []
-
+    ies_1000_address = []
     address_nat = []
     p_ies_3000 = generate_pat(0, 'ies', 8, '3000')
+    p_ies_1000 = generate_pat(0, 'ies', 8, '1000')
     res_ies_3000 = re.findall(p_ies_3000, config)
+    res_ies_1000 = re.findall(p_ies_1000, config)
+    if len(res_ies_1000) != 2:
+        return err
+
+    res_ies_1000_address = re.findall(PAT['address'], res_ies_1000[1][0])
     if len(res_ies_3000) != 2:
         return err
     else:
@@ -336,8 +342,8 @@ def ies_3000_inside_check(config):
 
 
         err_ips = address_include_each(address_nat, inside_addresss)
-        if err_ips != []:
-            
-            for item in err_ips:
+
+        for item in err_ips:
+            if item not in res_ies_1000_address:
                 err.append('ies 3000 sub interface下的私网地址与 Nat 中 inside 地址不一致\n   请检查 \"address {}\"\n'.format(item))
     return err
