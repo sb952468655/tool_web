@@ -17,7 +17,7 @@ from .statistic import get_statistic_data
 from urllib.request import quote, unquote
 from .. import db
 from ..models import CardPort1
-
+from .report import get_host_list, get_card_detail, get_card_statistic, get_mda_detail, get_mda_statistic, get_port_statistic
 sys.path.append('../')
 # from . report import get_report_data
 # from . import report
@@ -139,6 +139,70 @@ def report_port(node_name, host_name):
         node_name=node_name, 
         host_name=host_name,
         pageination = pageination)
+
+@main.route('/host_list_data/<node_name>/<host_name>')
+def host_list_data(node_name, host_name):
+    '''设备清单统计'''
+    node_path = os.path.join('app', 'static', 'logs', CITY, node_name)
+    host_list_data = get_host_list(node_path)
+
+    return render_template('host_list_data.html', host_name=host_name, node_name = node_name, host_list_data = host_list_data ,action='host_list_data')
+
+@main.route('/card_detail/<node_name>/<host_name>')
+def card_detail(node_name, host_name):
+    '''card明细'''
+
+    with open(os.path.join('app', 'static', 'logs', CITY, node_name, host_name)) as f:
+        config = f.read()
+
+    card_detail_data = get_card_detail(config)
+
+    return render_template('card_detail.html', host_name=host_name, node_name = node_name ,card_detail_data = card_detail_data ,action='card_detail')
+
+@main.route('/card_statistic/<node_name>/<host_name>')
+def card_statistic(node_name, host_name):
+    '''card统计'''
+
+    with open(os.path.join('app', 'static', 'logs', CITY, node_name, host_name)) as f:
+        config = f.read()
+
+    card_statistic_data = get_card_statistic(config)
+
+    return render_template('card_statistic.html', host_name=host_name, node_name = node_name, card_statistic_data = card_statistic_data ,action='card_statistic')
+
+@main.route('/mda_detail/<node_name>/<host_name>')
+def mda_detail(node_name, host_name):
+    '''mda明细'''
+
+    with open(os.path.join('app', 'static', 'logs', CITY, node_name, host_name)) as f:
+        config = f.read()
+
+    mda_detail_data = get_mda_detail(config)
+
+    return render_template('mda_detail.html', host_name=host_name, node_name = node_name, mda_detail_data = mda_detail_data ,action='mda_detail')
+
+@main.route('/mda_statistic/<node_name>/<host_name>')
+def mda_statistic(node_name, host_name):
+    '''mda统计'''
+
+    with open(os.path.join('app', 'static', 'logs', CITY, node_name, host_name)) as f:
+        config = f.read()
+
+    mda_statistic_data = get_mda_statistic(config)
+
+    return render_template('mda_statistic.html', host_name=host_name, node_name = node_name, mda_statistic_data = mda_statistic_data ,action='mda_statistic')
+
+@main.route('/port_statistic/<node_name>/<host_name>')
+def port_statistic(node_name, host_name):
+    '''port统计'''
+
+    with open(os.path.join('app', 'static', 'logs', CITY, node_name, host_name)) as f:
+        config = f.read()
+
+    port_statistic_data = get_port_statistic(config)
+
+    return render_template('port_statistic.html', host_name=host_name, node_name = node_name, port_statistic_data = port_statistic_data ,action='port_statistic')
+
 
 @main.route('/check_config/<node_name>/<host_name>')
 def check_config(node_name, host_name):

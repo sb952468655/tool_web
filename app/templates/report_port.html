@@ -16,15 +16,45 @@
             {% else %}
             <li role="presentation" ><a href="{{ url_for('main.report_port', node_name = node_name, host_name = host_name ) }}">端口明细</a></li>
             {% endif %}
+            {% if action == 'port_statistic' %}
+                <li role="presentation" class="active"><a href="{{ url_for('main.port_statistic', node_name = node_name, host_name = host_name ) }}">端口统计</a></li>
+            {% else %}
+                <li role="presentation" ><a href="{{ url_for('main.port_statistic', node_name = node_name, host_name = host_name ) }}">端口统计</a></li>
+            {% endif %}
+            {% if action == 'card_detail' %}
+                <li role="presentation" class="active"><a href="{{ url_for('main.card_detail', node_name = node_name, host_name = host_name ) }}">card明细</a></li>
+            {% else %}
+                <li role="presentation" ><a href="{{ url_for('main.card_detail', node_name = node_name, host_name = host_name ) }}">card明细</a></li>
+            {% endif %}
+            {% if action == 'card_statistic' %}
+                <li role="presentation" class="active"><a href="{{ url_for('main.card_statistic', node_name = node_name, host_name = host_name ) }}">card统计</a></li>
+            {% else %}
+                <li role="presentation" ><a href="{{ url_for('main.card_statistic', node_name = node_name, host_name = host_name ) }}">card统计</a></li>
+            {% endif %}
+            {% if action == 'mda_detail' %}
+                <li role="presentation" class="active"><a href="{{ url_for('main.mda_detail', node_name = node_name, host_name = host_name ) }}">mda明细</a></li>
+            {% else %}
+                <li role="presentation" ><a href="{{ url_for('main.mda_detail', node_name = node_name, host_name = host_name ) }}">mda明细</a></li>
+            {% endif %}
+            {% if action == 'mda_statistic' %}
+                <li role="presentation" class="active"><a href="{{ url_for('main.mda_statistic', node_name = node_name, host_name = host_name ) }}">mda统计</a></li>
+            {% else %}
+                <li role="presentation" ><a href="{{ url_for('main.mda_statistic', node_name = node_name, host_name = host_name ) }}">mda统计</a></li>
+            {% endif %}
             {% if action == 'address_collect' %}
                 <li role="presentation" class="active"><a href="{{ url_for('main.address_collect', node_name = node_name, host_name = host_name ) }}">地址采集</a></li>
             {% else %}
                 <li role="presentation" ><a href="{{ url_for('main.address_collect', node_name = node_name, host_name = host_name ) }}">地址采集</a></li>
             {% endif %}
+            {% if action == 'host_list_data' %}
+                <li role="presentation" class="active"><a href="{{ url_for('main.host_list_data', node_name = node_name, host_name = host_name ) }}">设备清单统计</a></li>
+            {% else %}
+                <li role="presentation" ><a href="{{ url_for('main.host_list_data', node_name = node_name, host_name = host_name ) }}">设备清单统计</a></li>
+            {% endif %}
         </ul>
     </div>
     <div class="col-md-10">
-        <div style="overflow:scroll">
+        <div style="overflow:scroll;max-height:400px">
             {% block report_content %}
             {% endblock %}
         </div>
