@@ -1,5 +1,6 @@
 import re
-from .report import get_port, get_ip
+import os
+from .report import get_port, get_ip, get_host_name
 
 def get_statistic_data(config):
     '''获取业务负荷数据'''
@@ -97,9 +98,86 @@ def get_statistic_data(config):
         lyl_4015 = ''
         if res_stable_leases and user_num_4015:
             a = res_stable_leases.group(4)
-            lyl_4015 = str(round(int(user_num_4015)/int(res_stable_leases.group(4)),4) * 100) + ' %'
+            lyl_4015 = str(round(int(user_num_4015)/int(res_stable_leases.group(4)),2) * 100) + ' %'
         statistic_data.append(
             [item[0], item[1], res_ip, port_type, res_utilization[i][0], res_utilization[i][1], user_num, utilization, user_num_4015, lyl_4015]
         )
 
     return statistic_data
+
+def get_statistic_host_data(node_path):
+    '''按设备统计用户数'''
+
+    statistic_host_data = []
+    p_pool_pppoe = r'(?s)(Pool                       pppoe\n.*?\nLast Reset Time)'
+    p_pool_vprn_cms = r'(?s)(Pool                       vprn_cms\n.*?\nLast Reset Time)'
+
+    p_user_num = r'Stable Leases {12}(\d{1,6}) {10,16}(\d{1,6}) '
+    p_provisioned_addresses = r'Provisioned Addresses    (\d{1,6}) '
+
+    
+
+    filenames = []
+    for a,b,filenames in os.walk(node_path):
+        for item in filenames:
+            with open(os.path.join(node_path, item)) as f:
+                config = f.read()
+
+            host_name = get_host_name(config)
+            host_ip = get_ip(config)
+
+            if not host_name or not host_ip:
+                continue
+
+            res_pool_pppoe = re.search(p_pool_pppoe, config)
+            if res_pool_pppoe:
+                res_user_num = re.search(p_user_num, res_pool_pppoe.group())
+                res_provisioned_addresses = re.search(p_provisioned_addresses, res_pool_pppoe.group())
+                if res_user_num:
+                    current_num = res_user_num.group(1)
+                    peak_num = res_user_num.group(2)
+                if res_provisioned_addresses:
+                    provisioned_addresses = res_provisioned_addresses.group(1)
+
+            res_pool_vprn_cms = re.search(p_pool_vprn_cms, config)
+            if res_pool_vprn_cms:
+                text = res_pool_vprn_cms.group()
+            if res_user_num:
+                res_user_num2 = re.search(p_user_num, res_pool_vprn_cms.group())
+                res_provisioned_addresses2 = re.search(p_provisioned_addresses, res_pool_vprn_cms.group())
+                if res_user_num2:
+                    current_num_4015 = res_user_num2.group(1)
+                    peak_num_4015 = res_user_num2.group(2)
+                if res_provisioned_addresses2:
+                    provisioned_addresses_4015 = res_provisioned_addresses2.group(1)
+
+            ies_3000_lyl_current = str(round(int(current_num) * 100/int(provisioned_addresses),2)) + ' %'
+            ies_3000_lyl_peak = str(round(int(peak_num) * 100/int(provisioned_addresses),2)) + ' %'
+
+            vprn_4015_lyl_current = str(round(int(current_num_4015) * 100/int(provisioned_addresses_4015),2)) + ' %'
+            vprn_4015_lyl_peak = str(round(int(peak_num_4015) * 100/int(provisioned_addresses_4015),2)) + ' %'
+
+
+            statistic_host_data.append((
+                host_name,
+                host_ip,
+                current_num,
+                '当前利用率：' + ies_3000_lyl_current + '|峰值利用率 ' + ies_3000_lyl_peak,
+                current_num_4015,
+                '当前利用率：' + vprn_4015_lyl_current + '|峰值利用率 ' + vprn_4015_lyl_peak
+            ))
+
+        break
+
+    
+
+    return statistic_host_data
+
+                    
+
+
+
+
+
+
+            

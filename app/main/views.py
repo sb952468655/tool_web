@@ -13,7 +13,7 @@ from ..inspection import mobile
 from ..models import AddressCollect, LoadStatistic
 from .config import CITY
 from .address import get_address_data
-from .statistic import get_statistic_data
+from .statistic import get_statistic_data, get_statistic_host_data
 from urllib.request import quote, unquote
 from .. import db
 from ..models import CardPort1
@@ -596,7 +596,15 @@ def load_statistic(node_name, host_name):
 def load_statistic_host(node_name, host_name):
     '''按设备统计用户数量'''
 
-    return 'hello'
+    node_path = os.path.join('app', 'static', 'logs', CITY, node_name)
+    load_statistic_host_data = get_statistic_host_data(node_path)
+
+    return render_template('statistic_host.html',
+        load_statistic_host_data = load_statistic_host_data, 
+        action = 'load_statistic_host', 
+        node_name=node_name, 
+        host_name=host_name)
+    
     
 
 @main.route('/db_test')

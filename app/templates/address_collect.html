@@ -30,7 +30,7 @@
         <tbody>
             {% for item in address_data %}
                 <tr>
-                    <th>{{ item.host_name }}</th>
+                    <th>{{ item.host_name[:-4] }}</th>
                     <th>{{ item.host_ip }}</th>
                     <th>{{ item.ip_type }}</th>
                     <th>{{ item.function_type }}</th>

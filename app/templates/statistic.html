@@ -21,7 +21,7 @@
         <tbody>
             {% for item in statistic_data %}
                 <tr>
-                    <th>{{ item.host_name }}</th>
+                    <th>{{ item.host_name.split('.')[0] }}</th>
                     <th>{{ item.host_ip }}</th>
                     <th>{{ item.port }}</th>
                     <th>{{ item.port_dk }}</th>

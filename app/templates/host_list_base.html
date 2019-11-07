@@ -5,7 +5,7 @@
 
 {% block page_content %}
 <div class="row">
-    <div class="col-md-8">
+    <div class="col-md-6">
         <div class="page-header">
             <h1>设备</h1>
         </div>
@@ -20,13 +20,21 @@
                     <tr>
                         <th>{{ item.split('.')[0] }}</th>
                         <th>
-                            <div class="btn-group" role="group" aria-label="...">
-                                <a class="btn btn-default btn-sm" href="{{ url_for('main.report_port', node_name = node_name, host_name = item ) }}">报表统计</a>
-                                <a class="btn btn-default btn-sm" href="{{ url_for('main.xunjian', node_name = node_name, host_name = item ) }}">巡检</a>
-                                <a class="btn btn-default btn-sm" href="{{ url_for('main.check_config', node_name = node_name, host_name = item ) }}">配置检查</a>
-                                <a class="btn btn-default btn-sm" href="{{ url_for('main.config_backup', node_name = node_name, host_name = item ) }}">config备份</a>
-                                <a class="btn btn-default btn-sm" href="{{ url_for('main.load_statistic', node_name = node_name, host_name = item ) }}">业务负荷统计</a>
-                            </div>
+                            {% if session.get('action') == 'report_port'%}
+                            <a class="btn btn-default btn-sm" href="{{ url_for('main.report_port', node_name = node_name, host_name = item ) }}">报表统计</a>
+                            {% endif %}
+                            {% if session.get('action') == 'xunjian'%}
+                            <a class="btn btn-default btn-sm" href="{{ url_for('main.xunjian', node_name = node_name, host_name = item ) }}">巡检</a>
+                            {% endif %}
+                            {% if session.get('action') == 'check_config'%}
+                            <a class="btn btn-default btn-sm" href="{{ url_for('main.check_config', node_name = node_name, host_name = item ) }}">配置检查</a>
+                            {% endif %}
+                            {% if session.get('action') == 'config_backup'%}
+                            <a class="btn btn-default btn-sm" href="{{ url_for('main.config_backup', node_name = node_name, host_name = item ) }}">config备份</a>
+                            {% endif %}
+                            {% if session.get('action') == 'load_statistic'%}
+                            <a class="btn btn-default btn-sm" href="{{ url_for('main.load_statistic', node_name = node_name, host_name = item ) }}">业务负荷统计</a>
+                            {% endif %}
                         </th>
                     </tr>
                 {% endfor %} 
