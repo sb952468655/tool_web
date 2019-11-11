@@ -88,7 +88,14 @@ def report_port(node_name, host_name):
                 elif item[-1].startswith('GIGE'):
                     dk = 'GE'
                 try:
+                    if item[2] == 'Up' and item[3] == 'Yes' and item[4] == 'Up':
+                        if ggl_data[i][7] and (float(ggl_data[i][5]) < float(ggl_data[i][8]) or float(ggl_data[i][5]) > float(ggl_data[i][7])):
+                            port_is_ok = '是'
+                        if ggl_data[i][3] and (float(ggl_data[i][0]) < float(ggl_data[i][3]) or float(ggl_data[i][0]) > float(ggl_data[i][2])):
+                            port_is_ok = '是'
+
                     res.append(item + [ggl_data[i][0], ggl_data[i][5], ggl_data[i][2]+'|'+ ggl_data[i][3], ggl_data[i][7]+'|'+ ggl_data[i][8], ip, port_is_ok, dk])
+
                 except Exception:
                     print('端口数和光功率数量不匹配')
                 
@@ -235,14 +242,14 @@ def check_excel(host_name):
     sheet['C1'] = '检查项'
 
     sheet.column_dimensions['A'].width = 40.0
-    sheet.column_dimensions['B'].width = 70.0
-    sheet.column_dimensions['C'].width = 110.0
+    sheet.column_dimensions['B'].width = 110.0
+    sheet.column_dimensions['C'].width = 70.0
     cur_row = 2
     for item in check_res:
         for item2 in item[1]:
             sheet['A'+ str(cur_row)] = host_name.split('.')[0]
-            sheet['B'+ str(cur_row)] = item[0]
-            sheet['C'+ str(cur_row)] = item2
+            sheet['B'+ str(cur_row)] = item2
+            sheet['C'+ str(cur_row)] = item[0]
 
             cur_row += 1
     
@@ -424,11 +431,17 @@ def host_list(node_name):
     host_data = []
 
     for root,dirs,files in os.walk(os.path.join('app','static','logs', CITY, node_name)):
-        host_data = files
+        for item in files:
+            create_time = os.path.getctime(os.path.join('app','static','logs', CITY, node_name, item))
+            create_time = time.localtime(create_time)
+            host_data.append((item, '{}/{}/{}'.format(create_time.tm_year,create_time.tm_mon,create_time.tm_mday)))
         break
     # host_data = [ item.split('.')[0] for item in host_data ]
     action = session.get('action')
-    return render_template('host_list_base.html', host_data = host_data, node_name = node_name, action = action)
+    log_time = False
+    if action == 'config_backup':
+        log_time = True
+    return render_template('host_list_base.html', host_data = host_data, node_name = node_name, action = action, log_time = log_time)
 
 
 @main.route('/address_collect/<node_name>/<host_name>')
@@ -438,10 +451,12 @@ def address_collect(node_name, host_name):
     # pageination = None
     page = request.args.get('page', 1, type=int)
     count = AddressCollect.query.filter_by(host_name = host_name).count()
+    # count = 0 #等下去掉
     if count == 0:
         with open(os.path.join('app', 'static', 'logs', CITY, node_name, host_name)) as f:
             config = f.read()
         res = get_address_data(config)
+
         for item in res:
             address_data.append([host_name] + item)
 
@@ -514,7 +529,7 @@ def address_mk_excel(host_name):
 
     address_data = AddressCollect.query.filter_by(host_name = host_name).order_by(AddressCollect.date_time.desc()).all()
     for item in address_data:
-        sheet['A'+ str(cur_row)] = item.host_name
+        sheet['A'+ str(cur_row)] = item.host_name.split('.')[0]
         sheet['B'+ str(cur_row)] = item.host_ip
         sheet['C'+ str(cur_row)] = item.ip_type
         sheet['D'+ str(cur_row)] = item.function_type

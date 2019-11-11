@@ -4,7 +4,7 @@
 
 {% block report_content %}
     <a class="btn btn-default" href="{{ url_for('main.generate_excel') }}" role="button">生成表格</a>
-    <table class="table table-striped table-condensed" style="min-width:2000px;" >
+    <table class="table table-condensed" style="min-width:2000px;" >
         <thead>
             <tr>
                 <th>设备名</th>
@@ -30,14 +30,26 @@
         </thead>
         <tbody>
             {% for item in card_data %}
+                {% if item.is_abnormal == '否' or item.is_abnormal == '' %}
                 <tr>
+                {% else %}
+                <tr bgcolor="#FFFF00">
+                {% endif %}
                     <th>{{ item.host_name.split('.')[0] }}</th>
                     <th>{{ item.host_ip }}</th>
                     <th>{{ item.port }}</th>
                     <th>{{ item.port_dk }}</th>
                     <th>{{ item.admin_state }}</th>
+                    {% if item.admin_state == 'Up' and item.link_state == 'No' %}
+                    <th bgcolor="#FF0000">{{ item.link_state }}</th>
+                    {% else %}
                     <th>{{ item.link_state }}</th>
+                    {% endif %}
+                    {% if item.admin_state == 'Up' and item.port_state != 'Up' %}
+                    <th bgcolor="#FF0000">{{ item.port_state }}</th>
+                    {% else %}
                     <th>{{ item.port_state }}</th>
+                    {% endif %}
                     <th>{{ item.cfg_mtu }}</th>
                     <th>{{ item.oper_mtu }}</th>
                     <th>{{ item.lag }}</th>
@@ -57,11 +69,7 @@
                     {% endif %}
                     <th>{{ item.output_warn }}</th>
                     <th>{{ item.optical_warn }}</th>
-                    {% if item.is_abnormal == '否' or item.is_abnormal == '' %}
-                        <th>否</th>
-                    {% else %}
-                        <th bgcolor="#FF0000">是</th>
-                    {% endif %}
+                    <th>{{ item.is_abnormal }}</th>
                 </tr>
             {% endfor %}
         </tbody>

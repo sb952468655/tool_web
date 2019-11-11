@@ -18,7 +18,10 @@
             <tbody>
                 {% for item in host_data %}
                     <tr>
-                        <th>{{ item.split('.')[0] }}</th>
+                        <th>{{ item[0].split('.')[0] }}</th>
+                        {% if log_time %}
+                        <th>{{ item[1] }}</th>
+                        {% endif %}
                         <th>
                             {% if session.get('action') == 'report_port'%}
                             <a class="btn btn-default btn-sm" href="{{ url_for('main.report_port', node_name = node_name, host_name = item ) }}">报表统计</a>

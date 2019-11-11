@@ -340,8 +340,12 @@ def ies_3000_inside_check(config):
             if nat_check(add):
                 address_nat.append(add)
 
-
-        err_ips = address_include_each(address_nat, inside_addresss)
+        #获取inside中的私网地址
+        address_inside_nat = []
+        for add2 in inside_addresss:
+            if nat_check(add2):
+                address_inside_nat.append(add2)
+        err_ips = address_include_each(address_nat, address_inside_nat)
 
         for item in err_ips:
             if item not in res_ies_1000_address:
