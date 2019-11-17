@@ -1,12 +1,10 @@
-import os, sys
+import os, sys, zipfile, time, datetime
 from flask import render_template, session, redirect, url_for, current_app, request
 import openpyxl
 from openpyxl.styles import Alignment, PatternFill
 import docx
 from docx.shared import Pt
 from docx.shared import RGBColor
-import time
-import datetime
 from . import main
 from ..check_pool import all_check
 from ..inspection import mobile
@@ -266,9 +264,23 @@ def xunjian(node_name, host_name):
         config = f.read()
 
     xunjian_data = mobile.xunjian(config)
+    warn_data = [item for item in xunjian_data if item[0]]
     session['xunjian_data'] = xunjian_data
     
-    return render_template('xunjian.html', xunjian_data=xunjian_data, host_name = host_name)
+    return render_template('xunjian/xunjian.html', xunjian_data=warn_data, host_name = host_name, node_name = node_name)
+
+@main.route('/xunjian_output_all/<node_name>/<host_name>')
+def xunjian_output_all(node_name, host_name):
+    '''设备巡检-全量输出'''
+
+    with open(os.path.join('app', 'static', 'logs', CITY, node_name, host_name)) as f:
+        config = f.read()
+
+    xunjian_data = mobile.xunjian(config)
+    warn_data = [item for item in xunjian_data if item[2] and item[3]]
+    session['xunjian_data'] = xunjian_data
+    
+    return render_template('xunjian/xunjian_output_all.html', xunjian_data=warn_data, host_name = host_name, node_name = node_name)
 
 @main.route('/auto_config')
 def auto_config():
@@ -430,18 +442,14 @@ def host_list(node_name):
     session['node_name'] = node_name
     host_data = []
 
-    for root,dirs,files in os.walk(os.path.join('app','static','logs', CITY, node_name)):
-        for item in files:
-            create_time = os.path.getctime(os.path.join('app','static','logs', CITY, node_name, item))
-            create_time = time.localtime(create_time)
-            host_data.append((item, '{}/{}/{}'.format(create_time.tm_year,create_time.tm_mon,create_time.tm_mday)))
-        break
-    # host_data = [ item.split('.')[0] for item in host_data ]
+    for _,_,files in os.walk(os.path.join('app','static','logs', CITY, node_name)):
+        host_data = files
+
     action = session.get('action')
-    log_time = False
     if action == 'config_backup':
-        log_time = True
-    return render_template('host_list_base.html', host_data = host_data, node_name = node_name, action = action, log_time = log_time)
+        return redirect(url_for('main.config_backup', node_name = node_name))
+
+    return render_template('host_list_base.html', host_data = host_data, node_name = node_name, action = action)
 
 
 @main.route('/address_collect/<node_name>/<host_name>')
@@ -552,13 +560,37 @@ def address_mk_excel(host_name):
     return redirect(url_for('static', filename='address.xlsx'))
 
 
-@main.route('/config_backup/<host_name>')
-def config_backup(host_name):
+@main.route('/config_backup/<node_name>')
+def config_backup(node_name):
     '''config备份（下载到本地）'''
+    host_data = []
 
-    url = url_for('static', filename = 'logs/{}/{}/{}'.format(CITY, session.get('node_name'), host_name))
-    url2 = unquote(url, encoding='utf-8')
-    return redirect(url2)
+    for _,_,files in os.walk(os.path.join('app','static','logs', CITY, node_name)):
+        for item in files:
+            create_time = os.path.getctime(os.path.join('app','static','logs', CITY, node_name, item))
+            create_time = time.localtime(create_time)
+            host_data.append((item, '{}/{}/{}'.format(create_time.tm_year,create_time.tm_mon,create_time.tm_mday)))
+        break
+    
+    return render_template('back_up/config_backup_host_list.html', host_data=host_data, node_name = node_name)
+
+@main.route('/backup_list/<node_name>', methods=['POST'])
+def backup_list(node_name):
+    '''获取需要备份的config列表'''
+    if request.method=='POST':
+
+        file_name = str(time.time()) + '.zip'
+        zip_name = os.path.join('app', 'static', 'backup', file_name)
+        zip = zipfile.ZipFile(zip_name, 'w', zipfile.ZIP_DEFLATED )
+        
+        for name, _ in request.form.to_dict().items():
+            zip.write(os.path.join('app', 'static', 'logs', CITY, node_name, name), name)
+        zip.close()
+
+        url = url_for('static', filename = 'backup/{}'.format(file_name))
+        url2 = unquote(url, encoding='utf-8')
+        return redirect(url2)
+
 
 
 @main.route('/load_statistic/<node_name>/<host_name>')

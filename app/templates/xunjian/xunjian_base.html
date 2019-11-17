@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %} 设备巡检 {% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+    <h1>{% block page_header %} 设备巡检 {% endblock %}</h1>
+</div>
+
+<div class="row">
+    <div class="col-md-2">
+        <ul class="nav nav-pills nav-stacked">
+            {% if request.path == '/xunjian/' + node_name + '/' + host_name %}
+                <li role="presentation" class="active"><a href="{{ url_for('main.xunjian', node_name = node_name, host_name = host_name ) }}">设备巡检</a></li>
+            {% else %}
+            <li role="presentation" ><a href="{{ url_for('main.xunjian', node_name = node_name, host_name = host_name ) }}">设备巡检</a></li>
+            {% endif %}
+            {% if request.path == '/xunjian_output_all/' + node_name + '/' + host_name %}
+                <li role="presentation" class="active"><a href="{{ url_for('main.xunjian_output_all', node_name = node_name, host_name = host_name ) }}">全量输出</a></li>
+            {% else %}
+                <li role="presentation" ><a href="{{ url_for('main.xunjian_output_all', node_name = node_name, host_name = host_name ) }}">全量输出</a></li>
+            {% endif %}
+        </ul>
+    </div>
+    <div class="col-md-10">
+        <div style="overflow:scroll;max-height:400px">
+            {% block xunjian_content %}
+            {% endblock %}
+        </div>
+        {% block pageination %}
+        {% endblock %}
+    </div>
+</div>
+
+{% endblock %}
