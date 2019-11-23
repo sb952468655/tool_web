@@ -1,4 +1,5 @@
-import os
+import os, logging
+logging.basicConfig(filename="D:\\PythonStudy\\tool_web\\log.txt",format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 from flask import Flask
 from flask_migrate import Migrate, MigrateCommand
 from app import create_app, db
@@ -6,6 +7,7 @@ from app.models import AddressCollect, CardPort1, LoadStatistic
 from flask_script import Manager, Shell
 
 app = create_app('default')
+
 # app = Flask(__name__)
 migrate = Migrate(app, db)
 manager = Manager(app)
