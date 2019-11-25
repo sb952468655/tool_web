@@ -1,5 +1,4 @@
-import os, logging
-logging.basicConfig(filename="D:\\PythonStudy\\tool_web\\log.txt",format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+import os
 from flask import Flask
 from flask_migrate import Migrate, MigrateCommand
 from app import create_app, db
