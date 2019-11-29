@@ -1,5 +1,4 @@
 import os, sys, zipfile, time, datetime, logging
-logging.basicConfig(filename="D:\\PythonStudy\\tool_web\\log.txt",format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 from flask import render_template, session, redirect, url_for, current_app, request
 import openpyxl
 from openpyxl.styles import Alignment, PatternFill
@@ -266,7 +265,7 @@ def xunjian(node_name, host_name):
         config = f.read()
 
     xunjian_data = mobile.xunjian(config, config)
-    warn_data = [item for item in xunjian_data if item[0]]
+    warn_data = [item for item in xunjian_data if item[0] and '正常' not in item[1]]
     session['xunjian_data'] = xunjian_data
     
     return render_template('xunjian/xunjian.html', xunjian_data=warn_data, host_name = host_name, node_name = node_name)
@@ -279,10 +278,10 @@ def xunjian_output_all(node_name, host_name):
         config = f.read()
 
     xunjian_data = mobile.xunjian(config, config)
-    # warn_data = [item for item in xunjian_data if item[2] and item[3]]
-    session['xunjian_data'] = xunjian_data
+    warn_data = [item for item in xunjian_data if item[0]]
+    session['xunjian_data_all'] = warn_data
     
-    return render_template('xunjian/xunjian_output_all.html', xunjian_data=xunjian_data, host_name = host_name, node_name = node_name)
+    return render_template('xunjian/xunjian_output_all.html', xunjian_data=warn_data, host_name = host_name, node_name = node_name)
 
 @main.route('/auto_config')
 def auto_config():

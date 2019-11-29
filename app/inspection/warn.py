@@ -21,26 +21,31 @@ def mobile_warn1(res):
     Speed                           : (\d{1,3} %|\w{3,4} speed( \(0-\d\d%\))?)
     Status                          : (\w{2,5}))'''
 
+    p_fan_info = r'(?s)Environment Information\n.*?\n-'
+
     re_obj = re.compile(re_str)
-    result = re_obj.findall(res)
+    
+    res_fan_info = re.search(p_fan_info, res)
 
-
-    if result:
-        for item in result:
-            msg += item[0] + '\n'
-            if item[2] == 'full speed':
-                err += '风扇%s全转速，建议清洗滤尘网。\n' % item[1]
-            elif 'speed' not in item[2]:
-                if int(item[2][:-2]) >= 50:
+    if res_fan_info:
+        result = re_obj.findall(res_fan_info.group())
+        if result:
+            for item in result:
+                msg += item[0] + '\n'
+                if item[2] == 'full speed':
+                    err += '风扇%s全转速，建议清洗滤尘网。\n' % item[1]
+                elif 'speed' not in item[2]:
+                    if int(item[2][:-2]) >= 50:
+                        err += '风扇%s转速大于50。\n' % item[1]
+                elif int(item[3][-4:-2]) >= 50:
+                    msg += 'Fan tray number: %s\nSpeed: %s\n' % (item[1], item[2])
                     err += '风扇%s转速大于50。\n' % item[1]
-            elif int(item[3][-4:-2]) >= 50:
-                msg += 'Fan tray number: %s\nSpeed: %s\n' % (item[1], item[2])
-                err += '风扇%s转速大于50。\n' % item[1]
-            elif item[4] != 'up':
-                err += '风扇%s状态不正常。\n' % item[1]
-
+                elif item[4] != 'up':
+                    err += '风扇%s状态不正常。\n' % item[1]
+        else:
+            logging.error('没有找到风扇信息')
     else:
-        logging.error('没有找到风扇信息')
+        logging.error('没有找到Environment Information')
 
     if err == '':
         err = '风扇SPEED正常'
@@ -77,9 +82,9 @@ def mobile_warn2(res):
 def mobile_warn3(res):
     '''系统状态巡检'''
 
-    re_str = r'''(Critical LED state                : (.{2,10})
+    re_str = r'''Critical LED state                : (.{2,10})
   Major LED state                   : (.{2,10})
-  Minor LED state                   : (.{2,10}))'''
+  Minor LED state                   : (.{2,10})'''
 
     re_obj = re.compile(re_str)
     result = re_obj.search(res)
@@ -323,7 +328,7 @@ def mobile_warn13(res):
             err = 'FTP状态异常'
 
     if err == '':
-        err = 'FTP正常关闭状态'
+        err = 'FTP关闭状态正常'
 
     return (msg, err, check_item)
 
@@ -504,7 +509,7 @@ def mobile_warn20(res):
             err = 'config.cfg上次修改后未做保存'
 
     if err == '':
-        err = 'config.cfg上次修改后已做保存'
+        err = 'config.cfg保存状态正常'
 
     return (msg, err, check_item)
 
