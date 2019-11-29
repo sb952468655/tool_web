@@ -353,26 +353,27 @@ def get_mda_statistic(config):
 
     return mda_statistic_data
 
-def get_device_name(config):
-    '''获取设备名称'''
-    p_device = r'(\*?(A|B):.*?7750#)'
-
-    res_device = re.search(p_device, config)
-    if res_device:
-        return res_device.group()
-    else:
-        return None
-
 def get_host_name(config):
     '''获取设备名称'''
 
     p_host_name = r'System Name            : (.*?)\n'
     res_host_name = re.search(p_host_name, config)
     if not res_host_name:
-        host_name = ''
+        host_name = get_device_name(config)
     else:
         host_name = res_host_name.group(1)
 
     return host_name
+
+
+def get_device_name(config):
+    '''获取设备名称'''
+    p_device = r'\*?(A|B):(.*?7750)#'
+
+    res_device = re.search(p_device, config)
+    if res_device:
+        return res_device.group(2)
+    else:
+        return None
 
 

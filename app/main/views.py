@@ -392,7 +392,7 @@ def xj_report(host_name, type):
         xunjian_data = session.get('xunjian_data')
     else:
         xunjian_data = session.get('xunjian_data_all')
-        
+
     for line in xunjian_data:
         p_name = doc.add_paragraph(host_name.split('.')[0], style='report-info')
         if line[0]:
