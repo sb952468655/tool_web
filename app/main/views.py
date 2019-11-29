@@ -588,7 +588,9 @@ def config_backup(node_name):
 def backup_list(node_name):
     '''获取需要备份的config列表'''
     if request.method=='POST':
-
+        if not os.path.exists(os.path.join('app', 'static', 'backup')):
+            os.makedirs(os.path.join('app', 'static', 'backup'))
+            
         file_name = str(time.time()) + '.zip'
         zip_name = os.path.join('app', 'static', 'backup', file_name)
         zip = zipfile.ZipFile(zip_name, 'w', zipfile.ZIP_DEFLATED )
