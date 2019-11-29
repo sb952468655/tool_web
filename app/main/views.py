@@ -263,7 +263,7 @@ def xunjian(node_name, host_name):
     with open(os.path.join('app', 'static', 'logs', CITY, node_name, host_name)) as f:
         config = f.read()
 
-    xunjian_data = mobile.xunjian(config)
+    xunjian_data = mobile.xunjian(config, config)
     warn_data = [item for item in xunjian_data if item[0]]
     session['xunjian_data'] = xunjian_data
     
@@ -276,11 +276,11 @@ def xunjian_output_all(node_name, host_name):
     with open(os.path.join('app', 'static', 'logs', CITY, node_name, host_name)) as f:
         config = f.read()
 
-    xunjian_data = mobile.xunjian(config)
-    warn_data = [item for item in xunjian_data if item[2] and item[3]]
+    xunjian_data = mobile.xunjian(config, config)
+    # warn_data = [item for item in xunjian_data if item[2] and item[3]]
     session['xunjian_data'] = xunjian_data
     
-    return render_template('xunjian/xunjian_output_all.html', xunjian_data=warn_data, host_name = host_name, node_name = node_name)
+    return render_template('xunjian/xunjian_output_all.html', xunjian_data=xunjian_data, host_name = host_name, node_name = node_name)
 
 @main.route('/auto_config')
 def auto_config():
