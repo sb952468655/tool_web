@@ -266,7 +266,7 @@ def xunjian(node_name, host_name):
 
     xunjian_data = mobile.xunjian(config, config)
     warn_data = [item for item in xunjian_data if item[0] and '正常' not in item[1]]
-    session['xunjian_data'] = xunjian_data
+    session['xunjian_data'] = warn_data
     
     return render_template('xunjian/xunjian.html', xunjian_data=warn_data, host_name = host_name, node_name = node_name)
 
@@ -369,12 +369,12 @@ def generate_excel():
     return redirect(url_for('static', filename='port.xlsx'))
 
 
-@main.route('/xj_report/<host_name>')
-def xj_report(host_name):
+@main.route('/xj_report/<host_name>/<type>')
+def xj_report(host_name, type):
     '''生成巡检报告'''
 
     doc = docx.Document(os.path.join('app','static','xunjian.docx'))
-    area =  '常州移动' 
+    area =  CITY + '移动'
     doc.add_paragraph(area + '巡检报告', style='report-head')
     # doc.add_paragraph(area + '巡检报告')
     doc.add_paragraph('上海贝尔7750设备巡检报告', style='report-head')
@@ -388,8 +388,13 @@ def xj_report(host_name):
     doc.add_page_break()
     doc.add_heading('巡检情况汇总', 4)
     
-    for line in session.get('xunjian_data'):
-        p_name = doc.add_paragraph(host_name, style='report-info')
+    if type == '1':
+        xunjian_data = session.get('xunjian_data')
+    else:
+        xunjian_data = session.get('xunjian_data_all')
+        
+    for line in xunjian_data:
+        p_name = doc.add_paragraph(host_name.split('.')[0], style='report-info')
         if line[0]:
             p_info = doc.add_paragraph(line[0], style='report-info')
         if line[1]:
@@ -419,7 +424,7 @@ def xj_report(host_name):
             # doc.add_paragraph('2，板卡温度高建议清洗防尘网。')
         break
     
-    report_name = '%s移动巡检报告-%s.docx' % ('常州', today)
+    report_name = '%s移动巡检报告-%s.docx' % (CITY, today)
     doc.save( os.path.join('app', 'static', report_name))
 
     # url = url_for('static', filename = report_name)
