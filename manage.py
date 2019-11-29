@@ -6,6 +6,7 @@ from app.models import AddressCollect, CardPort1, LoadStatistic
 from flask_script import Manager, Shell
 
 app = create_app('default')
+
 # app = Flask(__name__)
 migrate = Migrate(app, db)
 manager = Manager(app)

@@ -1,4 +1,5 @@
-import os, sys, zipfile, time, datetime
+import os, sys, zipfile, time, datetime, logging
+logging.basicConfig(filename="D:\\PythonStudy\\tool_web\\log.txt",format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 from flask import render_template, session, redirect, url_for, current_app, request
 import openpyxl
 from openpyxl.styles import Alignment, PatternFill
@@ -95,7 +96,8 @@ def report_port(node_name, host_name):
                     res.append(item + [ggl_data[i][0], ggl_data[i][5], ggl_data[i][2]+'|'+ ggl_data[i][3], ggl_data[i][7]+'|'+ ggl_data[i][8], ip, port_is_ok, dk])
 
                 except Exception:
-                    print('端口数和光功率数量不匹配')
+                    # print('端口数和光功率数量不匹配')
+                    continue
                 
                 i += 1
             else:
@@ -429,9 +431,13 @@ def xj_report(host_name):
 def node_list(action):
     session['action'] = action
     node_data = []
+    
     for root,dirs,files in os.walk(os.path.join('app','static','logs', CITY)):
         node_data = dirs
         break
+
+    current_app.logger.info('node_path: ' + os.path.join(os.getcwd(), 'app' ,'static' ,'logs' , CITY))
+    current_app.logger.info('nodes: ' + ','.join(node_data))
                 
     return render_template('node_list_base.html', node_data = node_data, action = action)
 
