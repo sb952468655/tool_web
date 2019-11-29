@@ -252,9 +252,10 @@ def check_excel(host_name):
 
             cur_row += 1
     
-    excel.save(os.path.join('app','static', 'check.xlsx'))
+    file_name = '{}_配置检查.xlsx'.format(host_name.split('.')[0])
+    excel.save(os.path.join('app','static', file_name))
 
-    return redirect(url_for('static', filename='check.xlsx'))
+    return redirect(url_for('static', filename=file_name))
 
 
 @main.route('/xunjian/<node_name>/<host_name>')
@@ -590,7 +591,7 @@ def backup_list(node_name):
     if request.method=='POST':
         if not os.path.exists(os.path.join('app', 'static', 'backup')):
             os.makedirs(os.path.join('app', 'static', 'backup'))
-            
+
         file_name = str(time.time()) + '.zip'
         zip_name = os.path.join('app', 'static', 'backup', file_name)
         zip = zipfile.ZipFile(zip_name, 'w', zipfile.ZIP_DEFLATED )
