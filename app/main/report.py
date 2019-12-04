@@ -1,5 +1,5 @@
 import re, os
-
+from .common import get_host, get_log
 def get_report_data(config):
     '''从配置获取报表数据'''
     res_port = get_port(config)
@@ -111,7 +111,7 @@ def get_ip(config):
     else:
         return ''
 
-def get_host_list(node_path):
+def get_host_list(node_name):
     '''设备清单统计'''
 
     host_list_data = []
@@ -120,12 +120,12 @@ def get_host_list(node_path):
     p_start_time = r' Time of last boot               : (.*?)\n'
     p_save_time = r'Time Last Saved        : (.*?)\n'
 
-    filenames = []
-    for a, b, filenames in os.walk(node_path):
-        break
-    for item in filenames:
-        with open(os.path.join(node_path, item)) as f:
-            config = f.read()
+    host_list = get_host(node_name)
+    for i in host_list:
+        config = get_log(node_name, i)
+        if not config:
+            continue
+
         res_host_name = re.search(p_host_name, config)
         if not res_host_name:
             host_name = ''

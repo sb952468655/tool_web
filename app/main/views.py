@@ -1,5 +1,5 @@
 import os, sys, zipfile, time, datetime, logging
-from flask import render_template, session, redirect, url_for, current_app, request
+from flask import render_template, session, redirect, url_for, current_app, request, abort
 import openpyxl
 from openpyxl.styles import Alignment, PatternFill
 import docx
@@ -16,37 +16,14 @@ from urllib.request import quote, unquote
 from .. import db
 from ..models import CardPort1
 from .report import get_host_list, get_card_detail, get_card_statistic, get_mda_detail, get_mda_statistic, get_port_statistic
+from .common import get_log, get_node, get_host, get_today_log_name
 sys.path.append('../')
-# from . report import get_report_data
-# from . import report
-# from .forms import NameForm, UploadForm
 
 @main.route('/')
 def index():
 
     return redirect(url_for('main.node_list', action = 'report_port'))
 
-
-@main.route('/report')
-def report():
-    items = [
-        ['show port', '检查端口是否有down的', 'sdsdsdsd'],
-        ['show port detail', '检查端口光功率', 'sdsdsdsd'],
-        ['show lag', '检查lag信息', 'sdsdsdsd'],
-        ['show lag detail', '检查lag信息', 'sdsdsdsd'],
-        ['show lag des', '检查lag信息', 'sdsdsdsd'],
-        ['show router interface', '计算固定地址使用情况', 'sdsdsdsd'],
-        ['show router arp', '计算固定地址使用情况', 'sdsdsdsd'],
-        ['show router dhcp servers', '计算dhcp地址、地址利用率', 'sdsdsdsd'],
-        ['show router dhcp local-dhcp-server "dhcp-s1" summary', '计算dhcp地址、地址利用率', 'sdsdsdsd'],
-        ['admin display-config', '计算每个端口的业务种类、数量', 'sdsdsdsd'],
-        ['show service service-using ies', '计算每个端口的业务种类、数量', 'sdsdsdsd'],
-        ['show service service-using vprn', '计算每个端口的业务种类、数量', 'sdsdsdsd'],
-        ['show service sap-using', '计算每个端口的业务种类、数量', 'sdsdsdsd'],
-        ['show lag description', '计算每个端口的业务种类、数量', 'sdsdsdsd']
-    ]
-
-    return render_template('index.html', items = items)
 
 @main.route('/report_port/<node_name>/<host_name>')
 def report_port(node_name, host_name):
@@ -59,8 +36,11 @@ def report_port(node_name, host_name):
     count = CardPort1.query.filter_by(host_name = host_name).count()
     if count == 0:
 
-        with open(os.path.join('app', 'static', 'logs', CITY, node_name, host_name)) as f:
-            config = f.read()
+        # with open(os.path.join('app', 'static', 'logs', CITY, node_name, host_name)) as f:
+        #     config = f.read()
+        config = get_log(node_name, host_name)
+        if not config:
+            abort(404)
 
         ip = get_ip(config)
         report_data = get_report_data(config)
@@ -149,8 +129,8 @@ def report_port(node_name, host_name):
 @main.route('/host_list_data/<node_name>/<host_name>')
 def host_list_data(node_name, host_name):
     '''设备清单统计'''
-    node_path = os.path.join('app', 'static', 'logs', CITY, node_name)
-    host_list_data = get_host_list(node_path)
+    # node_path = os.path.join('app', 'static', 'logs', CITY, node_name)
+    host_list_data = get_host_list(node_name)
 
     return render_template('host_list_data.html', host_name=host_name, node_name = node_name, host_list_data = host_list_data ,action='host_list_data')
 
@@ -158,9 +138,11 @@ def host_list_data(node_name, host_name):
 def card_detail(node_name, host_name):
     '''card明细'''
 
-    with open(os.path.join('app', 'static', 'logs', CITY, node_name, host_name)) as f:
-        config = f.read()
-
+    # with open(os.path.join('app', 'static', 'logs', CITY, node_name, host_name)) as f:
+    #     config = f.read()
+    config = get_log(node_name, host_name)
+    if not config:
+        abort(404)
     card_detail_data = get_card_detail(config)
 
     return render_template('card_detail.html', host_name=host_name, node_name = node_name ,card_detail_data = card_detail_data ,action='card_detail')
@@ -169,8 +151,11 @@ def card_detail(node_name, host_name):
 def card_statistic(node_name, host_name):
     '''card统计'''
 
-    with open(os.path.join('app', 'static', 'logs', CITY, node_name, host_name)) as f:
-        config = f.read()
+    # with open(os.path.join('app', 'static', 'logs', CITY, node_name, host_name)) as f:
+    #     config = f.read()
+    config = get_log(node_name, host_name)
+    if not config:
+        abort(404)
 
     card_statistic_data = get_card_statistic(config)
 
@@ -180,9 +165,11 @@ def card_statistic(node_name, host_name):
 def mda_detail(node_name, host_name):
     '''mda明细'''
 
-    with open(os.path.join('app', 'static', 'logs', CITY, node_name, host_name)) as f:
-        config = f.read()
-
+    # with open(os.path.join('app', 'static', 'logs', CITY, node_name, host_name)) as f:
+    #     config = f.read()
+    config = get_log(node_name, host_name)
+    if not config:
+        abort(404)
     mda_detail_data = get_mda_detail(config)
 
     return render_template('mda_detail.html', host_name=host_name, node_name = node_name, mda_detail_data = mda_detail_data ,action='mda_detail')
@@ -191,9 +178,11 @@ def mda_detail(node_name, host_name):
 def mda_statistic(node_name, host_name):
     '''mda统计'''
 
-    with open(os.path.join('app', 'static', 'logs', CITY, node_name, host_name)) as f:
-        config = f.read()
-
+    # with open(os.path.join('app', 'static', 'logs', CITY, node_name, host_name)) as f:
+    #     config = f.read()
+    config = get_log(node_name, host_name)
+    if not config:
+        abort(404)
     mda_statistic_data = get_mda_statistic(config)
 
     return render_template('mda_statistic.html', host_name=host_name, node_name = node_name, mda_statistic_data = mda_statistic_data ,action='mda_statistic')
@@ -202,9 +191,11 @@ def mda_statistic(node_name, host_name):
 def port_statistic(node_name, host_name):
     '''port统计'''
 
-    with open(os.path.join('app', 'static', 'logs', CITY, node_name, host_name)) as f:
-        config = f.read()
-
+    # with open(os.path.join('app', 'static', 'logs', CITY, node_name, host_name)) as f:
+    #     config = f.read()
+    config = get_log(node_name, host_name)
+    if not config:
+        abort(404)
     port_statistic_data = get_port_statistic(config)
 
     return render_template('port_statistic.html', host_name=host_name, node_name = node_name, port_statistic_data = port_statistic_data ,action='port_statistic')
@@ -214,9 +205,11 @@ def port_statistic(node_name, host_name):
 def check_config(node_name, host_name):
     '''配置检查'''
 
-    with open(os.path.join('app', 'static', 'logs', CITY, node_name, host_name)) as f:
-        config = f.read()
-
+    # with open(os.path.join('app', 'static', 'logs', CITY, node_name, host_name)) as f:
+    #     config = f.read()
+    config = get_log(node_name, host_name)
+    if not config:
+        abort(404)
     check_res = all_check.all_check(config)
 
     session['node_name'] = node_name
@@ -229,9 +222,11 @@ def check_excel(host_name):
 
     #先获取检查结果
     node_name = session['node_name']
-    with open(os.path.join('app', 'static', 'logs', CITY, node_name, host_name)) as f:
-        config = f.read()
-
+    # with open(os.path.join('app', 'static', 'logs', CITY, node_name, host_name)) as f:
+    #     config = f.read()
+    config = get_log(node_name, host_name)
+    if not config:
+        abort(404)
     check_res = all_check.all_check(config)
 
     excel = openpyxl.Workbook()
@@ -262,8 +257,9 @@ def check_excel(host_name):
 def xunjian(node_name, host_name):
     '''巡检'''
 
-    with open(os.path.join('app', 'static', 'logs', CITY, node_name, host_name)) as f:
-        config = f.read()
+    config = get_log(node_name, host_name)
+    if not config:
+        abort(404)
 
     xunjian_data = mobile.xunjian(config, config)
     warn_data = [item for item in xunjian_data if item[0] and '正常' not in item[1]]
@@ -275,8 +271,9 @@ def xunjian(node_name, host_name):
 def xunjian_output_all(node_name, host_name):
     '''设备巡检-全量输出'''
 
-    with open(os.path.join('app', 'static', 'logs', CITY, node_name, host_name)) as f:
-        config = f.read()
+    config = get_log(node_name, host_name)
+    if not config:
+        abort(404)
 
     xunjian_data = mobile.xunjian(config, config)
     warn_data = [item for item in xunjian_data if item[0]]
@@ -435,11 +432,7 @@ def xj_report(host_name, type):
 @main.route('/node_list/<action>')
 def node_list(action):
     session['action'] = action
-    node_data = []
-    
-    for root,dirs,files in os.walk(os.path.join('app','static','logs', CITY)):
-        node_data = dirs
-        break
+    node_data = get_node()
 
     current_app.logger.info('node_path: ' + os.path.join(os.getcwd(), 'app' ,'static' ,'logs' , CITY))
     current_app.logger.info('nodes: ' + ','.join(node_data))
@@ -451,10 +444,7 @@ def node_list(action):
 def host_list(node_name):
 
     session['node_name'] = node_name
-    host_data = []
-
-    for _,_,files in os.walk(os.path.join('app','static','logs', CITY, node_name)):
-        host_data = files
+    host_data = get_host(node_name)
 
     action = session.get('action')
     if action == 'config_backup':
@@ -472,8 +462,9 @@ def address_collect(node_name, host_name):
     count = AddressCollect.query.filter_by(host_name = host_name).count()
     # count = 0 #等下去掉
     if count == 0:
-        with open(os.path.join('app', 'static', 'logs', CITY, node_name, host_name)) as f:
-            config = f.read()
+        config = get_log(node_name, host_name)
+        if not config:
+            abort(404)
         res = get_address_data(config)
 
         for item in res:
@@ -575,14 +566,14 @@ def address_mk_excel(host_name):
 def config_backup(node_name):
     '''config备份（下载到本地）'''
     host_data = []
+    host_list = get_host(node_name)
+    for item in host_list:
+        # create_time = os.path.getctime(os.path.join('app','static','logs', CITY, node_name, item, get_today_log_name(item)))
+        # create_time = time.localtime(create_time)
+        log_name = get_today_log_name(item)
+        log_date = log_name.split('.')[0][-10:]
+        host_data.append((item, log_date))
 
-    for _,_,files in os.walk(os.path.join('app','static','logs', CITY, node_name)):
-        for item in files:
-            create_time = os.path.getctime(os.path.join('app','static','logs', CITY, node_name, item))
-            create_time = time.localtime(create_time)
-            host_data.append((item, '{}/{}/{}'.format(create_time.tm_year,create_time.tm_mon,create_time.tm_mday)))
-        break
-    
     return render_template('back_up/config_backup_host_list.html', host_data=host_data, node_name = node_name)
 
 @main.route('/backup_list/<node_name>', methods=['POST'])
@@ -597,7 +588,8 @@ def backup_list(node_name):
         zip = zipfile.ZipFile(zip_name, 'w', zipfile.ZIP_DEFLATED )
         
         for name, _ in request.form.to_dict().items():
-            zip.write(os.path.join('app', 'static', 'logs', CITY, node_name, name), name)
+            today_log_name = get_today_log_name(name)
+            zip.write(os.path.join('app', 'static', 'logs', CITY, node_name, name, today_log_name), today_log_name)
         zip.close()
 
         url = url_for('static', filename = 'backup/{}'.format(file_name))
@@ -613,8 +605,9 @@ def load_statistic(node_name, host_name):
     page = request.args.get('page', 1, type=int)
     count = LoadStatistic.query.filter_by(host_name = host_name).count()
     if count == 0:
-        with open(os.path.join('app', 'static', 'logs', CITY, node_name, host_name)) as f:
-            config = f.read()
+        config = get_log(node_name, host_name)
+        if not config:
+            abort(404)
         res = get_statistic_data(config)
         for item in res:
 
@@ -657,7 +650,7 @@ def load_statistic_host(node_name, host_name):
     '''按设备统计用户数量'''
 
     node_path = os.path.join('app', 'static', 'logs', CITY, node_name)
-    load_statistic_host_data = get_statistic_host_data(node_path)
+    load_statistic_host_data = get_statistic_host_data(node_name)
 
     return render_template('statistic_host.html',
         load_statistic_host_data = load_statistic_host_data, 
