@@ -570,9 +570,11 @@ def config_backup(node_name):
     for item in host_list:
         # create_time = os.path.getctime(os.path.join('app','static','logs', CITY, node_name, item, get_today_log_name(item)))
         # create_time = time.localtime(create_time)
+
         log_name = get_today_log_name(item)
-        log_date = log_name.split('.')[0][-10:]
-        host_data.append((item, log_date))
+        if os.path.exists(os.path.join('app', 'static', 'logs', CITY, node_name, item, log_name)):
+            log_date = log_name.split('.')[0][-10:]
+            host_data.append((item, log_date))
 
     return render_template('back_up/config_backup_host_list.html', host_data=host_data, node_name = node_name)
 
