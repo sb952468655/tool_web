@@ -25,11 +25,11 @@
         <div class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
                 <li><a href="#">主页</a></li>
-                <li><a href="{{ url_for('main.node_list', action = 'report_port') }}">统计报表</a></li>
-                <li><a href="{{ url_for('main.node_list', action = 'xunjian') }}">设备巡检</a></li>
-                <li><a href="{{ url_for('main.node_list', action = 'check_config') }}">配置检查</a></li>
-                <li><a href="{{ url_for('main.node_list', action = 'config_backup') }}">config备份</a></li>
-                <li><a href="{{ url_for('main.node_list', action = 'load_statistic') }}">业务负荷统计</a></li>
+                <li><a href="{{ url_for('main.host_list', action = 'report_port') }}">统计报表</a></li>
+                <li><a href="{{ url_for('main.host_list', action = 'xunjian') }}">设备巡检</a></li>
+                <li><a href="{{ url_for('main.host_list', action = 'check_config') }}">配置检查</a></li>
+                <li><a href="{{ url_for('main.host_list', action = 'config_backup') }}">config备份</a></li>
+                <li><a href="{{ url_for('main.host_list', action = 'load_statistic') }}">业务负荷统计</a></li>
             </ul>
         </div>
     </div>

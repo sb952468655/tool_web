@@ -18,7 +18,7 @@
             <tbody>
                 {% for item in city_data %}
                     <tr>
-                        <th><a href="{{ url_for('main.node_list', city = item[0], action = session.get('action')) }}">{{ item[1] }}</a></th>
+                        <th><a href="{{ url_for('main.host_list', city = item[0], action = session.get('action')) }}">{{ item[1] }}</a></th>
                     </tr>
                 {% endfor %}
             </tbody>

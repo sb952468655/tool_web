@@ -78,7 +78,7 @@
 {% block pageination %}
     {% if pageination %}
     <div class="pagination">
-        {{ macros.pagination_widget(pageination, 'main.report_port', host_name=host_name, node_name=node_name) }}
+        {{ macros.pagination_widget(pageination, 'main.report_port', host_name=host_name) }}
     </div>
     {% endif %}
 {% endblock %}

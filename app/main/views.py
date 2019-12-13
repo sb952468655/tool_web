@@ -16,7 +16,7 @@ from urllib.request import quote, unquote
 from .. import db
 from ..models import CardPort1
 from .report import get_host_list, get_card_detail, get_card_statistic, get_mda_detail, get_mda_statistic, get_port_statistic
-from .common import get_log, get_node, get_host, get_today_log_name, get_city_list
+from .common import get_log, get_host, get_today_log_name, get_city_list
 sys.path.append('../')
 
 @main.route('/')
@@ -25,8 +25,8 @@ def index():
     return redirect(url_for('main.city_list'))
 
 
-@main.route('/report_port/<node_name>/<host_name>')
-def report_port(node_name, host_name):
+@main.route('/report_port/<host_name>')
+def report_port(host_name):
     '''统计报表-端口明细'''
 
     card_data = []
@@ -38,7 +38,7 @@ def report_port(node_name, host_name):
     count = CardPort1.query.filter_by(host_name = host_name, date_time = datetime.date.today()).count()
     if count == 0:
         
-        config = get_log(city, node_name, host_name)
+        config = get_log(city, host_name)
         if not config:
             abort(404)
 
@@ -122,92 +122,89 @@ def report_port(node_name, host_name):
     return render_template('report.html', 
         card_data = card_data, 
         action = 'report_port', 
-        node_name=node_name, 
         host_name=host_name,
         pageination = pageination)
 
-@main.route('/host_list_data/<node_name>/<host_name>')
-def host_list_data(node_name, host_name):
+@main.route('/host_list_data/<host_name>')
+def host_list_data(host_name):
     '''设备清单统计'''
-    # node_path = os.path.join('app', 'static', 'logs', CITY, node_name)
     city = session.get('city')
-    host_list_data = get_host_list(city, node_name)
+    host_list_data = get_host_list(city)
 
-    return render_template('host_list_data.html', host_name=host_name, node_name = node_name, host_list_data = host_list_data ,action='host_list_data')
+    return render_template('host_list_data.html', host_name=host_name, host_list_data = host_list_data ,action='host_list_data')
 
-@main.route('/card_detail/<node_name>/<host_name>')
-def card_detail(node_name, host_name):
+@main.route('/card_detail/<host_name>')
+def card_detail(host_name):
     '''card明细'''
 
     city = session.get('city')
-    config = get_log(city, node_name, host_name)
+    config = get_log(city, host_name)
     if not config:
         abort(404)
     card_detail_data = get_card_detail(config)
 
-    return render_template('card_detail.html', host_name=host_name, node_name = node_name ,card_detail_data = card_detail_data ,action='card_detail')
+    return render_template('card_detail.html', host_name=host_name, card_detail_data = card_detail_data ,action='card_detail')
 
-@main.route('/card_statistic/<node_name>/<host_name>')
-def card_statistic(node_name, host_name):
+@main.route('/card_statistic/<host_name>')
+def card_statistic(host_name):
     '''card统计'''
 
     city = session.get('city')
-    config = get_log(city, node_name, host_name)
+    config = get_log(city, host_name)
     if not config:
         abort(404)
 
     card_statistic_data = get_card_statistic(config)
 
-    return render_template('card_statistic.html', host_name=host_name, node_name = node_name, card_statistic_data = card_statistic_data ,action='card_statistic')
+    return render_template('card_statistic.html', host_name=host_name, card_statistic_data = card_statistic_data ,action='card_statistic')
 
-@main.route('/mda_detail/<node_name>/<host_name>')
-def mda_detail(node_name, host_name):
+@main.route('/mda_detail/<host_name>')
+def mda_detail(host_name):
     '''mda明细'''
 
     city = session.get('city')
-    config = get_log(city, node_name, host_name)
+    config = get_log(city, host_name)
     if not config:
         abort(404)
     mda_detail_data = get_mda_detail(config)
 
-    return render_template('mda_detail.html', host_name=host_name, node_name = node_name, mda_detail_data = mda_detail_data ,action='mda_detail')
+    return render_template('mda_detail.html', host_name=host_name,  mda_detail_data = mda_detail_data ,action='mda_detail')
 
-@main.route('/mda_statistic/<node_name>/<host_name>')
-def mda_statistic(node_name, host_name):
+@main.route('/mda_statistic/<host_name>')
+def mda_statistic(host_name):
     '''mda统计'''
 
     city = session.get('city')
-    config = get_log(city, node_name, host_name)
+    config = get_log(city, host_name)
     if not config:
         abort(404)
     mda_statistic_data = get_mda_statistic(config)
 
-    return render_template('mda_statistic.html', host_name=host_name, node_name = node_name, mda_statistic_data = mda_statistic_data ,action='mda_statistic')
+    return render_template('mda_statistic.html', host_name=host_name,  mda_statistic_data = mda_statistic_data ,action='mda_statistic')
 
-@main.route('/port_statistic/<node_name>/<host_name>')
-def port_statistic(node_name, host_name):
+@main.route('/port_statistic/<host_name>')
+def port_statistic(host_name):
     '''port统计'''
 
     city = session.get('city')
-    config = get_log(city, node_name, host_name)
+    config = get_log(city, host_name)
     if not config:
         abort(404)
     port_statistic_data = get_port_statistic(config)
 
-    return render_template('port_statistic.html', host_name=host_name, node_name = node_name, port_statistic_data = port_statistic_data ,action='port_statistic')
+    return render_template('port_statistic.html', host_name=host_name,  port_statistic_data = port_statistic_data ,action='port_statistic')
 
 
-@main.route('/check_config/<node_name>/<host_name>')
-def check_config(node_name, host_name):
+@main.route('/check_config/<host_name>')
+def check_config(host_name):
     '''配置检查'''
 
     city = session.get('city')
-    config = get_log(city, node_name, host_name)
+    config = get_log(city, host_name)
     if not config:
         abort(404)
     check_res = all_check.all_check(config)
 
-    session['node_name'] = node_name
     session['host_name'] = host_name
     return render_template('check.html', check_data=check_res, host_name=host_name)
 
@@ -216,9 +213,8 @@ def check_excel(host_name):
     '''配置检查生成表格'''
 
     #先获取检查结果
-    node_name = session['node_name']
     city = session.get('city')
-    config = get_log(city, node_name, host_name)
+    config = get_log(city, host_name)
     if not config:
         abort(404)
     check_res = all_check.all_check(config)
@@ -247,11 +243,11 @@ def check_excel(host_name):
     return redirect(url_for('static', filename=file_name))
 
 
-@main.route('/xunjian/<node_name>/<host_name>')
-def xunjian(node_name, host_name):
+@main.route('/xunjian/<host_name>')
+def xunjian(host_name):
     '''巡检'''
     city = session.get('city')
-    config = get_log(city, node_name, host_name)
+    config = get_log(city, host_name)
     if not config:
         abort(404)
 
@@ -259,14 +255,14 @@ def xunjian(node_name, host_name):
     warn_data = [item for item in xunjian_data if item[0] and '正常' not in item[1]]
     session['xunjian_data'] = warn_data
     
-    return render_template('xunjian/xunjian.html', xunjian_data=warn_data, host_name = host_name, node_name = node_name)
+    return render_template('xunjian/xunjian.html', xunjian_data=warn_data, host_name = host_name)
 
-@main.route('/xunjian_output_all/<node_name>/<host_name>')
-def xunjian_output_all(node_name, host_name):
+@main.route('/xunjian_output_all/<host_name>')
+def xunjian_output_all(host_name):
     '''设备巡检-全量输出'''
 
     city = session.get('city')
-    config = get_log(city, node_name, host_name)
+    config = get_log(city, host_name)
     if not config:
         abort(404)
 
@@ -274,7 +270,7 @@ def xunjian_output_all(node_name, host_name):
     warn_data = [item for item in xunjian_data if item[0]]
     session['xunjian_data_all'] = warn_data
     
-    return render_template('xunjian/xunjian_output_all.html', xunjian_data=warn_data, host_name = host_name, node_name = node_name)
+    return render_template('xunjian/xunjian_output_all.html', xunjian_data=warn_data, host_name = host_name)
 
 @main.route('/auto_config')
 def auto_config():
@@ -434,34 +430,22 @@ def city_list():
     return render_template('city_list.html', city_data = city_data)
 
 
-@main.route('/<action>')
-def node_list(action):
+@main.route('/host_list/<action>')
+def host_list(action):
+    session['action'] = action
     if not session.get('city'):
         session['city'] = request.args.get('city')
-
-    session['action'] = action
     city = session.get('city')
-    node_data = get_node(city)
+    host_data = get_host(city)
 
-    return render_template('node_list_base.html', node_data = node_data, action = action)
-
-
-@main.route('/host_list/<node_name>')
-def host_list(node_name):
-
-    session['node_name'] = node_name
-    city = session.get('city')
-    host_data = get_host(city, node_name)
-
-    action = session.get('action')
     if action == 'config_backup':
-        return redirect(url_for('main.config_backup', node_name = node_name))
+        return redirect(url_for('main.config_backup'))
 
-    return render_template('host_list_base.html', host_data = host_data, node_name = node_name, action = action)
+    return render_template('host_list_base.html', host_data = host_data,  action = action)
 
 
-@main.route('/address_collect/<node_name>/<host_name>')
-def address_collect(node_name, host_name):
+@main.route('/address_collect/<host_name>')
+def address_collect(host_name):
     '''三层接口和静态用户IP地址采集'''
     address_data = []
     city = session.get('city')
@@ -469,7 +453,7 @@ def address_collect(node_name, host_name):
     count = AddressCollect.query.filter_by(host_name = host_name, date_time = datetime.date.today()).count()
     # count = 0 #等下去掉
     if count == 0:
-        config = get_log(city, node_name, host_name)
+        config = get_log(city, host_name)
         if not config:
             abort(404)
         res = get_address_data(config)
@@ -510,7 +494,6 @@ def address_collect(node_name, host_name):
     return render_template('address_collect.html', 
         address_data = address_data, 
         action = 'address_collect', 
-        node_name=node_name, 
         host_name=host_name,
         pageination = pageination)
 
@@ -569,26 +552,28 @@ def address_mk_excel(host_name):
     return redirect(url_for('static', filename='address.xlsx'))
 
 
-@main.route('/config_backup/<node_name>')
-def config_backup(node_name):
+@main.route('/config_backup')
+def config_backup():
     '''config备份（下载到本地）'''
     host_data = []
     city = session.get('city')
-    host_list = get_host(city, node_name)
+    host_list = get_host(city)
     for item in host_list:
-        # create_time = os.path.getctime(os.path.join('app','static','logs', CITY, node_name, item, get_today_log_name(item)))
+        # create_time = os.path.getctime(os.path.join('app','static','logs', CITY, item, get_today_log_name(item)))
         # create_time = time.localtime(create_time)
 
         log_name = get_today_log_name(item)
-        if os.path.exists(os.path.join('app', 'static', 'logs', CITY, node_name, item, log_name)):
+        if os.path.exists(os.path.join('app', 'static', 'logs', city, item, log_name)):
             log_date = log_name.split('.')[0][-10:]
             host_data.append((item, log_date))
 
-    return render_template('back_up/config_backup_host_list.html', host_data=host_data, node_name = node_name)
+    return render_template('back_up/config_backup_host_list.html', host_data=host_data)
 
-@main.route('/backup_list/<node_name>', methods=['POST'])
-def backup_list(node_name):
+@main.route('/backup_list', methods=['POST'])
+def backup_list():
     '''获取需要备份的config列表'''
+
+    city = session.get('city')
     if request.method=='POST':
         if not os.path.exists(os.path.join('app', 'static', 'backup')):
             os.makedirs(os.path.join('app', 'static', 'backup'))
@@ -599,7 +584,7 @@ def backup_list(node_name):
         
         for name, _ in request.form.to_dict().items():
             today_log_name = get_today_log_name(name)
-            zip.write(os.path.join('app', 'static', 'logs', CITY, node_name, name, today_log_name), today_log_name)
+            zip.write(os.path.join('app', 'static', 'logs', city, name, today_log_name), today_log_name)
         zip.close()
 
         url = url_for('static', filename = 'backup/{}'.format(file_name))
@@ -608,15 +593,15 @@ def backup_list(node_name):
 
 
 
-@main.route('/load_statistic/<node_name>/<host_name>')
-def load_statistic(node_name, host_name):
+@main.route('/load_statistic/<host_name>')
+def load_statistic(host_name):
     '''业务负荷统计'''
     statistic_data = None
     page = request.args.get('page', 1, type=int)
     city = session.get('city')
     count = LoadStatistic.query.filter_by(host_name = host_name, date_time = datetime.date.today()).count()
     if count == 0:
-        config = get_log(city, node_name, host_name)
+        config = get_log(city, host_name)
         if not config:
             abort(404)
         res = get_statistic_data(config)
@@ -649,25 +634,22 @@ def load_statistic(node_name, host_name):
     return render_template('statistic.html',
         statistic_data = statistic_data, 
         action = 'load_statistic', 
-        node_name=node_name, 
         host_name=host_name,
         pageination = pageination)
 
 
 
 
-@main.route('/load_statistic_host/<node_name>/<host_name>')
-def load_statistic_host(node_name, host_name):
+@main.route('/load_statistic_host/<host_name>')
+def load_statistic_host(host_name):
     '''按设备统计用户数量'''
 
-    node_path = os.path.join('app', 'static', 'logs', CITY, node_name)
     city = session.get('city')
-    load_statistic_host_data = get_statistic_host_data(city, node_name)
+    load_statistic_host_data = get_statistic_host_data(city)
 
     return render_template('statistic_host.html',
         load_statistic_host_data = load_statistic_host_data, 
         action = 'load_statistic_host', 
-        node_name=node_name, 
         host_name=host_name)
     
     

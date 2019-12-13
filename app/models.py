@@ -1,5 +1,5 @@
 from . import db
-from datetime import datetime
+from datetime import datetime, date
 
 class AddressCollect(db.Model):
     '''地址采集表'''
@@ -20,7 +20,7 @@ class AddressCollect(db.Model):
     vpn_rd = db.Column(db.String(64)) #VPN-RD
     vpn_rt = db.Column(db.String(64)) #VPN-RT
     description = db.Column(db.String(128)) #接口或用户描述
-    date_time = db.Column(db.DateTime, default = datetime.now()) #采集时间
+    date_time = db.Column(db.Date, default = date.today()) #采集时间
 
     def count_table():
         return AddressCollect.query.count()
@@ -52,7 +52,7 @@ class CardPort1(db.Model):
     optical_warn = db.Column(db.String(64)) #收光门限
     output_warn = db.Column(db.String(64)) #发光门限
     is_abnormal = db.Column(db.String(64)) #是否存在异常
-    date_time = db.Column(db.DateTime, default = datetime.now()) #采集时间
+    date_time = db.Column(db.Date, default = date.today()) #采集时间
 
     def __repr__(self):
         return '<CardPort1 %r>' % self.host_name
@@ -72,7 +72,7 @@ class LoadStatistic(db.Model):
     ies_3000_utilization = db.Column(db.String(64)) #ies 3000地址池利用率
     vprn_4015_user_num = db.Column(db.String(64)) #vprn 4015用户数量
     vprn_4015_utilization = db.Column(db.String(64)) #vprn 4015地址池利用率
-    date_time = db.Column(db.DateTime, default = datetime.now()) #采集时间
+    date_time = db.Column(db.Date, default = date.today()) #采集时间
 
     def __repr__(self):
         return '<LoadStatistic %r>' % self.host_name

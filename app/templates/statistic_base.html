@@ -12,14 +12,14 @@
     <div class="col-md-2">
         <ul class="nav nav-pills nav-stacked">
             {% if action == 'load_statistic' %}
-                <li role="presentation" class="active"><a href="{{ url_for('main.load_statistic', node_name = node_name, host_name = host_name ) }}">按端口统计用户数量</a></li>
+                <li role="presentation" class="active"><a href="{{ url_for('main.load_statistic', host_name = host_name ) }}">按端口统计用户数量</a></li>
             {% else %}
-            <li role="presentation" ><a href="{{ url_for('main.load_statistic', node_name = node_name, host_name = host_name ) }}">按端口统计用户数量</a></li>
+            <li role="presentation" ><a href="{{ url_for('main.load_statistic', host_name = host_name ) }}">按端口统计用户数量</a></li>
             {% endif %}
             {% if action == 'load_statistic_host' %}
-                <li role="presentation" class="active"><a href="{{ url_for('main.load_statistic_host', node_name = node_name, host_name = host_name ) }}">按设备统计用户数量</a></li>
+                <li role="presentation" class="active"><a href="{{ url_for('main.load_statistic_host', host_name = host_name ) }}">按设备统计用户数量</a></li>
             {% else %}
-                <li role="presentation" ><a href="{{ url_for('main.load_statistic_host', node_name = node_name, host_name = host_name ) }}">按设备统计用户数量</a></li>
+                <li role="presentation" ><a href="{{ url_for('main.load_statistic_host', host_name = host_name ) }}">按设备统计用户数量</a></li>
             {% endif %}
         </ul>
     </div>

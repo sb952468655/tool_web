@@ -1,28 +1,17 @@
 import os, datetime, logging, re
 from .config import CITY, g_log_path
 
-def get_node(city):
-    '''获取节点列表'''
-
-    node_data = []
-    for _,dirs,_ in os.walk(os.path.join(g_log_path, city)):
-        node_data = dirs
-        break
-
-    return node_data
-
-
-def get_host(city, node):
+def get_host(city):
     '''获取设备列表'''
 
     host_data = []
-    for _,dirs,_ in os.walk(os.path.join(g_log_path, city, node)):
+    for _,dirs,_ in os.walk(os.path.join(g_log_path, city)):
         host_data = dirs
         break
 
     return host_data
 
-def get_log(city, node, host, date=None):
+def get_log(city, host, date=None):
     '''根据节点，设备名称， 日期获取log'''
 
     log_str = ''
@@ -32,13 +21,13 @@ def get_log(city, node, host, date=None):
         date = today.strftime('%Y%m%d')
 
     p_host_log = host + '_' + date
-    for _, _, files in os.walk(os.path.join(g_log_path, city, node, host)):
+    for _, _, files in os.walk(os.path.join(g_log_path, city, host)):
         logs = files
         break
 
     for i in logs:
         if p_host_log in i:
-            log_str = open(os.path.join(g_log_path, city, node, host, i)).read()
+            log_str = open(os.path.join(g_log_path, city, host, i)).read()
             break
     
     if not log_str:
