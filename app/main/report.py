@@ -111,7 +111,7 @@ def get_ip(config):
     else:
         return ''
 
-def get_host_list(node_name):
+def get_host_list(city, node_name):
     '''设备清单统计'''
 
     host_list_data = []
@@ -120,9 +120,9 @@ def get_host_list(node_name):
     p_start_time = r' Time of last boot               : (.*?)\n'
     p_save_time = r'Time Last Saved        : (.*?)\n'
 
-    host_list = get_host(node_name)
+    host_list = get_host(city, node_name)
     for i in host_list:
-        config = get_log(node_name, i)
+        config = get_log(city, node_name, i)
         if not config:
             continue
 

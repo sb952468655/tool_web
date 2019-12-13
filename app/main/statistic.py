@@ -106,7 +106,7 @@ def get_statistic_data(config):
 
     return statistic_data
 
-def get_statistic_host_data(node_name):
+def get_statistic_host_data(city, node_name):
     '''按设备统计用户数'''
 
     statistic_host_data = []
@@ -116,10 +116,10 @@ def get_statistic_host_data(node_name):
     p_user_num = r'Stable Leases {12}(\d{1,6}) {10,16}(\d{1,6}) '
     p_provisioned_addresses = r'Provisioned Addresses    (\d{1,6}) '
 
-    host_list = get_host(node_name)
+    host_list = get_host(city, node_name)
     # filenames = []
     for i in host_list:
-        config = get_log(node_name, i)
+        config = get_log(city, node_name, i)
         if not config:
             continue
 

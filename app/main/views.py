@@ -9,20 +9,20 @@ from . import main
 from ..check_pool import all_check
 from ..inspection import mobile
 from ..models import AddressCollect, LoadStatistic
-from .config import CITY
+from .config import CITY, g_city_to_name
 from .address import get_address_data
 from .statistic import get_statistic_data, get_statistic_host_data
 from urllib.request import quote, unquote
 from .. import db
 from ..models import CardPort1
 from .report import get_host_list, get_card_detail, get_card_statistic, get_mda_detail, get_mda_statistic, get_port_statistic
-from .common import get_log, get_node, get_host, get_today_log_name
+from .common import get_log, get_node, get_host, get_today_log_name, get_city_list
 sys.path.append('../')
 
 @main.route('/')
 def index():
-
-    return redirect(url_for('main.node_list', action = 'report_port'))
+    session['action'] = 'report_port'
+    return redirect(url_for('main.city_list'))
 
 
 @main.route('/report_port/<node_name>/<host_name>')
@@ -30,15 +30,15 @@ def report_port(node_name, host_name):
     '''统计报表-端口明细'''
 
     card_data = []
+    city = session.get('city')
+
     from .report import get_report_data, get_device_name, get_port_ggl, get_ip
 
     page = request.args.get('page', 1, type=int)
-    count = CardPort1.query.filter_by(host_name = host_name).count()
+    count = CardPort1.query.filter_by(host_name = host_name, date_time = datetime.date.today()).count()
     if count == 0:
-
-        # with open(os.path.join('app', 'static', 'logs', CITY, node_name, host_name)) as f:
-        #     config = f.read()
-        config = get_log(node_name, host_name)
+        
+        config = get_log(city, node_name, host_name)
         if not config:
             abort(404)
 
@@ -113,7 +113,7 @@ def report_port(node_name, host_name):
         session['report'] = res
 
         
-    pageination = CardPort1.query.filter_by(host_name = host_name).order_by(CardPort1.date_time.desc()).paginate(
+    pageination = CardPort1.query.filter_by(host_name = host_name, date_time = datetime.date.today()).order_by(CardPort1.date_time.desc()).paginate(
         page, per_page = current_app.config['FLASKY_POSTS_PER_PAGE'],
         error_out = False
     )
@@ -130,7 +130,8 @@ def report_port(node_name, host_name):
 def host_list_data(node_name, host_name):
     '''设备清单统计'''
     # node_path = os.path.join('app', 'static', 'logs', CITY, node_name)
-    host_list_data = get_host_list(node_name)
+    city = session.get('city')
+    host_list_data = get_host_list(city, node_name)
 
     return render_template('host_list_data.html', host_name=host_name, node_name = node_name, host_list_data = host_list_data ,action='host_list_data')
 
@@ -138,9 +139,8 @@ def host_list_data(node_name, host_name):
 def card_detail(node_name, host_name):
     '''card明细'''
 
-    # with open(os.path.join('app', 'static', 'logs', CITY, node_name, host_name)) as f:
-    #     config = f.read()
-    config = get_log(node_name, host_name)
+    city = session.get('city')
+    config = get_log(city, node_name, host_name)
     if not config:
         abort(404)
     card_detail_data = get_card_detail(config)
@@ -151,9 +151,8 @@ def card_detail(node_name, host_name):
 def card_statistic(node_name, host_name):
     '''card统计'''
 
-    # with open(os.path.join('app', 'static', 'logs', CITY, node_name, host_name)) as f:
-    #     config = f.read()
-    config = get_log(node_name, host_name)
+    city = session.get('city')
+    config = get_log(city, node_name, host_name)
     if not config:
         abort(404)
 
@@ -165,9 +164,8 @@ def card_statistic(node_name, host_name):
 def mda_detail(node_name, host_name):
     '''mda明细'''
 
-    # with open(os.path.join('app', 'static', 'logs', CITY, node_name, host_name)) as f:
-    #     config = f.read()
-    config = get_log(node_name, host_name)
+    city = session.get('city')
+    config = get_log(city, node_name, host_name)
     if not config:
         abort(404)
     mda_detail_data = get_mda_detail(config)
@@ -178,9 +176,8 @@ def mda_detail(node_name, host_name):
 def mda_statistic(node_name, host_name):
     '''mda统计'''
 
-    # with open(os.path.join('app', 'static', 'logs', CITY, node_name, host_name)) as f:
-    #     config = f.read()
-    config = get_log(node_name, host_name)
+    city = session.get('city')
+    config = get_log(city, node_name, host_name)
     if not config:
         abort(404)
     mda_statistic_data = get_mda_statistic(config)
@@ -191,9 +188,8 @@ def mda_statistic(node_name, host_name):
 def port_statistic(node_name, host_name):
     '''port统计'''
 
-    # with open(os.path.join('app', 'static', 'logs', CITY, node_name, host_name)) as f:
-    #     config = f.read()
-    config = get_log(node_name, host_name)
+    city = session.get('city')
+    config = get_log(city, node_name, host_name)
     if not config:
         abort(404)
     port_statistic_data = get_port_statistic(config)
@@ -205,9 +201,8 @@ def port_statistic(node_name, host_name):
 def check_config(node_name, host_name):
     '''配置检查'''
 
-    # with open(os.path.join('app', 'static', 'logs', CITY, node_name, host_name)) as f:
-    #     config = f.read()
-    config = get_log(node_name, host_name)
+    city = session.get('city')
+    config = get_log(city, node_name, host_name)
     if not config:
         abort(404)
     check_res = all_check.all_check(config)
@@ -222,9 +217,8 @@ def check_excel(host_name):
 
     #先获取检查结果
     node_name = session['node_name']
-    # with open(os.path.join('app', 'static', 'logs', CITY, node_name, host_name)) as f:
-    #     config = f.read()
-    config = get_log(node_name, host_name)
+    city = session.get('city')
+    config = get_log(city, node_name, host_name)
     if not config:
         abort(404)
     check_res = all_check.all_check(config)
@@ -256,8 +250,8 @@ def check_excel(host_name):
 @main.route('/xunjian/<node_name>/<host_name>')
 def xunjian(node_name, host_name):
     '''巡检'''
-
-    config = get_log(node_name, host_name)
+    city = session.get('city')
+    config = get_log(city, node_name, host_name)
     if not config:
         abort(404)
 
@@ -271,7 +265,8 @@ def xunjian(node_name, host_name):
 def xunjian_output_all(node_name, host_name):
     '''设备巡检-全量输出'''
 
-    config = get_log(node_name, host_name)
+    city = session.get('city')
+    config = get_log(city, node_name, host_name)
     if not config:
         abort(404)
 
@@ -428,15 +423,26 @@ def xj_report(host_name, type):
     # url = url_for('static', filename = report_name)
     return redirect(url_for('static', filename = report_name))
 
+@main.route('/city_list')
+def city_list():
+    '''地市列表'''
 
-@main.route('/node_list/<action>')
+    city_data = []
+    citys = get_city_list()
+    for i in citys:
+        city_data.append((i, g_city_to_name.get(i)))
+    return render_template('city_list.html', city_data = city_data)
+
+
+@main.route('/<action>')
 def node_list(action):
-    session['action'] = action
-    node_data = get_node()
+    if not session.get('city'):
+        session['city'] = request.args.get('city')
 
-    current_app.logger.info('node_path: ' + os.path.join(os.getcwd(), 'app' ,'static' ,'logs' , CITY))
-    current_app.logger.info('nodes: ' + ','.join(node_data))
-                
+    session['action'] = action
+    city = session.get('city')
+    node_data = get_node(city)
+
     return render_template('node_list_base.html', node_data = node_data, action = action)
 
 
@@ -444,7 +450,8 @@ def node_list(action):
 def host_list(node_name):
 
     session['node_name'] = node_name
-    host_data = get_host(node_name)
+    city = session.get('city')
+    host_data = get_host(city, node_name)
 
     action = session.get('action')
     if action == 'config_backup':
@@ -457,12 +464,12 @@ def host_list(node_name):
 def address_collect(node_name, host_name):
     '''三层接口和静态用户IP地址采集'''
     address_data = []
-    # pageination = None
+    city = session.get('city')
     page = request.args.get('page', 1, type=int)
-    count = AddressCollect.query.filter_by(host_name = host_name).count()
+    count = AddressCollect.query.filter_by(host_name = host_name, date_time = datetime.date.today()).count()
     # count = 0 #等下去掉
     if count == 0:
-        config = get_log(node_name, host_name)
+        config = get_log(city, node_name, host_name)
         if not config:
             abort(404)
         res = get_address_data(config)
@@ -493,7 +500,7 @@ def address_collect(node_name, host_name):
         db.session.commit()
 
 
-    pageination = AddressCollect.query.filter_by(host_name = host_name).order_by(AddressCollect.date_time.desc()).paginate(
+    pageination = AddressCollect.query.filter_by(host_name = host_name, date_time = datetime.date.today()).order_by(AddressCollect.date_time.desc()).paginate(
         page, per_page = current_app.config['FLASKY_POSTS_PER_PAGE'],
         error_out = False
     )
@@ -537,7 +544,7 @@ def address_mk_excel(host_name):
     # sheet.column_dimensions['R'].width = 15.0
     cur_row = 2
 
-    address_data = AddressCollect.query.filter_by(host_name = host_name).order_by(AddressCollect.date_time.desc()).all()
+    address_data = AddressCollect.query.filter_by(host_name = host_name, date_time = datetime.date.today()).order_by(AddressCollect.date_time.desc()).all()
     for item in address_data:
         sheet['A'+ str(cur_row)] = item.host_name.split('.')[0]
         sheet['B'+ str(cur_row)] = item.host_ip
@@ -566,7 +573,8 @@ def address_mk_excel(host_name):
 def config_backup(node_name):
     '''config备份（下载到本地）'''
     host_data = []
-    host_list = get_host(node_name)
+    city = session.get('city')
+    host_list = get_host(city, node_name)
     for item in host_list:
         # create_time = os.path.getctime(os.path.join('app','static','logs', CITY, node_name, item, get_today_log_name(item)))
         # create_time = time.localtime(create_time)
@@ -605,9 +613,10 @@ def load_statistic(node_name, host_name):
     '''业务负荷统计'''
     statistic_data = None
     page = request.args.get('page', 1, type=int)
-    count = LoadStatistic.query.filter_by(host_name = host_name).count()
+    city = session.get('city')
+    count = LoadStatistic.query.filter_by(host_name = host_name, date_time = datetime.date.today()).count()
     if count == 0:
-        config = get_log(node_name, host_name)
+        config = get_log(city, node_name, host_name)
         if not config:
             abort(404)
         res = get_statistic_data(config)
@@ -630,7 +639,7 @@ def load_statistic(node_name, host_name):
             db.session.add(load_statistic)
         db.session.commit()
 
-    pageination = LoadStatistic.query.filter_by(host_name = host_name).order_by(LoadStatistic.date_time.desc()).paginate(
+    pageination = LoadStatistic.query.filter_by(host_name = host_name, date_time = datetime.date.today()).order_by(LoadStatistic.date_time.desc()).paginate(
         page, per_page = current_app.config['FLASKY_POSTS_PER_PAGE'],
         error_out = False
     )
@@ -652,7 +661,8 @@ def load_statistic_host(node_name, host_name):
     '''按设备统计用户数量'''
 
     node_path = os.path.join('app', 'static', 'logs', CITY, node_name)
-    load_statistic_host_data = get_statistic_host_data(node_name)
+    city = session.get('city')
+    load_statistic_host_data = get_statistic_host_data(city, node_name)
 
     return render_template('statistic_host.html',
         load_statistic_host_data = load_statistic_host_data, 
