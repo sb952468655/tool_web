@@ -35,15 +35,27 @@ def get_log(city, host, date=None):
 
     return log_str
 
-def get_today_log_name(host):
+def get_today_log_name(city, host):
     '''根据设备名称生成当天log名称'''
 
     today = datetime.date.today()
-    date = today.strftime('%Y-%m-%d')
+    date = today.strftime('%Y%m%d')
+    logs = get_host_logs(city, host)
+    for i in logs:
+        if date in i:
+            return i
 
-    log_path = '{}_{}.log'.format(host, date)
+    return None
 
-    return log_path
+def get_host_logs(city, host):
+    '''获取指定设备的所有log'''
+
+    logs = []
+    for _, _, files in os.walk(os.path.join(g_log_path, city, host)):
+        logs = files
+        break
+
+    return logs
 
 def get_city_list():
     '''获取城市列表'''

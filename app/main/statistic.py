@@ -51,7 +51,7 @@ def get_statistic_data(config):
             pool_num = res_provisioned_addresses.group(1)
 
         utilization = ''
-        if user_num and pool_num:
+        if user_num and pool_num and user_num != '0' and pool_num != '0':
             utilization = str(round(int(user_num)/int(pool_num),2) * 10) + ' %'
 
         #vprn 4015用户数，地址池利用率
@@ -97,7 +97,7 @@ def get_statistic_data(config):
         p_stable_leases = r'(?s)(Stable Leases *?(\d{1,10}) *?(\d{1,10}).*?Provisioned Addresses *?(\d{1,10}) )'
         res_stable_leases = re.search(p_stable_leases, config)
         lyl_4015 = ''
-        if res_stable_leases and user_num_4015:
+        if res_stable_leases and user_num_4015 and res_stable_leases.group(4) != '0' and user_num_4015 != '0':
             a = res_stable_leases.group(4)
             lyl_4015 = str(round(int(user_num_4015)/int(res_stable_leases.group(4)),2) * 100) + ' %'
         statistic_data.append(

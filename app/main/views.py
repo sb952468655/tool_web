@@ -1,4 +1,4 @@
-import os, sys, zipfile, time, datetime, logging
+import os, sys, zipfile, time, datetime, logging, re
 from flask import render_template, session, redirect, url_for, current_app, request, abort
 import openpyxl
 from openpyxl.styles import Alignment, PatternFill
@@ -9,14 +9,14 @@ from . import main
 from ..check_pool import all_check
 from ..inspection import mobile
 from ..models import AddressCollect, LoadStatistic
-from .config import CITY, g_city_to_name
+from .config import CITY, g_city_to_name, g_log_path
 from .address import get_address_data
 from .statistic import get_statistic_data, get_statistic_host_data
 from urllib.request import quote, unquote
 from .. import db
 from ..models import CardPort1
 from .report import get_host_list, get_card_detail, get_card_statistic, get_mda_detail, get_mda_statistic, get_port_statistic
-from .common import get_log, get_host, get_today_log_name, get_city_list
+from .common import get_log, get_host, get_today_log_name, get_city_list, get_host_logs
 sys.path.append('../')
 
 @main.route('/')
@@ -558,15 +558,15 @@ def config_backup():
     host_data = []
     city = session.get('city')
     host_list = get_host(city)
+    today = datetime.date.today()
+    date = today.strftime('%Y%m%d')
     for item in host_list:
-        # create_time = os.path.getctime(os.path.join('app','static','logs', CITY, item, get_today_log_name(item)))
-        # create_time = time.localtime(create_time)
-
-        log_name = get_today_log_name(item)
-        if os.path.exists(os.path.join('app', 'static', 'logs', city, item, log_name)):
-            log_date = log_name.split('.')[0][-10:]
-            host_data.append((item, log_date))
-
+        logs = get_host_logs(city, item)
+        for i in logs:
+            log_date = item + '_' + date
+            if log_date in i:
+                host_data.append((item, date))
+        
     return render_template('back_up/config_backup_host_list.html', host_data=host_data)
 
 @main.route('/backup_list', methods=['POST'])
@@ -583,7 +583,7 @@ def backup_list():
         zip = zipfile.ZipFile(zip_name, 'w', zipfile.ZIP_DEFLATED )
         
         for name, _ in request.form.to_dict().items():
-            today_log_name = get_today_log_name(name)
+            today_log_name = get_today_log_name(city, name)
             zip.write(os.path.join('app', 'static', 'logs', city, name, today_log_name), today_log_name)
         zip.close()
 

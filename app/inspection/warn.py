@@ -569,7 +569,7 @@ def mobile_warn23(res, res_old):
     if res_old == '':
         res_old = res
 
-    p_mda = r'(?s)(={79}\MDA (\d{1,2}/\d{1,2}) detail\n={79}.*?\n([a-zA-Z]{3,10} Errors.*?)\n)='
+    p_mda = r'(?s)(={79}\nMDA (\d{1,2}/\d{1,2}) detail\n={79}.*?\n([a-zA-Z]{3,10} Errors.*?)\n)='
     p_trap_raised = r'Trap raised (\d{1,7}) times;'
 
     res_mda = re.findall(p_mda, res)
@@ -581,8 +581,9 @@ def mobile_warn23(res, res_old):
         res_trap_raised = re.search(p_trap_raised, i[0][0])
         res_trap_raised_old = re.search(p_trap_raised, i[1][0])
 
-        if int(res_trap_raised.group(1)) > int(res_trap_raised_old.group(1)):
-            err += 'MDA{}状态异常\n'.format(i[1])
+        if res_trap_raised and res_trap_raised_old:
+            if int(res_trap_raised.group(1)) > int(res_trap_raised_old.group(1)):
+                err += 'MDA{}状态异常\n'.format(i[1])
 
     if err == '':
         err = 'MDA状态正常'
