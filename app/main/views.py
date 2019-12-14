@@ -416,7 +416,7 @@ def xj_report(city, host_name, type):
     doc.add_paragraph('1，为了保障%s移动城域网7750设备正常运行，请定期清理过滤网。' % '常州',
         style='report-normal')
 
-    for item in session.get('xunjian_data'):
+    for item in xunjian_data:
         if 'Temperature' in item:
             doc.add_paragraph('2，板卡温度高建议清洗防尘网。',
             style='report-normal')
