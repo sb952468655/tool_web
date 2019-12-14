@@ -417,7 +417,7 @@ def xj_report(city, host_name, type):
         style='report-normal')
 
     for item in xunjian_data:
-        if 'Temperature' in item:
+        if 'Temperature' in item[1]:
             doc.add_paragraph('2，板卡温度高建议清洗防尘网。',
             style='report-normal')
             # doc.add_paragraph('2，板卡温度高建议清洗防尘网。')
