@@ -1,5 +1,5 @@
 import os, datetime, logging, re
-from .config import CITY, g_log_path
+from .config import g_log_path
 
 def get_host(city):
     '''获取设备列表'''
