@@ -561,11 +561,8 @@ def config_backup():
     today = datetime.date.today()
     date = today.strftime('%Y%m%d')
     for item in host_list:
-        logs = get_host_logs(city, item)
-        for i in logs:
-            log_date = item + '_' + date
-            if log_date in i:
-                host_data.append((item, date))
+        if get_log(city, item):
+            host_data.append((item, date))
         
     return render_template('back_up/config_backup_host_list.html', host_data=host_data)
 
@@ -583,8 +580,13 @@ def backup_list():
         zip = zipfile.ZipFile(zip_name, 'w', zipfile.ZIP_DEFLATED )
         
         for name, _ in request.form.to_dict().items():
-            today_log_name = get_today_log_name(city, name)
-            zip.write(os.path.join('app', 'static', 'logs', city, name, today_log_name), today_log_name)
+            log_str = get_log(city, name)
+            log_config_str = log_str[:log_str.index('# Finished')]
+            back_up_log_path = os.path.join('app', 'static', 'backup', name + '.log')
+            with open(back_up_log_path, 'w') as f:
+                f.write(log_config_str)
+            zip.write(back_up_log_path, name + '.log')
+
         zip.close()
 
         url = url_for('static', filename = 'backup/{}'.format(file_name))
