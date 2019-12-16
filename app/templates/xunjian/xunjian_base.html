@@ -21,6 +21,11 @@
             {% else %}
                 <li role="presentation" ><a href="{{ url_for('main.xunjian_output_all', host_name = host_name ) }}">全量输出</a></li>
             {% endif %}
+            {% if request.path == '/xj_log/' + host_name %}
+                <li role="presentation" class="active"><a href="{{ url_for('main.xj_log', host_name = host_name ) }}">日志</a></li>
+            {% else %}
+                <li role="presentation" ><a href="{{ url_for('main.xj_log', host_name = host_name ) }}">日志</a></li>
+            {% endif %}
         </ul>
     </div>
     <div class="col-md-10">

@@ -170,18 +170,22 @@ def mobile_warn6(res):
     msg = ''
     check_item = '空闲队列资源检查'
 
+    p_hardware_resource_ssage = r'(?s)(Hardware Resource Usage for Slot.*?Egress TLS Mcast Entries \|[ 0-9]{11}\|[ 0-9]{11}\|[ 0-9]{11}\n)'
     re_str = r'''((Dynamic|Ingress|Egress) Queues (\+|\|)\s{1,11}\d{2,10}\|\s{1,11}(\d{2,10})\|\s{1,11}(\d{2,10}))'''
-    re_obj = re.compile(re_str)     
-    result = re_obj.findall(res)
+    re_obj = re.compile(re_str)
+    
 
-    if result:
-        for item in result:
-            msg += item[0] + '\n'
-            if int(item[4]) < int(item[3]):
-                err += '空闲队列资源不足'
-                break
-    else:
-        logging.error('warn6没有找到空闲队列资源')
+    res_hardware_resource_ssage = re.findall(p_hardware_resource_ssage, res)
+    for i in res_hardware_resource_ssage:
+        result = re_obj.search(i)
+        if result:
+            msg += i + '\n'
+            a = result.group(4)
+            b = result.group(5)
+            if int(result.group(5)) < int(result.group(4)):
+                err += '空闲队列资源不足：{}\n'.format(result.group())
+        else:
+            logging.error('warn6没有找到空闲队列资源')
 
     if err == '':
         err = '空闲队列资源正常'
@@ -265,15 +269,15 @@ def mobile_warn11(res):
     msg = ''
     check_item = '地址池空闲值巡检'
 
-    re_str = r'''(Totals for pool\s{1,9}\d{2,5}\s{1,8}(\d{1,3})%)'''
+    re_str = r'''(?s)(Pool name : (.*?)\n.*?Totals for pool\s{1,9}\d{2,5}\s{1,8}(\d{1,3})%)'''
     re_obj = re.compile(re_str)
     result = re_obj.findall(res)
 
     if result:
         for item in result:
             msg += item[0] + '\n'
-            if int(item[1]) <= 20:
-                err = '地址池空闲值低于20%。'
+            if int(item[2]) <= 20:
+                err += 'pool {} 地址池空闲值低于20%。\n'.format(item[1])
                 break
     else:
         logging.error('warn11没有找到地址池空闲值')
@@ -657,6 +661,8 @@ def mobile_warn25(res, res_old):
     res_ethernet_interface_zip = zip(res_ethernet_interface, res_ethernet_interface_old)
 
     for i in res_ethernet_interface_zip:
+        if 'Admin State        : up' not in i[0]:
+            continue
         res_interface = re.search(p_interface, i[0])
         res_tx_rx = re.search(p_tx_rx, i[0])
         if res_tx_rx and res_interface:
@@ -874,207 +880,138 @@ def mobile_warn31(res):
     err = ''
     check_item = 'system-resources巡检'
 
+    p_hardware_resource_sage = r'(?s)(Hardware Resource Usage for Slot.*?Egress TLS Mcast Entries \|[ 0-9]{11}\|[ 0-9]{11}\|[ 0-9]{11}\n)'
     p_dynamic_queues = r'Dynamic Queues \+ {2,10}(\d{1,7})\| {3,9}(\d{1,7})\| '
     p_subscriber_hosts = r'Subscriber Hosts - {2,10}(\d{1,7})\| {3,11}(\d{1,7})\| '
+    p_ingress_policer_stats = r'Ingress Policer Stats \|([ 0-9]{11})\|([ 0-9]{11})\|'
+    p_egress_policer_stats = r'Egress Policer Stats \|([ 0-9]{11})\|([ 0-9]{11})\|'
 
-    res_dynamic_queues = re.search(p_dynamic_queues, res)
-    res_subscriber_hosts = re.search(p_subscriber_hosts, res)
 
-    if res_dynamic_queues and res_subscriber_hosts:
-        msg = res_dynamic_queues.group() + '\n' + res_subscriber_hosts.group()
-        if int(res_dynamic_queues.group(2))/int(res_dynamic_queues.group(1)) >= 0.8 or \
-        int(res_subscriber_hosts.group(2))/int(res_subscriber_hosts.group(1)) >= 0.8:
-            err = 'system-resources资源状态异常'
-    else:
-        logging.error('没有找到system-resources')
+    res_hardware_resource_sage = re.findall(p_hardware_resource_sage, res)
+
+    for i in res_hardware_resource_sage:
+
+        res_dynamic_queues = re.search(p_dynamic_queues, i)
+        res_subscriber_hosts = re.search(p_subscriber_hosts, i)
+        res_ingress_policer_stats = re.search(p_ingress_policer_stats, i)
+        res_egress_policer_stats = re.search(p_egress_policer_stats, i)
+
+        if res_dynamic_queues and res_subscriber_hosts:
+            msg = i + '\n'
+            if int(res_dynamic_queues.group(2))/int(res_dynamic_queues.group(1)) >= 0.8 or \
+            int(res_subscriber_hosts.group(2))/int(res_subscriber_hosts.group(1)) >= 0.8:
+                err = 'Dynamic Queues 和 Subscriber Hosts system-resources资源状态异常\n'
+        else:
+            logging.error('没有找到system-resources')
+
+        if res_ingress_policer_stats:
+            a = res_ingress_policer_stats.group(2)
+            b = res_ingress_policer_stats.group(1)
+
+            if res_ingress_policer_stats and int(res_ingress_policer_stats.group(2))/int(res_ingress_policer_stats.group(1)) >= 0.8:
+                err += 'Ingress Policer Stats 资源状态异常\n'
+
+        if res_egress_policer_stats:
+            a = res_egress_policer_stats.group(2)
+            b = res_egress_policer_stats.group(1)
+
+            if res_egress_policer_stats and int(res_egress_policer_stats.group(2))/int(res_egress_policer_stats.group(1)) >= 0.8:
+                err += 'Egress Policer Stats 资源状态异常\n'
 
     if err == '':
         err = 'system-resources状态正常'
 
     return (msg, err, check_item)
 
+def mobile_warn32(config, config_old):
+
+    msg = ''
+    err = ''
+    check_item = 'ppp用户数巡检'
+
+    p_total = r'(?s)(Subscriber Management Statistics for Port (\d{1,2}/\d{1,2}/\d{1,2}).*?Total  PPP Hosts([ 0-9]{34})([ 0-9]{9}) .*?\n'\
+        ' {7}IPOE Hosts([ 0-9]{33})([ 0-9]{9}) .*?\n'\
+        ' {7}IPv4 Hosts([ 0-9]{33})([ 0-9]{9}) .*?\n'\
+        ' {7}IPv6 Hosts([ 0-9]{33})([ 0-9]{9}) )'
+
+    p = r'(?s)Total  PPP Hosts([ 0-9]{34})([ 0-9]{9}) .*?\n'\
+        ' {7}IPOE Hosts([ 0-9]{33})([ 0-9]{9}) .*?\n'\
+        ' {7}IPv4 Hosts([ 0-9]{33})([ 0-9]{9}) .*?\n'\
+        ' {7}IPv6 Hosts([ 0-9]{33})([ 0-9]{9}) )'
+
+    res_total = re.findall(p_total, config)
+    res_total_old = re.findall(p_total, config_old)
+
+    for i in zip(res_total_old, res_total):
+        msg += i[1][0] + '\n'
+        if i[0][2].strip() != '0' and i[1][2].strip() == '0':
+            err += 'port {} 下ppp 用户数异常，请检查核实'.format(i[0][1])
+            continue
+
+        if i[0][3].strip() != '0' and i[1][3].strip() == '0':
+            err += 'port {} 下ppp 用户数异常，请检查核实'.format(i[0][1])
+            continue
+
+        if i[0][4].strip() != '0' and i[1][4].strip() == '0':
+            err += 'port {} 下ppp 用户数异常，请检查核实'.format(i[0][1])
+            continue
+
+        if i[0][5].strip() != '0' and i[1][5].strip() == '0':
+            err += 'port {} 下ppp 用户数异常，请检查核实'.format(i[0][1])
+            continue
+
+        if i[0][6].strip() != '0' and i[1][6].strip() == '0':
+            err += 'port {} 下ppp 用户数异常，请检查核实'.format(i[0][1])
+            continue
+
+        if i[0][7].strip() != '0' and i[1][7].strip() == '0':
+            err += 'port {} 下ppp 用户数异常，请检查核实'.format(i[0][1])
+            continue
+
+        if i[0][8].strip() != '0' and i[1][8].strip() == '0':
+            err += 'port {} 下ppp 用户数异常，请检查核实'.format(i[0][1])
+            continue
+
+        if i[0][9].strip() != '0' and i[1][9].strip() == '0':
+            err += 'port {} 下ppp 用户数异常，请检查核实'.format(i[0][1])
 
 
+    if err == '':
+        err = 'PPP 用户数正常'
 
-def warn1(res):
-    str1 = ''
-    str2 = ''
-    b = res.split('-------------------------------------------------------------------------------')
-    if len(b) < 2:
-        logging.error('warn1没有找到风扇信息')
-        return ('', '')
-    re_obj = re.compile(r'Fan tray number                   : (\d)')
-    result = re_obj.findall(b[1])
-    re_obj2 = re.compile(r'Speed                           : (.*)\n')
-    result2 = re_obj2.findall(b[1])
-
-    if not result or not result2:
-        return ('', '')
-
-    fan_list = []
-    for i in range(len(result2)):
-        if result2[i].strip('\r\n') == 'full speed':
-            fan_list.append(result[i])
-    if fan_list:
-        str1 = '1.Environment Information\nFan tray number ：' + ','.join(fan_list) + ' full speed'
-        str2 = '%s个风扇满运行，建议降低机房温度或更换增强型风扇' % str(len(result))
-
-    return (str1, str2)
+    return (msg, err, check_item)
 
 
-def warn2(res):
+def mobile_warn33(config):
+    msg = ''
+    err = ''
+    check_item = 'Nat地址资源利用率状态'
 
-    #先判断是否为mda卡
-    mda_obj = re.compile(r'MDA (.*) detail')
-    result_mda = mda_obj.findall(res)
+    p_nat_pppoe= r'(?s)NAT Pool nat-pppoe\n={79}.*?='
+    p_nat_iptv= r'(?s)NAT Pool nat-iptv\n={79}.*?='
+    p_usage = r'Block usage \(%\)                       : (< )?(\d{1,3})'
 
-    result1 = None
-    result2 = None
-    if result_mda:
-        re_obj1 = re.compile(r'(\d?\d)?\s{4,5}(\d)\s{5}(.*)\s+up        up')
-    else:
-        re_obj1 = re.compile(r'(\w?\w)?\s{5,6}(.*)\s+up    up')
+    res_nat_pppoe = re.search(p_nat_pppoe, config)
+    res_nat_iptv = re.search(p_nat_iptv, config)
 
-    result1 = re_obj1.findall(res)
-    re_obj2 = re.compile(r'Temperature                   : (\d\d)C')
-    result2 = re_obj2.findall(res)
+    if res_nat_pppoe:
+        msg += res_nat_pppoe.group() + '\n'
+        res_usage = re.search(p_usage, res_nat_pppoe.group())
 
-    if not result1 or not result2:
-        logging.error('warn2没有找到板卡温度')
-        return ('', '')
+        a = res_usage.group(2)
+        if res_usage and int(res_usage.group(2)) >= 60:
+            err += 'nat pool "nat-pppoe" 地址利用率大于60%\n'
+    if res_nat_iptv:
+        msg += res_nat_iptv.group() + '\n'
+        res_usage = re.search(p_usage, res_nat_iptv.group())
 
-    dict1 = dict(zip(result2, result1))
-    str1 = ''
+        if res_usage and int(res_usage.group(2)) >= 60:
+            err += 'nat pool "nat-iptv" 地址利用率大于60%\n'
 
-    for key,val in dict1.items():
-        if int(key) >= 63:
-            if result_mda:
-                if ('imm12' in val[2] or 'imm48' in val[2]) and int(key) < 65:
-                    continue
-                str1 += 'mda %s/%s     %s\nTemperature        : %sC\n' % (val[0], val[1], val[2].strip(), key)
-            else:
-                if ('imm12' in val[1] or 'imm48' in val[1]) and int(key) < 65:
-                    continue
-                str1 += 'Card %s     %s\nTemperature        : %sC\n' % (val[0], val[1].strip(), key)
 
-    str2 = '注释：板卡温度过高，建议清洗滤网。'
-    if result_mda:
-        str2 = 'mda' + str2 
-    
-    return (str1, str2)
+    if err == '':
+        err = 'PPP 用户数正常'
 
-def warn3(res):
-    err_sum = 0
-    re_obj1 = re.compile(r'(XPL Errors:   Trap raised \d{1,6} times;   Last Trap (\d{2})/(\d{2})/(\d{4}) (\d{2}):(\d{2}):(\d{2}))')
-    result1 = re_obj1.findall(res)
-    if not result1:
-        return ('', '')
-    str1 = ''
-    datetime_15d_ago = datetime.datetime.now() - datetime.timedelta(days=15)
-    for item in result1:
-        datetime_befor = datetime.datetime(int(item[3]), int(item[1]), 
-            int(item[2]), int(item[4]), int(item[5]), int(item[6]))
+    return (msg, err, check_item)
 
-        if datetime_befor > datetime_15d_ago:
-            err_sum += 1
-            str1 += item[0] + '\n'
-    #告警在5次以内忽略
-    if str1 and err_sum > 5:
-        return (str1, '注释：XPL 告警，建议拔插处理，如继续存在，建议更换板卡')
-   
-    return ('', '')
-
-def warn4(res):
-    re_obj2 = re.compile(r'(\d{6} (\d{4})/(\d{2})/(\d{2}) (\d{2}):(\d{2}):(\d{2})\.\d{2} GMT8 MINOR: PORT #\d{4} Base Port (\d/\d/\d)\s+"SFF DDM \(rxOpticalPower-(low|high)-alarm\) \w+")')
-    result2 = re_obj2.findall(res)
-
-    if not result2:
-        return ('', '')
-    
-    # str1 = '高' if result1.group(0) == 'high' else '低'
-    str2 = ''
-    datetime_15d_ago = datetime.datetime.now() - datetime.timedelta(days=15)
-
-    port = []
-    for item in result2:
-        datetime_befor = datetime.datetime(int(item[1]), int(item[2]), 
-            int(item[3]), int(item[4]), int(item[5]), int(item[6]))
-            
-        if datetime_befor > datetime_15d_ago and item[7] not in port:
-            str2 += item[0] + '\n'
-            port.append(item[7])
-
-    return(str2, '注释：端口收光告警,建议检查光路')
-
-def warn5(res):
-    err_sum = 0
-    re_obj1 = re.compile(r'((Q|P)chip Errors Detected\n\s{4}Complex \d \(parity error\): Trap raised \d{1,6} times; Last Trap (\d{2})/(\d{2})/(\d{4}) (\d{2}):(\d{2}):(\d{2}))')
-    result1 = re_obj1.findall(res)
-    if not result1:
-        return ('', '')
-    str1 = ''
-    warn_type = 'P'
-    datetime_15d_ago = datetime.datetime.now() - datetime.timedelta(days=15)
-    for item in result1:
-        datetime_befor = datetime.datetime(int(item[4]), int(item[2]), 
-            int(item[3]), int(item[5]), int(item[6]), int(item[7]))
-
-        if datetime_befor > datetime_15d_ago:
-            str1 += item[0] + '\n'
-            err_sum += 1
-        warn_type = item[1]
-
-    if str1 and err_sum > 5:
-        return (str1, '注释：%schip 告警，建议拔插处理，如继续存在，建议更换板卡' % warn_type)
-   
-    return ('', '')
-
-def warn6(res):
-    p_ftp = r'Tel/Tel6/SSH/FTP Admin : (.*)\n'
-    obj_ftp = re.compile(p_ftp)
-
-    res_ftp = obj_ftp.search(res)
-    if res_ftp == None:
-        logging.debug('warn6没有找到ftp配置')
-    else:
-        res = res_ftp.group(1).split('/')
-        if len(res) != 4:
-            logging.debug('ftp配置解析错误')
-        else:
-            if 'Disabled' not in res[-1]:
-                logging.debug(res_ftp.group())
-                return (res_ftp.group(), '注释：ftp没有关闭')
-
-    return ('', '')
-
-def warn7(res):
-    if 'no user "admin"' not in res:
-        return (' ', '注释：user 账号是 admin')
-
-    return ('', '')
-
-def warn8(res):
-    '''sfm检查
-    状态应该都是UP'''
-
-    return mobile_warn15(res)
-
-def warn9(res):
-    '''Subscriber Host超预警线检查'''
-
-    return mobile_warn16(res)
-
-def warn10(res):
-    '''Total Subscribers超预警线检查'''
-
-    return mobile_warn17(res)
-
-def warn11(res):
-    '''mda cpu利用率检查'''
-
-    return mobile_warn8(res)
-
-def warn12(res):
-    '''nat discards检查'''
-
-    return mobile_warn19(res)
+ 

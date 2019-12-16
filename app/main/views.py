@@ -9,7 +9,7 @@ from . import main
 from ..check_pool import all_check
 from ..inspection import mobile
 from ..models import AddressCollect, LoadStatistic
-from .config import g_city_to_name, g_log_path
+from .config import g_city_to_name, g_log_path, g_backup_path
 from .address import get_address_data
 from .statistic import get_statistic_data, get_statistic_host_data
 from urllib.request import quote, unquote
@@ -257,7 +257,11 @@ def xunjian(host_name):
     if not config:
         abort(404)
 
-    xunjian_data = mobile.xunjian(config, config)
+    yesday_log = get_log(city, host_name, 1)
+    if not yesday_log:
+        yesday_log = config 
+
+    xunjian_data = mobile.xunjian(config, yesday_log)
     warn_data = [item for item in xunjian_data if item[0] and '正常' not in item[1]]
     
     return render_template('xunjian/xunjian.html', xunjian_data=warn_data, host_name = host_name, city = city)
@@ -361,6 +365,33 @@ def generate_excel():
 
     return redirect(url_for('static', filename='port.xlsx'))
 
+@main.route('/xj_log_export/<host_name>')
+def xj_log_export(host_name):
+    '''巡检日志导出'''
+
+    city = session.get('city')
+    config = get_log(city, host_name)
+    if not config:
+        abort(404)
+
+    log_config_str = config[config.index('# Finished'):]
+    with open(os.path.join(g_backup_path, host_name + '.log'), 'w') as f:
+        f.write(log_config_str)
+
+    return redirect(url_for('static', filename = 'backup/{}.log'.format(host_name)))
+
+@main.route('/xj_log/<host_name>')
+def xj_log(host_name):
+    '''巡检log全量输出'''
+
+    city = session.get('city')
+    config = get_log(city, host_name)
+    if not config:
+        abort(404)
+
+    log_str = config[config.index('# Finished'):]
+
+    return render_template('xunjian/xunjian_log.html', log_str = log_str, host_name = host_name)
 
 @main.route('/xj_report/<city>/<host_name>/<type>')
 def xj_report(city, host_name, type):
