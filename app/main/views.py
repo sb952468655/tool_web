@@ -1,5 +1,5 @@
 import os, sys, zipfile, time, datetime, logging, re
-from flask import render_template, session, redirect, url_for, current_app, request, abort
+from flask import render_template, session, redirect, url_for, current_app, request, abort, g, Response
 import openpyxl
 from openpyxl.styles import Alignment, PatternFill
 import docx
@@ -9,7 +9,7 @@ from . import main
 from ..check_pool import all_check
 from ..inspection import mobile
 from ..models import AddressCollect, LoadStatistic
-from .config import CITY, g_city_to_name, g_log_path
+from .config import g_city_to_name, g_log_path
 from .address import get_address_data
 from .statistic import get_statistic_data, get_statistic_host_data
 from urllib.request import quote, unquote
@@ -200,6 +200,9 @@ def check_config(host_name):
     '''配置检查'''
 
     city = session.get('city')
+    if not city:
+        return redirect(url_for('main.city_list'))
+
     config = get_log(city, host_name)
     if not config:
         abort(404)
@@ -247,15 +250,17 @@ def check_excel(host_name):
 def xunjian(host_name):
     '''巡检'''
     city = session.get('city')
+    if not city:
+        return redirect(url_for('main.city_list'))
+
     config = get_log(city, host_name)
     if not config:
         abort(404)
 
     xunjian_data = mobile.xunjian(config, config)
     warn_data = [item for item in xunjian_data if item[0] and '正常' not in item[1]]
-    session['xunjian_data'] = warn_data
     
-    return render_template('xunjian/xunjian.html', xunjian_data=warn_data, host_name = host_name)
+    return render_template('xunjian/xunjian.html', xunjian_data=warn_data, host_name = host_name, city = city)
 
 @main.route('/xunjian_output_all/<host_name>')
 def xunjian_output_all(host_name):
@@ -268,9 +273,8 @@ def xunjian_output_all(host_name):
 
     xunjian_data = mobile.xunjian(config, config)
     warn_data = [item for item in xunjian_data if item[0]]
-    session['xunjian_data_all'] = warn_data
     
-    return render_template('xunjian/xunjian_output_all.html', xunjian_data=warn_data, host_name = host_name)
+    return render_template('xunjian/xunjian_output_all.html', xunjian_data=warn_data, host_name = host_name, city = city)
 
 @main.route('/auto_config')
 def auto_config():
@@ -358,12 +362,19 @@ def generate_excel():
     return redirect(url_for('static', filename='port.xlsx'))
 
 
-@main.route('/xj_report/<host_name>/<type>')
-def xj_report(host_name, type):
+@main.route('/xj_report/<city>/<host_name>/<type>')
+def xj_report(city, host_name, type):
     '''生成巡检报告'''
 
+    config = get_log(city, host_name)
+    if not config:
+        abort(404)
+
+    xunjian_data = mobile.xunjian(config, config)
+
     doc = docx.Document(os.path.join('app','static','xunjian.docx'))
-    area =  CITY + '移动'
+
+    area = g_city_to_name.get(city) + '移动'
     doc.add_paragraph(area + '巡检报告', style='report-head')
     # doc.add_paragraph(area + '巡检报告')
     doc.add_paragraph('上海贝尔7750设备巡检报告', style='report-head')
@@ -378,11 +389,10 @@ def xj_report(host_name, type):
     doc.add_heading('巡检情况汇总', 4)
     
     if type == '1':
-        xunjian_data = session.get('xunjian_data')
+        warn_data = [item for item in xunjian_data if item[0] and '正常' not in item[1]]
     else:
-        xunjian_data = session.get('xunjian_data_all')
-
-    for line in xunjian_data:
+        warn_data = [item for item in xunjian_data if item[0]]
+    for line in warn_data:
         p_name = doc.add_paragraph(host_name.split('.')[0], style='report-info')
         if line[0]:
             p_info = doc.add_paragraph(line[0], style='report-info')
@@ -406,14 +416,14 @@ def xj_report(host_name, type):
     doc.add_paragraph('1，为了保障%s移动城域网7750设备正常运行，请定期清理过滤网。' % '常州',
         style='report-normal')
 
-    for item in session.get('xunjian_data'):
-        if 'Temperature' in item:
+    for item in xunjian_data:
+        if 'Temperature' in item[1]:
             doc.add_paragraph('2，板卡温度高建议清洗防尘网。',
             style='report-normal')
             # doc.add_paragraph('2，板卡温度高建议清洗防尘网。')
         break
     
-    report_name = '%s移动巡检报告-%s.docx' % (CITY, today)
+    report_name = '%s移动巡检报告-%s.docx' % (g_city_to_name.get(city), today)
     doc.save( os.path.join('app', 'static', report_name))
 
     # url = url_for('static', filename = report_name)
@@ -436,6 +446,9 @@ def host_list(action):
     if not session.get('city'):
         session['city'] = request.args.get('city')
     city = session.get('city')
+    if not city:
+        return redirect(url_for('main.city_list'))
+    
     host_data = get_host(city)
 
     if action == 'config_backup':
@@ -557,6 +570,9 @@ def config_backup():
     '''config备份（下载到本地）'''
     host_data = []
     city = session.get('city')
+    if not city:
+        return redirect(url_for('main.city_list'))
+
     host_list = get_host(city)
     today = datetime.date.today()
     date = today.strftime('%Y%m%d')
@@ -601,6 +617,9 @@ def load_statistic(host_name):
     statistic_data = None
     page = request.args.get('page', 1, type=int)
     city = session.get('city')
+    if not city:
+        return redirect(url_for('main.city_list'))
+
     count = LoadStatistic.query.filter_by(host_name = host_name, date_time = datetime.date.today()).count()
     if count == 0:
         config = get_log(city, host_name)

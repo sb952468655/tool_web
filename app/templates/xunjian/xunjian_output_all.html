@@ -3,7 +3,7 @@
 {% block title %} 设备巡检 {% endblock %}
 
 {% block xunjian_content %}
-    <a class="btn btn-default" href="{{ url_for('main.xj_report', host_name = host_name, type = '2') }}" role="button" style="margin : 0px 0px 15px 0px;">生成巡检报告</a>
+    <a class="btn btn-default" href="{{ url_for('main.xj_report', host_name = host_name, type = '2', city = city) }}" role="button" style="margin : 0px 0px 15px 0px;">生成巡检报告</a>
     <div class="panel panel-default">
         <div class="panel-heading">{{ host_name.split('.')[0] }}</div>
         <div class="panel-body">
