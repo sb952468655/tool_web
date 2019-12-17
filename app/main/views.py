@@ -259,10 +259,10 @@ def xunjian(host_name):
 
     yesday_log = get_log(city, host_name, 1)
     if not yesday_log:
-        yesday_log = config 
+        yesday_log = config
 
     xunjian_data = mobile.xunjian(config, yesday_log)
-    warn_data = [item for item in xunjian_data if item[0] and '正常' not in item[1]]
+    warn_data = [item for item in xunjian_data if item[0]]
     
     return render_template('xunjian/xunjian.html', xunjian_data=warn_data, host_name = host_name, city = city)
 
@@ -279,6 +279,23 @@ def xunjian_output_all(host_name):
     warn_data = [item for item in xunjian_data if item[0]]
     
     return render_template('xunjian/xunjian_output_all.html', xunjian_data=warn_data, host_name = host_name, city = city)
+
+@main.route('/xunjian_all_host')
+def xunjian_all_host():
+    '''所有设备巡检'''
+
+    warn_data = []
+    city = session.get('city')
+    
+    host_list = get_host(city)
+    for i in host_list:
+        log = get_log(city, i)
+        yesday_log = get_log(city, i, 1)
+        if log and yesday_log:
+            xunjian_data = mobile.xunjian(log, yesday_log)
+            warn_data.append((i, [item for item in xunjian_data if item[0]]))
+
+    return render_template('xunjian/xunjian_all_host.html', xunjian_data=warn_data)
 
 @main.route('/auto_config')
 def auto_config():
@@ -404,18 +421,14 @@ def xj_report(city, host_name, type):
     xunjian_data = mobile.xunjian(config, config)
 
     doc = docx.Document(os.path.join('app','static','xunjian.docx'))
-
     area = g_city_to_name.get(city) + '移动'
     doc.add_paragraph(area + '巡检报告', style='report-head')
-    # doc.add_paragraph(area + '巡检报告')
     doc.add_paragraph('上海贝尔7750设备巡检报告', style='report-head')
-    # doc.add_paragraph('上海贝尔7750设备巡检报告3333333')
     doc.add_paragraph()
     doc.add_paragraph()
     today_obj = datetime.datetime.now()
     today = '%d年%d月%d日' % (today_obj.year, today_obj.month, today_obj.day)
     doc.add_paragraph(today, style='report-date')
-    doc.add_paragraph(today)
     doc.add_page_break()
     doc.add_heading('巡检情况汇总', 4)
     
@@ -423,23 +436,21 @@ def xj_report(city, host_name, type):
         warn_data = [item for item in xunjian_data if item[0] and '正常' not in item[1]]
     else:
         warn_data = [item for item in xunjian_data if item[0]]
+    
+    p_name = doc.add_paragraph(host_name.split('.')[0], style='report-info')
+    font = p_name.runs[0].font
+    font.color.rgb = RGBColor(0, 0, 0)
     for line in warn_data:
-        p_name = doc.add_paragraph(host_name.split('.')[0], style='report-info')
-        if line[0]:
-            p_info = doc.add_paragraph(line[0], style='report-info')
-        if line[1]:
-            p_warn = doc.add_paragraph('注：' + line[1], style='report-normal')
+        p_info = doc.add_paragraph(line[2], style='report-info')
+        p_warn = doc.add_paragraph('注：' + line[1], style='report-normal')
 
         doc.add_paragraph()
         
-        font = p_name.runs[0].font
-        font.color.rgb = RGBColor(0, 0, 0)
-
         font = p_info.runs[0].font
         font.color.rgb = RGBColor(0, 0, 255)
 
-        font = p_warn.runs[0].font
-        font.color.rgb = RGBColor(255, 0, 255)
+        # font = p_warn.runs[0].font
+        # font.color.rgb = RGBColor(255, 0, 255)
 
 
     doc.add_heading('总结', 4)
@@ -447,18 +458,91 @@ def xj_report(city, host_name, type):
     doc.add_paragraph('1，为了保障%s移动城域网7750设备正常运行，请定期清理过滤网。' % '常州',
         style='report-normal')
 
-    for item in xunjian_data:
+    for item in warn_data:
         if 'Temperature' in item[1]:
             doc.add_paragraph('2，板卡温度高建议清洗防尘网。',
             style='report-normal')
-            # doc.add_paragraph('2，板卡温度高建议清洗防尘网。')
         break
     
     report_name = '%s移动巡检报告-%s.docx' % (g_city_to_name.get(city), today)
     doc.save( os.path.join('app', 'static', report_name))
 
-    # url = url_for('static', filename = report_name)
     return redirect(url_for('static', filename = report_name))
+
+@main.route('/xj_report_all_host')
+def xj_report_all_host():
+    '''所有设备巡检，生成巡检报告'''
+
+    warn_data = []
+    city = session.get('city')
+    
+    host_list = get_host(city)
+    for i in host_list:
+        log = get_log(city, i)
+        yesday_log = get_log(city, i, 1)
+        if log and yesday_log:
+            xunjian_data = mobile.xunjian(log, yesday_log)
+            warn_data.append((i, [item for item in xunjian_data if item[0]]))
+
+
+    #生成报告
+
+    doc = docx.Document(os.path.join('app','static','xunjian.docx'))
+
+    area = g_city_to_name.get(city) + '移动'
+    doc.add_paragraph(area + '巡检报告', style='report-head')
+    doc.add_paragraph('上海贝尔7750设备巡检报告', style='report-head')
+    doc.add_paragraph()
+    doc.add_paragraph()
+    today_obj = datetime.datetime.now()
+    today = '%d年%d月%d日' % (today_obj.year, today_obj.month, today_obj.day)
+    doc.add_paragraph(today, style='report-date')
+    doc.add_page_break()
+    doc.add_heading('巡检情况汇总', 4)
+    
+    p_num = 1
+    for line in warn_data:
+        p_name = doc.add_paragraph(str(p_num) + '. ' + line[0] + '\n', style='report-info')
+        p_num += 1
+        font = p_name.runs[0].font
+        font.color.rgb = RGBColor(0, 0, 0)
+
+        for j in line[1]:
+            
+            p_info = doc.add_paragraph(j[2], style='report-info')
+            p_warn = doc.add_paragraph('注：' + j[1], style='report-normal')
+
+            doc.add_paragraph()
+            
+            font = p_info.runs[0].font
+            font.color.rgb = RGBColor(0, 0, 255)
+
+            font = p_warn.runs[0].font
+            if 'port状态巡检' == j[2]:
+                font.size = Pt(9)
+            else:
+                font.size = Pt(12)
+            # font.color.rgb = RGBColor(255, 0, 255)
+
+
+    doc.add_heading('总结', 4)
+
+    doc.add_paragraph('1，为了保障%s移动城域网7750设备正常运行，请定期清理过滤网。' % g_city_to_name.get(city),
+        style='report-normal')
+
+    for item in warn_data:
+        for j in item[1]:
+            if 'Temperature' in j[1]:
+                doc.add_paragraph('2，板卡温度高建议清洗防尘网。',
+                style='report-normal')
+            break
+    
+    report_name = '%s移动巡检报告-%s.docx' % (g_city_to_name.get(city), today)
+    doc.save( os.path.join('app', 'static', report_name))
+
+    return redirect(url_for('static', filename = report_name))
+
+
 
 @main.route('/city_list')
 def city_list():

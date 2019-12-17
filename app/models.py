@@ -76,3 +76,6 @@ class LoadStatistic(db.Model):
 
     def __repr__(self):
         return '<LoadStatistic %r>' % self.host_name
+
+
+

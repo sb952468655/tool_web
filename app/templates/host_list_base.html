@@ -9,6 +9,9 @@
         <div class="page-header">
             <h1>设备</h1>
         </div>
+        {% if action == 'xunjian'%}
+        <a class="btn btn-default btn-sm" href="{{ url_for('main.xj_report_all_host') }}">所有设备巡检</a>
+        {% endif %}
         <table class="table table-striped table-condensed" >
             <thead>
                 <tr>
