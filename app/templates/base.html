@@ -31,6 +31,13 @@
                 <li><a href="{{ url_for('main.host_list', action = 'config_backup') }}">config备份</a></li>
                 <li><a href="{{ url_for('main.host_list', action = 'load_statistic') }}">业务负荷统计</a></li>
             </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    {% if session.get('city_name') %}
+                        <a href="#">{{ session.get('city_name') }}</a>
+                    {% endif %}
+                </li>
+            </ul>
         </div>
     </div>
 </div>

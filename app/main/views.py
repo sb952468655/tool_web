@@ -560,9 +560,14 @@ def host_list(action):
     session['action'] = action
     if not session.get('city'):
         session['city'] = request.args.get('city')
+        session['city_name'] = session.get('city')
+
     city = session.get('city')
     if not city:
         return redirect(url_for('main.city_list'))
+
+    session['city_name'] = g_city_to_name.get(city)
+    
     
     host_data = get_host(city)
 
