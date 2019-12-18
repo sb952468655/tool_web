@@ -606,8 +606,9 @@ def mobile_warn23(res, res_old):
     if res_old == '':
         res_old = res
 
-    p_mda = r'(?s)(={79}\nMDA (\d{1,2}/\d{1,2}) detail\n={79}.*?\n([a-zA-Z]{3,10} Errors.*?)\n)='
-    p_trap_raised = r'Trap raised (\d{1,7}) times;'
+    p_mda = r'(?s)(={79}\nMDA (\d{1,2}/\d{1,2}) detail\n={79}.*?\n)='
+    p_trap_raised = r'(?s)([ a-zA-Z]{3,12}) Errors:   Trap raised (\d{1,7}) times;'
+
     p_temperature = r'Temperature                   : (\d{1,3})C'
 
     res_mda = re.findall(p_mda, res)
@@ -622,8 +623,8 @@ def mobile_warn23(res, res_old):
         res_temperature = re.search(p_temperature, i[0][0])
 
         if res_trap_raised and res_trap_raised_old:
-            if int(res_trap_raised.group(1)) > int(res_trap_raised_old.group(1)):
-                err += 'MDA{}状态异常,比上一日增加{}次\n'.format(i[1], int(res_trap_raised.group(1)) - int(res_trap_raised_old.group(1)))
+            if int(res_trap_raised.group(2)) > int(res_trap_raised_old.group(2)):
+                err += 'MDA {} 状态异常,{} Errors 比上一日增加{}次\n'.format(i[0][1], res_trap_raised.group(1), int(res_trap_raised.group(2)) - int(res_trap_raised_old.group(2)))
 
         if res_temperature and int(res_temperature.group(1)) > 75:
             err += 'MDA {} {}\n'.format(i[0][1], res_temperature.group())
@@ -975,42 +976,47 @@ def mobile_warn32(config, config_old):
         ' {7}IPv4 Hosts([ 0-9]{33})([ 0-9]{9}) .*?\n'\
         ' {7}IPv6 Hosts([ 0-9]{33})([ 0-9]{9}) )'
 
-    res_total = list(set(re.findall(p_total, config)))
-    res_total_old = list(set(re.findall(p_total, config_old)))
+    res_total = sorted(list(set(re.findall(p_total, config))))
 
-    for i in zip(res_total_old, res_total):
-        is_true = True
-        msg += i[0][0] + '\n'
-        if i[0][2].strip() != '0' and i[1][2].strip() == '0':
-            err += 'port {} 下ppp 用户数异常，请检查核实\n'.format(i[0][1])
+    for i in res_total:
+        port = i[1]
+        p_port_total = r'(?s)(Subscriber Management Statistics for Port @@.*?Total  PPP Hosts([ 0-9]{34})([ 0-9]{9}) .*?\n'\
+        ' {7}IPOE Hosts([ 0-9]{33})([ 0-9]{9}) .*?\n'\
+        ' {7}IPv4 Hosts([ 0-9]{33})([ 0-9]{9}) .*?\n'\
+        ' {7}IPv6 Hosts([ 0-9]{33})([ 0-9]{9}) )'.replace('@@', port)
+
+        res_port_total = re.search(p_port_total, config_old)
+        if res_port_total and i[2] != '0' and res_port_total.group(1) == '0':
+            err += 'port {} 下ppp 用户数异常，请检查核实\n'.format(port)
             continue
 
-        if i[0][3].strip() != '0' and i[1][3].strip() == '0':
-            err += 'port {} 下ppp 用户数异常，请检查核实\n'.format(i[0][1])
+        if res_port_total and i[3] != '0' and res_port_total.group(2) == '0':
+            err += 'port {} 下ppp 用户数异常，请检查核实\n'.format(port)
             continue
 
-        if i[0][4].strip() != '0' and i[1][4].strip() == '0':
-            err += 'port {} 下ppp 用户数异常，请检查核实\n'.format(i[0][1])
+        if res_port_total and i[4] != '0' and res_port_total.group(3) == '0':
+            err += 'port {} 下ppp 用户数异常，请检查核实\n'.format(port)
             continue
 
-        if i[0][5].strip() != '0' and i[1][5].strip() == '0':
-            err += 'port {} 下ppp 用户数异常，请检查核实\n'.format(i[0][1])
+        if res_port_total and i[5] != '0' and res_port_total.group(4) == '0':
+            err += 'port {} 下ppp 用户数异常，请检查核实\n'.format(port)
             continue
 
-        if i[0][6].strip() != '0' and i[1][6].strip() == '0':
-            err += 'port {} 下ppp 用户数异常，请检查核实\n'.format(i[0][1])
+        if res_port_total and i[6] != '0' and res_port_total.group(5) == '0':
+            err += 'port {} 下ppp 用户数异常，请检查核实\n'.format(port)
             continue
 
-        if i[0][7].strip() != '0' and i[1][7].strip() == '0':
-            err += 'port {} 下ppp 用户数异常，请检查核实\n'.format(i[0][1])
+        if res_port_total and i[7] != '0' and res_port_total.group(6) == '0':
+            err += 'port {} 下ppp 用户数异常，请检查核实\n'.format(port)
             continue
 
-        if i[0][8].strip() != '0' and i[1][8].strip() == '0':
-            err += 'port {} 下ppp 用户数异常，请检查核实\n'.format(i[0][1])
+        if res_port_total and i[8] != '0' and res_port_total.group(7) == '0':
+            err += 'port {} 下ppp 用户数异常，请检查核实\n'.format(port)
             continue
 
-        if i[0][9].strip() != '0' and i[1][9].strip() == '0':
-            err += 'port {} 下ppp 用户数异常，请检查核实\n'.format(i[0][1])
+        if res_port_total and i[9] != '0' and res_port_total.group(8) == '0':
+            err += 'port {} 下ppp 用户数异常，请检查核实\n'.format(port)
+            continue
 
 
     if err == '':
