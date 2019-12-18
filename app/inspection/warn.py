@@ -129,7 +129,7 @@ def mobile_warn4(res):
     else:
         logging.error('没有找到系统cpu状态')
 
-    if err == '':
+    if err == '' and result:
         err = 'cpu利用率正常，利用率：{}%'.format(result.group(1))
 
     return (msg, err, check_item)
@@ -147,6 +147,7 @@ Available Memory   :   (.{10,15}) bytes'''
 
     re_obj = re.compile(re_str)
     result = re_obj.search(res)
+    ziyuan = ''
     if result:
         msg = result.group()
         current_sotal_size = int(result.group(1).replace(',', ''))
@@ -158,7 +159,7 @@ Available Memory   :   (.{10,15}) bytes'''
     else:
         logging.error('warn5 没有找到系统Memory状态')
 
-    if err == '':
+    if err == '' and ziyuan:
         err = '系统Memory正常，资源消耗：{}%'.format(int(ziyuan * 100))
 
     return (msg, err, check_item)
@@ -318,7 +319,7 @@ def mobile_warn12(res):
     else:
         logging.error('warn12没有找到NAT公网地址池空闲值')
 
-    if err == '':
+    if err == '' and result:
         err = 'NAT公网地址池空闲值巡检正常，空闲值：{}%'.format(result.group(1))
 
     return (msg, err, check_item)
@@ -407,7 +408,7 @@ def mobile_warn16(res):
     res_hardware_resource_sage = re.findall(p_hardware_resource_sage, res)
     # res_hosts = re.findall(p_hosts, res)
 
-    for item in p_hardware_resource_sage:
+    for item in res_hardware_resource_sage:
         msg += item[0] + '\n'
         res_hosts = re.search(p_hosts, item[0])
         if res_hosts and int(res_hosts.group(2)) > 100000:
@@ -685,7 +686,11 @@ def mobile_warn25(res, res_old):
             indexs.append(start)
         except ValueError:
             break
-    res_ethernet_interface = res[indexs[0]:indexs[-1]].split('Ethernet Interface')[1:]
+
+    if len(indexs) < 2:
+        res_ethernet_interface = None
+    else:
+        res_ethernet_interface = res[indexs[0]:indexs[-1]].split('Ethernet Interface')[1:]
 
     start = 0
     indexs = []
@@ -695,26 +700,32 @@ def mobile_warn25(res, res_old):
             indexs.append(start)
         except ValueError:
             break
-    res_ethernet_interface_old = res_old[indexs[0]:indexs[-1]].split('Ethernet Interface')[1:]
-    res_ethernet_interface_zip = zip(res_ethernet_interface, res_ethernet_interface_old)
 
-    for i in res_ethernet_interface_zip:
-        if 'Admin State        : up' not in i[0]:
-            continue
-        res_interface = re.search(p_interface, i[0])
-        res_tx_rx = re.search(p_tx_rx, i[0])
-        if res_tx_rx and res_interface:
-            if float(res_tx_rx.group(1)) > float(res_tx_rx.group(2)) or float(res_tx_rx.group(1)) < float(res_tx_rx.group(3)):
-                err += 'port {} Tx Output Power 超限\n{}\n{}\n'.format(res_interface.group(1), ddm, res_tx_rx.group())
-                msg += 'port {} Tx Output Power Value: {}, High Warn: {}, Low Warn: {}\n'.format(res_interface.group(1),
-                    res_tx_rx.group(1), res_tx_rx.group(2), res_tx_rx.group(3))
-            if float(res_tx_rx.group(4)) > float(res_tx_rx.group(5)) or float(res_tx_rx.group(4)) < float(res_tx_rx.group(6)):
-                err += 'port {} Rx Optical Power 超限\n{}\n{}\n'.format(res_interface.group(1), ddm, res_tx_rx.group())
-                msg += 'port {} Tx Output Power Value: {}, High Warn: {}, Low Warn: {}\n'.format(res_interface.group(1),
-                    res_tx_rx.group(4), res_tx_rx.group(5), res_tx_rx.group(6))
-        else:
-            logging.error('没有找到光功率信息')
-            continue
+    if len(indexs) < 2:
+        res_ethernet_interface_old = None
+    else:
+        res_ethernet_interface_old = res_old[indexs[0]:indexs[-1]].split('Ethernet Interface')[1:]
+
+    if res_ethernet_interface and res_ethernet_interface_old:
+
+        res_ethernet_interface_zip = zip(res_ethernet_interface, res_ethernet_interface_old)
+        for i in res_ethernet_interface_zip:
+            if 'Admin State        : up' not in i[0]:
+                continue
+            res_interface = re.search(p_interface, i[0])
+            res_tx_rx = re.search(p_tx_rx, i[0])
+            if res_tx_rx and res_interface:
+                if float(res_tx_rx.group(1)) > float(res_tx_rx.group(2)) or float(res_tx_rx.group(1)) < float(res_tx_rx.group(3)):
+                    err += 'port {} Tx Output Power 超限\n{}\n{}\n'.format(res_interface.group(1), ddm, res_tx_rx.group())
+                    msg += 'port {} Tx Output Power Value: {}, High Warn: {}, Low Warn: {}\n'.format(res_interface.group(1),
+                        res_tx_rx.group(1), res_tx_rx.group(2), res_tx_rx.group(3))
+                if float(res_tx_rx.group(4)) > float(res_tx_rx.group(5)) or float(res_tx_rx.group(4)) < float(res_tx_rx.group(6)):
+                    err += 'port {} Rx Optical Power 超限\n{}\n{}\n'.format(res_interface.group(1), ddm, res_tx_rx.group())
+                    msg += 'port {} Tx Output Power Value: {}, High Warn: {}, Low Warn: {}\n'.format(res_interface.group(1),
+                        res_tx_rx.group(4), res_tx_rx.group(5), res_tx_rx.group(6))
+            else:
+                logging.error('没有找到光功率信息')
+                continue
 
         #检查 Ethernet-like Medium Statistics
         res_ethernet_like_medium_statistics = re.search(p_ethernet_like_medium_statistics, i[0])
@@ -964,41 +975,42 @@ def mobile_warn32(config, config_old):
         ' {7}IPv4 Hosts([ 0-9]{33})([ 0-9]{9}) .*?\n'\
         ' {7}IPv6 Hosts([ 0-9]{33})([ 0-9]{9}) )'
 
-    res_total = re.findall(p_total, config)
-    res_total_old = re.findall(p_total, config_old)
+    res_total = list(set(re.findall(p_total, config)))
+    res_total_old = list(set(re.findall(p_total, config_old)))
 
     for i in zip(res_total_old, res_total):
-        msg += i[1][0] + '\n'
+        is_true = True
+        msg += i[0][0] + '\n'
         if i[0][2].strip() != '0' and i[1][2].strip() == '0':
-            err += 'port {} 下ppp 用户数异常，请检查核实'.format(i[0][1])
+            err += 'port {} 下ppp 用户数异常，请检查核实\n'.format(i[0][1])
             continue
 
         if i[0][3].strip() != '0' and i[1][3].strip() == '0':
-            err += 'port {} 下ppp 用户数异常，请检查核实'.format(i[0][1])
+            err += 'port {} 下ppp 用户数异常，请检查核实\n'.format(i[0][1])
             continue
 
         if i[0][4].strip() != '0' and i[1][4].strip() == '0':
-            err += 'port {} 下ppp 用户数异常，请检查核实'.format(i[0][1])
+            err += 'port {} 下ppp 用户数异常，请检查核实\n'.format(i[0][1])
             continue
 
         if i[0][5].strip() != '0' and i[1][5].strip() == '0':
-            err += 'port {} 下ppp 用户数异常，请检查核实'.format(i[0][1])
+            err += 'port {} 下ppp 用户数异常，请检查核实\n'.format(i[0][1])
             continue
 
         if i[0][6].strip() != '0' and i[1][6].strip() == '0':
-            err += 'port {} 下ppp 用户数异常，请检查核实'.format(i[0][1])
+            err += 'port {} 下ppp 用户数异常，请检查核实\n'.format(i[0][1])
             continue
 
         if i[0][7].strip() != '0' and i[1][7].strip() == '0':
-            err += 'port {} 下ppp 用户数异常，请检查核实'.format(i[0][1])
+            err += 'port {} 下ppp 用户数异常，请检查核实\n'.format(i[0][1])
             continue
 
         if i[0][8].strip() != '0' and i[1][8].strip() == '0':
-            err += 'port {} 下ppp 用户数异常，请检查核实'.format(i[0][1])
+            err += 'port {} 下ppp 用户数异常，请检查核实\n'.format(i[0][1])
             continue
 
         if i[0][9].strip() != '0' and i[1][9].strip() == '0':
-            err += 'port {} 下ppp 用户数异常，请检查核实'.format(i[0][1])
+            err += 'port {} 下ppp 用户数异常，请检查核实\n'.format(i[0][1])
 
 
     if err == '':
