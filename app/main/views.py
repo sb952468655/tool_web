@@ -423,7 +423,10 @@ def xj_report(city, host_name, type):
     doc = docx.Document(os.path.join('app','static','xunjian.docx'))
     area = g_city_to_name.get(city) + '移动'
     doc.add_paragraph(area + '巡检报告', style='report-head')
-    doc.add_paragraph('上海贝尔7750设备巡检报告', style='report-head')
+    if type == '1':
+        doc.add_paragraph('上海贝尔7750单设备巡检报告', style='report-head')
+    else:
+        doc.add_paragraph('上海贝尔7750单设备巡检输出', style='report-head')
     doc.add_paragraph()
     doc.add_paragraph()
     today_obj = datetime.datetime.now()
@@ -463,10 +466,13 @@ def xj_report(city, host_name, type):
             doc.add_paragraph('2，板卡温度高建议清洗防尘网。',
             style='report-normal')
         break
-    
-    report_name = '%s移动巡检报告-%s.docx' % (g_city_to_name.get(city), today)
-    doc.save( os.path.join('app', 'static', report_name))
 
+    if type == '1':
+        report_name = '%s移动%s单设备巡检报告-%s.docx' % (g_city_to_name.get(city), host_name, today)
+    else:
+        report_name = '%s移动%s单设备巡检输出-%s.docx' % (g_city_to_name.get(city), host_name, today)
+
+    doc.save( os.path.join('app', 'static', report_name))
     return redirect(url_for('static', filename = report_name))
 
 @main.route('/xj_report_all_host')
@@ -486,7 +492,6 @@ def xj_report_all_host():
 
 
     #生成报告
-
     doc = docx.Document(os.path.join('app','static','xunjian.docx'))
 
     area = g_city_to_name.get(city) + '移动'

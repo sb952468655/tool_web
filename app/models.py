@@ -77,5 +77,35 @@ class LoadStatistic(db.Model):
     def __repr__(self):
         return '<LoadStatistic %r>' % self.host_name
 
+class XunJian(db_Model):
+    '''巡检表'''
+
+    __tablename__ = 'xunjian'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    city = db.Column(db.String(64)) #地市名
+    host_name = db.Column(db.String(64)) #设备名
+    check_item = db.Column(db.String(128)) #设备名
+    err = db.Column(db.Text) #错误提示
+    msg = db.Column(db.Text) #关键信息
+    date = db.Column(db.Date, default = date.today())
+
+    def __repr__(self):
+        return '<XunJian %r>' % self.host_name
+
+class ConfigCheck(db.Model):
+    '''配置检查表'''
+
+    __tablename__ = 'config_check'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    city = db.Column(db.String(64)) #地市名
+    host_name = db.Column(db.String(64)) #设备名
+    check_item = db.Column(db.String(128)) #设备名
+    err = db.Column(db.Text) #错误提示
+    msg = db.Column(db.Text) #关键信息
+    date = db.Column(db.Date, default = date.today())
+
+    def __repr__(self):
+        return '<ConfigCheck %r>' % self.host_name
+
 
 
