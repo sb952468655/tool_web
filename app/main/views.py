@@ -424,14 +424,6 @@ def xj_report_all_host():
 
     warn_data = []
     city = session.get('city')
-    
-    # host_list = get_host(city)
-    # for i in host_list:
-    #     log = get_log(city, i)
-    #     yesday_log = get_log(city, i, 1)
-    #     if log and yesday_log:
-    #         xunjian_data = mobile.xunjian(log, yesday_log)
-    #         warn_data.append((i, [item for item in xunjian_data if item[0]]))
 
     count = XunJian.query.filter_by(city = city, date_time = date.today()).count()
     if count == 0:
