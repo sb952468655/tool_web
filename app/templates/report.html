@@ -2,7 +2,7 @@
 {% import "_macros.html" as macros %}
 
 {% block report_content %}
-    <a class="btn btn-default" href="{{ url_for('main.generate_excel') }}" role="button">生成表格</a>
+    <a class="btn btn-default" href="{{ url_for('main.generate_excel', host_name = host_name) }}" role="button">生成表格</a>
     <table class="table table-condensed" style="min-width:2000px;" >
         <thead>
             <tr>

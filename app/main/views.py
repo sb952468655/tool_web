@@ -1,4 +1,6 @@
-import os, sys, zipfile, time, datetime, logging, re
+import os, sys, zipfile, time, logging, re
+from sqlite3 import OperationalError
+from datetime import date, datetime
 from flask import render_template, session, redirect, url_for, current_app, request, abort, g, Response
 import openpyxl
 from openpyxl.styles import Alignment, PatternFill
@@ -8,14 +10,13 @@ from docx.shared import RGBColor
 from . import main
 from ..check_pool import all_check
 from ..inspection import mobile
-from ..models import AddressCollect, LoadStatistic
 from .config import g_city_to_name, g_log_path, g_backup_path
 from .address import get_address_data
 from .statistic import get_statistic_data, get_statistic_host_data
 from urllib.request import quote, unquote
 from .. import db
-from ..models import CardPort1
-from .report import get_host_list, get_card_detail, get_card_statistic, get_mda_detail, get_mda_statistic, get_port_statistic
+from ..models import *
+from .report import *
 from .common import get_log, get_host, get_today_log_name, get_city_list, get_host_logs
 sys.path.append('../')
 
@@ -35,85 +36,11 @@ def report_port(host_name):
     from .report import get_report_data, get_device_name, get_port_ggl, get_ip
 
     page = request.args.get('page', 1, type=int)
-    count = CardPort1.query.filter_by(host_name = host_name, date_time = datetime.date.today()).count()
+    count = CardPort1.query.filter_by(host_name = host_name, date_time = date.today()).count()
     if count == 0:
-        
-        config = get_log(city, host_name)
-        if not config:
-            abort(404)
+        abort(404)
 
-        ip = get_ip(config)
-        report_data = get_report_data(config)
-        ggl_port = []
-        res = []
-
-
-        ggl_data = get_port_ggl(config)
-
-        i = 0
-        for item in report_data:
-            if item[-1] != 'MDX GIGE-T ' and item[-1] != 'MDI GIGE-T ':
-                ggl_port.append(item[0])
-                port_is_ok = '否'
-                #判断端口是否有异常
-                if item[2] == 'Up' and item[3] == 'No' and item[4] != 'Up':
-                    port_is_ok = '是'
-
-                #判断端口ge或者10ge
-                dk = ''
-                if item[-1].startswith('10'):
-                    dk = '10GE'
-                elif item[-1].startswith('GIGE'):
-                    dk = 'GE'
-                try:
-                    if item[2] == 'Up' and item[3] == 'Yes' and item[4] == 'Up':
-                        if ggl_data[i][7] and (float(ggl_data[i][5]) < float(ggl_data[i][8]) or float(ggl_data[i][5]) > float(ggl_data[i][7])):
-                            port_is_ok = '是'
-                        if ggl_data[i][3] and (float(ggl_data[i][0]) < float(ggl_data[i][3]) or float(ggl_data[i][0]) > float(ggl_data[i][2])):
-                            port_is_ok = '是'
-
-                    res.append(item + [ggl_data[i][0], ggl_data[i][5], ggl_data[i][2]+'|'+ ggl_data[i][3], ggl_data[i][7]+'|'+ ggl_data[i][8], ip, port_is_ok, dk])
-
-                except Exception:
-                    # print('端口数和光功率数量不匹配')
-                    continue
-                
-                i += 1
-            else:
-                res.append(item + ['','','','', ip, '', ''])
-
-        for item in res:
-
-            #存入数据库
-            card_port = CardPort1(
-                host_name = host_name,
-                host_ip = item[16],
-                port = item[1],
-                port_dk = item[18],
-                admin_state = item[2],
-                link_state = item[3],
-                port_state = item[4],
-                cfg_mtu = item[5],
-                oper_mtu = item[6],
-                lag = item[7],
-                port_mode = item[8],
-                port_encp = item[9],
-                port_type = item[10],
-                c_qs_s_xfp_mdimdx = item[11],
-                optical_power = item[12],
-                output_power = item[13],
-                optical_warn = item[14],
-                output_warn = item[15],
-                is_abnormal = item[17]
-            )
-
-            db.session.add(card_port)
-
-        db.session.commit()
-        session['report'] = res
-
-        
-    pageination = CardPort1.query.filter_by(host_name = host_name, date_time = datetime.date.today()).order_by(CardPort1.date_time.desc()).paginate(
+    pageination = CardPort1.query.filter_by(host_name = host_name, date_time = date.today()).paginate(
         page, per_page = current_app.config['FLASKY_POSTS_PER_PAGE'],
         error_out = False
     )
@@ -138,10 +65,12 @@ def card_detail(host_name):
     '''card明细'''
 
     city = session.get('city')
-    config = get_log(city, host_name)
-    if not config:
+
+    count = CardDetail.query.filter_by(host_name = host_name, date_time = date.today()).count()
+    if count == 0:
         abort(404)
-    card_detail_data = get_card_detail(config)
+
+    card_detail_data = CardDetail.query.filter_by(host_name = host_name, date_time = date.today()).all()
 
     return render_template('card_detail.html', host_name=host_name, card_detail_data = card_detail_data ,action='card_detail')
 
@@ -150,11 +79,11 @@ def card_statistic(host_name):
     '''card统计'''
 
     city = session.get('city')
-    config = get_log(city, host_name)
-    if not config:
+    count = CardStatistic.query.filter_by(host_name = host_name, date_time = date.today()).count()
+    if count == 0:
         abort(404)
 
-    card_statistic_data = get_card_statistic(config)
+    card_statistic_data = CardStatistic.query.filter_by(host_name = host_name, date_time = date.today()).all()
 
     return render_template('card_statistic.html', host_name=host_name, card_statistic_data = card_statistic_data ,action='card_statistic')
 
@@ -163,10 +92,11 @@ def mda_detail(host_name):
     '''mda明细'''
 
     city = session.get('city')
-    config = get_log(city, host_name)
-    if not config:
+    count = MdaDetail.query.filter_by(host_name = host_name, date_time = date.today()).count()
+    if count == 0:
         abort(404)
-    mda_detail_data = get_mda_detail(config)
+
+    mda_detail_data = MdaDetail.query.filter_by(host_name = host_name, date_time = date.today()).all()
 
     return render_template('mda_detail.html', host_name=host_name,  mda_detail_data = mda_detail_data ,action='mda_detail')
 
@@ -175,10 +105,11 @@ def mda_statistic(host_name):
     '''mda统计'''
 
     city = session.get('city')
-    config = get_log(city, host_name)
-    if not config:
+    count = MdaStatistic.query.filter_by(host_name = host_name, date_time = date.today()).count()
+    if count == 0:
         abort(404)
-    mda_statistic_data = get_mda_statistic(config)
+
+    mda_statistic_data = MdaStatistic.query.filter_by(host_name = host_name, date_time = date.today()).all()
 
     return render_template('mda_statistic.html', host_name=host_name,  mda_statistic_data = mda_statistic_data ,action='mda_statistic')
 
@@ -187,10 +118,11 @@ def port_statistic(host_name):
     '''port统计'''
 
     city = session.get('city')
-    config = get_log(city, host_name)
-    if not config:
+    count = PortStatistic.query.filter_by(host_name = host_name, date_time = date.today()).count()
+    if count == 0:
         abort(404)
-    port_statistic_data = get_port_statistic(config)
+
+    port_statistic_data = PortStatistic.query.filter_by(host_name = host_name, date_time = date.today()).all()
 
     return render_template('port_statistic.html', host_name=host_name,  port_statistic_data = port_statistic_data ,action='port_statistic')
 
@@ -249,20 +181,17 @@ def check_excel(host_name):
 @main.route('/xunjian/<host_name>')
 def xunjian(host_name):
     '''巡检'''
+
     city = session.get('city')
     if not city:
         return redirect(url_for('main.city_list'))
 
-    config = get_log(city, host_name)
-    if not config:
+    count = XunJian.query.filter_by(host_name = host_name, date_time = date.today()).count()
+    if count == 0:
         abort(404)
 
-    yesday_log = get_log(city, host_name, 1)
-    if not yesday_log:
-        yesday_log = config
-
-    xunjian_data = mobile.xunjian(config, yesday_log)
-    warn_data = [item for item in xunjian_data if item[0]]
+    xunjian_data = XunJian.query.filter_by(host_name = host_name, date_time = date.today()).all()
+    warn_data = [item for item in xunjian_data if item.err]
     
     return render_template('xunjian/xunjian.html', xunjian_data=warn_data, host_name = host_name, city = city)
 
@@ -271,12 +200,12 @@ def xunjian_output_all(host_name):
     '''设备巡检-全量输出'''
 
     city = session.get('city')
-    config = get_log(city, host_name)
-    if not config:
+    count = XunJian.query.filter_by(host_name = host_name, date_time = date.today()).count()
+    if count == 0:
         abort(404)
 
-    xunjian_data = mobile.xunjian(config, config)
-    warn_data = [item for item in xunjian_data if item[0]]
+    xunjian_data = XunJian.query.filter_by(host_name = host_name, date_time = date.today()).all()
+    warn_data = [item for item in xunjian_data if item.err]
     
     return render_template('xunjian/xunjian_output_all.html', xunjian_data=warn_data, host_name = host_name, city = city)
 
@@ -287,13 +216,16 @@ def xunjian_all_host():
     warn_data = []
     city = session.get('city')
     
+    count = XunJian.query.filter_by(city = city, date_time = date.today()).count()
+    if count == 0:
+        abort(404)
+
     host_list = get_host(city)
     for i in host_list:
-        log = get_log(city, i)
-        yesday_log = get_log(city, i, 1)
-        if log and yesday_log:
-            xunjian_data = mobile.xunjian(log, yesday_log)
-            warn_data.append((i, [item for item in xunjian_data if item[0]]))
+        xunjian_data = XunJian.query.filter_by(host_name = i, date_time = date.today()).all()
+        warn_data.append((i, [item for item in xunjian_data if item.err]))
+    
+    
 
     return render_template('xunjian/xunjian_all_host.html', xunjian_data=warn_data)
 
@@ -304,9 +236,9 @@ def auto_config():
     return render_template('auto_config.html')
 
 
-@main.route('/generate_excel')
-def generate_excel():
-    '''生成表格'''
+@main.route('/generate_excel/<host_name>')
+def generate_excel(host_name):
+    '''端口明细生成表格'''
 
     excel = openpyxl.Workbook()
     sheet = excel.active
@@ -336,40 +268,45 @@ def generate_excel():
     sheet.column_dimensions['Q'].width = 15.0
     sheet.column_dimensions['R'].width = 15.0
     cur_row = 2
-    for item in session.get('report'):
-        sheet['A'+ str(cur_row)] = item[0]
-        sheet['B'+ str(cur_row)] = item[16]
-        sheet['C'+ str(cur_row)] = item[1]
-        if '10' in item[11]:
+    count = CardPort1.query.filter_by(host_name = host_name, date_time = date.today()).count()
+    if count == 0:
+        abort(404)
+
+    port_detail_data = CardPort1.query.filter_by(host_name = host_name, date_time = date.today()).all()
+    for item in port_detail_data:
+        sheet['A'+ str(cur_row)] = item.host_name
+        sheet['B'+ str(cur_row)] = item.host_ip
+        sheet['C'+ str(cur_row)] = item.port
+        if '10' in item.port_dk:
             sheet['D'+ str(cur_row)] = '10GE'
         else:
             sheet['D'+ str(cur_row)] = 'GE'
-        sheet['E'+ str(cur_row)] = item[2]
-        sheet['F'+ str(cur_row)] = item[3]
-        sheet['G'+ str(cur_row)] = item[4]
-        sheet['H'+ str(cur_row)] = item[5]
-        sheet['I'+ str(cur_row)] = item[6]
-        sheet['J'+ str(cur_row)] = item[7]
-        sheet['K'+ str(cur_row)] = item[8]
-        sheet['L'+ str(cur_row)] = item[9]
-        sheet['M'+ str(cur_row)] = item[10]
-        sheet['N'+ str(cur_row)] = item[11]
-        sheet['O'+ str(cur_row)] = item[13]
+        sheet['E'+ str(cur_row)] = item.admin_state
+        sheet['F'+ str(cur_row)] = item.link_state
+        sheet['G'+ str(cur_row)] = item.port_state
+        sheet['H'+ str(cur_row)] = item.cfg_mtu
+        sheet['I'+ str(cur_row)] = item.oper_mtu
+        sheet['J'+ str(cur_row)] = item.lag
+        sheet['K'+ str(cur_row)] = item.port_mode
+        sheet['L'+ str(cur_row)] = item.port_encp
+        sheet['M'+ str(cur_row)] = item.port_type
+        sheet['N'+ str(cur_row)] = item.c_qs_s_xfp_mdimdx
+        sheet['O'+ str(cur_row)] = item.optical_power
 
-        if item[2] == 'Up' and item[3] == 'Yes' and item[4] == 'Up' and item[13] and (float(item[13]) < float(item[15].split('|')[1]) or float(item[13]) > float(item[15].split('|')[0])):
+        if item.admin_state == 'Up' and item.link_state == 'Yes' and item.port_state == 'Up' and item.optical_power and (float(item.optical_power) < float(item.optical_warn.split('|')[1]) or float(item.optical_power) > float(item.optical_warn.split('|')[0])):
             fill = PatternFill("solid", fgColor="FF0000")
             sheet['O'+ str(cur_row)].fill = fill
 
 
-        sheet['P'+ str(cur_row)] = item[12]
+        sheet['P'+ str(cur_row)] = item.output_power
 
-        if item[2] == 'Up' and item[3] == 'Yes' and item[4] == 'Up' and item[12] and (float(item[12]) < float(item[14].split('|')[1]) or float(item[12]) > float(item[14].split('|')[0])):
+        if item.admin_state == 'Up' and item.link_state == 'Yes' and item.port_state == 'Up' and item.output_power and (float(item.output_power) < float(item.output_warn.split('|')[1]) or float(item.output_power) > float(item.output_warn.split('|')[0])):
             fill = PatternFill("solid", fgColor="FF0000")
             sheet['P'+ str(cur_row)].fill = fill
 
-        sheet['Q'+ str(cur_row)] = item[15]
-        sheet['R'+ str(cur_row)] = item[14]
-        if item[2] == 'Up' and item[3] == 'No' and item[4] != 'Up':
+        sheet['Q'+ str(cur_row)] = item.optical_warn
+        sheet['R'+ str(cur_row)] = item.output_warn
+        if item.admin_state == 'Up' and item.link_state == 'No' and item.port_state != 'Up':
             sheet['S'+ str(cur_row)] = '是'
             fill = PatternFill("solid", fgColor="FF0000")
             sheet['S'+ str(cur_row)].fill = fill
@@ -418,7 +355,13 @@ def xj_report(city, host_name, type):
     if not config:
         abort(404)
 
-    xunjian_data = mobile.xunjian(config, config)
+    # xunjian_data = mobile.xunjian(config, config)
+    count = XunJian.query.filter_by(host_name = host_name, date_time = date.today()).count()
+    if count == 0:
+        abort(404)
+
+    xunjian_data = XunJian.query.filter_by(host_name = host_name, date_time = date.today()).all()
+    # warn_data = [item for item in xunjian_data if item.err]
 
     doc = docx.Document(os.path.join('app','static','xunjian.docx'))
     area = g_city_to_name.get(city) + '移动'
@@ -429,23 +372,23 @@ def xj_report(city, host_name, type):
         doc.add_paragraph('上海贝尔7750单设备巡检输出', style='report-head')
     doc.add_paragraph()
     doc.add_paragraph()
-    today_obj = datetime.datetime.now()
+    today_obj = datetime.now()
     today = '%d年%d月%d日' % (today_obj.year, today_obj.month, today_obj.day)
     doc.add_paragraph(today, style='report-date')
     doc.add_page_break()
     doc.add_heading('巡检情况汇总', 4)
     
     if type == '1':
-        warn_data = [item for item in xunjian_data if item[0] and '正常' not in item[1]]
+        warn_data = [item for item in xunjian_data if item.err and '正常' not in item.err]
     else:
-        warn_data = [item for item in xunjian_data if item[0]]
+        warn_data = [item for item in xunjian_data if item.err]
     
     p_name = doc.add_paragraph(host_name.split('.')[0], style='report-info')
     font = p_name.runs[0].font
     font.color.rgb = RGBColor(0, 0, 0)
     for line in warn_data:
-        p_info = doc.add_paragraph(line[2], style='report-info')
-        p_warn = doc.add_paragraph('注：' + line[1], style='report-normal')
+        p_info = doc.add_paragraph(line.check_item, style='report-info')
+        p_warn = doc.add_paragraph('注：' + line.err, style='report-normal')
 
         doc.add_paragraph()
         
@@ -458,11 +401,11 @@ def xj_report(city, host_name, type):
 
     doc.add_heading('总结', 4)
 
-    doc.add_paragraph('1，为了保障%s移动城域网7750设备正常运行，请定期清理过滤网。' % '常州',
+    doc.add_paragraph('1，为了保障%s移动城域网7750设备正常运行，请定期清理过滤网。' % g_city_to_name.get(city),
         style='report-normal')
 
     for item in warn_data:
-        if 'Temperature' in item[1]:
+        if 'Temperature' in item.err:
             doc.add_paragraph('2，板卡温度高建议清洗防尘网。',
             style='report-normal')
         break
@@ -482,13 +425,22 @@ def xj_report_all_host():
     warn_data = []
     city = session.get('city')
     
+    # host_list = get_host(city)
+    # for i in host_list:
+    #     log = get_log(city, i)
+    #     yesday_log = get_log(city, i, 1)
+    #     if log and yesday_log:
+    #         xunjian_data = mobile.xunjian(log, yesday_log)
+    #         warn_data.append((i, [item for item in xunjian_data if item[0]]))
+
+    count = XunJian.query.filter_by(city = city, date_time = date.today()).count()
+    if count == 0:
+        abort(404)
+
     host_list = get_host(city)
     for i in host_list:
-        log = get_log(city, i)
-        yesday_log = get_log(city, i, 1)
-        if log and yesday_log:
-            xunjian_data = mobile.xunjian(log, yesday_log)
-            warn_data.append((i, [item for item in xunjian_data if item[0]]))
+        xunjian_data = XunJian.query.filter_by(host_name = i, date_time = date.today()).all()
+        warn_data.append((i, [item for item in xunjian_data if item.err]))
 
 
     #生成报告
@@ -499,7 +451,7 @@ def xj_report_all_host():
     doc.add_paragraph('上海贝尔7750设备巡检报告', style='report-head')
     doc.add_paragraph()
     doc.add_paragraph()
-    today_obj = datetime.datetime.now()
+    today_obj = datetime.now()
     today = '%d年%d月%d日' % (today_obj.year, today_obj.month, today_obj.day)
     doc.add_paragraph(today, style='report-date')
     doc.add_page_break()
@@ -514,8 +466,8 @@ def xj_report_all_host():
 
         for j in line[1]:
             
-            p_info = doc.add_paragraph(j[2], style='report-info')
-            p_warn = doc.add_paragraph('注：' + j[1], style='report-normal')
+            p_info = doc.add_paragraph(j.check_item, style='report-info')
+            p_warn = doc.add_paragraph('注：' + j.err, style='report-normal')
 
             doc.add_paragraph()
             
@@ -523,7 +475,7 @@ def xj_report_all_host():
             font.color.rgb = RGBColor(0, 0, 255)
 
             font = p_warn.runs[0].font
-            if 'port状态巡检' == j[2]:
+            if 'port状态巡检' == j.check_item:
                 font.size = Pt(9)
             else:
                 font.size = Pt(12)
@@ -537,7 +489,7 @@ def xj_report_all_host():
 
     for item in warn_data:
         for j in item[1]:
-            if 'Temperature' in j[1]:
+            if 'Temperature' in j.err:
                 doc.add_paragraph('2，板卡温度高建议清洗防尘网。',
                 style='report-normal')
             break
@@ -585,44 +537,16 @@ def host_list(action):
 @main.route('/address_collect/<host_name>')
 def address_collect(host_name):
     '''三层接口和静态用户IP地址采集'''
+
     address_data = []
     city = session.get('city')
     page = request.args.get('page', 1, type=int)
-    count = AddressCollect.query.filter_by(host_name = host_name, date_time = datetime.date.today()).count()
-    # count = 0 #等下去掉
+    count = AddressCollect.query.filter_by(host_name = host_name, date_time = date.today()).count()
     if count == 0:
-        config = get_log(city, host_name)
-        if not config:
-            abort(404)
-        res = get_address_data(config)
-
-        for item in res:
-            address_data.append([host_name] + item)
-
-            #存入数据库
-            address_collect = AddressCollect(
-                host_name = host_name,
-                host_ip = item[0],
-                ip_type = item[1],
-                function_type = item[2],
-                is_use = item[3],
-                ip = item[4].strNormal(0),
-                gateway = item[5],
-                mask = item[6],
-                interface_name = item[7],
-                sap_id = item[8],
-                next_hop = item[9],
-                ies_vprn_id = item[10],
-                vpn_rd = item[11],
-                vpn_rt = item[12],
-                description = item[13]
-            )
-
-            db.session.add(address_collect)
-        db.session.commit()
+        abort(404)
 
 
-    pageination = AddressCollect.query.filter_by(host_name = host_name, date_time = datetime.date.today()).order_by(AddressCollect.date_time.desc()).paginate(
+    pageination = AddressCollect.query.filter_by(host_name = host_name, date_time = date.today()).paginate(
         page, per_page = current_app.config['FLASKY_POSTS_PER_PAGE'],
         error_out = False
     )
@@ -665,7 +589,7 @@ def address_mk_excel(host_name):
     # sheet.column_dimensions['R'].width = 15.0
     cur_row = 2
 
-    address_data = AddressCollect.query.filter_by(host_name = host_name, date_time = datetime.date.today()).order_by(AddressCollect.date_time.desc()).all()
+    address_data = AddressCollect.query.filter_by(host_name = host_name, date_time = date.today()).all()
     for item in address_data:
         sheet['A'+ str(cur_row)] = item.host_name.split('.')[0]
         sheet['B'+ str(cur_row)] = item.host_ip
@@ -699,11 +623,11 @@ def config_backup():
         return redirect(url_for('main.city_list'))
 
     host_list = get_host(city)
-    today = datetime.date.today()
-    date = today.strftime('%Y%m%d')
+    # today = date.today()
+    date_str = date.today().strftime('%Y%m%d')
     for item in host_list:
         if get_log(city, item):
-            host_data.append((item, date))
+            host_data.append((item, date_str))
         
     return render_template('back_up/config_backup_host_list.html', host_data=host_data)
 
@@ -745,32 +669,11 @@ def load_statistic(host_name):
     if not city:
         return redirect(url_for('main.city_list'))
 
-    count = LoadStatistic.query.filter_by(host_name = host_name, date_time = datetime.date.today()).count()
+    count = LoadStatistic.query.filter_by(host_name = host_name, date_time = date.today()).count()
     if count == 0:
-        config = get_log(city, host_name)
-        if not config:
-            abort(404)
-        res = get_statistic_data(config)
-        for item in res:
+        abort(404)
 
-            #存入数据库
-            load_statistic = LoadStatistic(
-                host_name = host_name,
-                host_ip = item[2],
-                port = item[1],
-                port_dk = item[3],
-                in_utilization = item[4],
-                out_utilization = item[5],
-                ies_3000_user_num = item[6],
-                ies_3000_utilization = item[7],
-                vprn_4015_user_num = item[8],
-                vprn_4015_utilization = item[9]
-            )
-
-            db.session.add(load_statistic)
-        db.session.commit()
-
-    pageination = LoadStatistic.query.filter_by(host_name = host_name, date_time = datetime.date.today()).order_by(LoadStatistic.date_time.desc()).paginate(
+    pageination = LoadStatistic.query.filter_by(host_name = host_name, date_time = date.today()).paginate(
         page, per_page = current_app.config['FLASKY_POSTS_PER_PAGE'],
         error_out = False
     )
@@ -791,14 +694,393 @@ def load_statistic_host(host_name):
     '''按设备统计用户数量'''
 
     city = session.get('city')
-    load_statistic_host_data = get_statistic_host_data(city)
+    count = LoadStatisticHost.query.filter_by(host_name = host_name, date_time = date.today()).count()
+    if count == 0:
+        abort(404)
+
+    load_statistic_host_data = LoadStatisticHost.query.filter_by(host_name = host_name, date_time = date.today()).all()
 
     return render_template('statistic_host.html',
         load_statistic_host_data = load_statistic_host_data, 
         action = 'load_statistic_host', 
         host_name=host_name)
-    
-    
+
+@main.route('/save_db')
+def save_db():
+    '''把所有数据入库'''
+
+    citys = get_city_list()
+    for i in citys:
+        hosts = get_host(i)
+        for j in hosts:
+            today_log = get_log(i, j)
+            yesterday_log = get_log(i, j, 1)
+            if today_log:
+                #端口明细
+                save_port_detail(i, j, today_log)
+                #端口统计
+                save_port_statistic(i, j, today_log)
+                #card明细
+                save_card_detail(i, j, today_log)
+                #card统计
+                save_card_statistic(i, j, today_log)
+                #mda明细
+                save_mda_detail(i, j, today_log)
+                #mda统计
+                save_mda_statistic(i, j, today_log)
+                #业务负载统计-按端口统计
+                save_load_statistic(i, j, today_log)
+                #业务负载统计-按设备统计
+                save_load_statistic_host(i, j, today_log)
+                #地址采集
+                save_address_collect(i, j, today_log)
+
+            if today_log and yesterday_log:
+                save_xunjian(i, j, today_log, yesterday_log)
+                #配置检查
+
+            else:
+                if not today_log:
+                    logging.info('host: {} not found today log'.format(j))
+                if not yesterday_log:
+                    logging.info('host: {} not found yesterday log'.format(j))
+
+    return '数据保存成功'
+
+
+def save_xunjian(city, host_name, config_new, config_old):
+    '''巡检数据入库'''
+
+    today_data_count = XunJian.query.filter_by(host_name = host_name, date_time = date.today()).count()
+
+    if today_data_count:
+        logging.info('xunjian host: {} today is saved'.format(host_name))
+        return
+
+    xunjian_data = mobile.xunjian(config_new, config_old)
+    for msg, err, check_item in xunjian_data:
+        xunjian = XunJian(
+            city = city,
+            host_name = host_name,
+            check_item = check_item,
+            err = err,
+            msg = msg
+        )
+
+        db.session.add(xunjian)
+    db.session.commit()
+    db.session.close()
+
+def save_port_detail(city, host_name, config):
+    '''端口明细入库'''
+
+    today_data_count = CardPort1.query.filter_by(host_name = host_name, date_time = date.today()).count()
+
+    if today_data_count:
+        logging.info('port_detail host: {} today is saved'.format(host_name))
+        return
+
+    ip = get_ip(config)
+    report_data = get_report_data(config)
+    ggl_data = get_port_ggl(config)
+    ggl_port = []
+    res = []
+
+    i = 0
+    for item in report_data:
+        if item[-1] != 'MDX GIGE-T ' and item[-1] != 'MDI GIGE-T ':
+            ggl_port.append(item[0])
+            port_is_ok = '否'
+            #判断端口是否有异常
+            if item[2] == 'Up' and item[3] == 'No' and item[4] != 'Up':
+                port_is_ok = '是'
+
+            #判断端口ge或者10ge
+            dk = ''
+            if item[-1].startswith('10'):
+                dk = '10GE'
+            elif item[-1].startswith('GIGE'):
+                dk = 'GE'
+            try:
+                if item[2] == 'Up' and item[3] == 'Yes' and item[4] == 'Up':
+                    if ggl_data[i][7] and (float(ggl_data[i][5]) < float(ggl_data[i][8]) or float(ggl_data[i][5]) > float(ggl_data[i][7])):
+                        port_is_ok = '是'
+                    if ggl_data[i][3] and (float(ggl_data[i][0]) < float(ggl_data[i][3]) or float(ggl_data[i][0]) > float(ggl_data[i][2])):
+                        port_is_ok = '是'
+
+                res.append(item + [ggl_data[i][0], ggl_data[i][5], ggl_data[i][2]+'|'+ ggl_data[i][3], ggl_data[i][7]+'|'+ ggl_data[i][8], ip, port_is_ok, dk])
+
+            except Exception:
+                continue
+            
+            i += 1
+        else:
+            res.append(item + ['','','','', ip, '', ''])
+
+    for item in res:
+
+        #存入数据库
+        card_port = CardPort1(
+            city = city,
+            host_name = host_name,
+            host_ip = item[16],
+            port = item[1],
+            port_dk = item[18],
+            admin_state = item[2],
+            link_state = item[3],
+            port_state = item[4],
+            cfg_mtu = item[5],
+            oper_mtu = item[6],
+            lag = item[7],
+            port_mode = item[8],
+            port_encp = item[9],
+            port_type = item[10],
+            c_qs_s_xfp_mdimdx = item[11],
+            optical_power = item[12],
+            output_power = item[13],
+            optical_warn = item[14],
+            output_warn = item[15],
+            is_abnormal = item[17]
+        )
+
+        db.session.add(card_port)
+
+    db.session.commit()
+    db.session.close()
+
+def save_port_statistic(city, host_name, config):
+    '''端口统计入库'''
+
+    today_data_count = PortStatistic.query.filter_by(host_name = host_name, date_time = date.today()).count()
+
+    if today_data_count:
+        logging.info('port_statistic host: {} today is saved'.format(host_name))
+        return
+
+    port_statistic_data = get_port_statistic(config)
+    for item in port_statistic_data:
+
+        #存入数据库
+        port_statistic = PortStatistic(
+            city = city,
+            host_name = host_name,
+            host_ip = item[0],
+            port_type = item[1],
+            port_num = item[2],
+            used_num = item[3],
+            unused_num = item[4]
+        )
+
+        db.session.add(port_statistic)
+    db.session.commit()
+    db.session.close()
+
+def save_card_detail(city, host_name, config):
+    '''card明细入库'''
+
+    today_data_count = CardDetail.query.filter_by(host_name = host_name, date_time = date.today()).count()
+
+    if today_data_count:
+        logging.info('card_detail host: {} today is saved'.format(host_name))
+        return
+
+    card_detail_data = get_card_detail(config)
+    for item in card_detail_data:
+        #存入数据库
+        card_detail = CardDetail(
+            host_name = host_name,
+            host_ip = item[1],
+            slot = item[2],
+            card_type = item[3],
+            admin_state = item[4],
+            operational_state = item[5],
+            serial_number = item[6],
+            time_of_last_boot = item[7],
+            temperature = item[8],
+            temperature_threshold = item[9],
+            is_abnormal = item[10]
+        )
+
+        db.session.add(card_detail)
+    db.session.commit()
+    db.session.close()
+
+def save_card_statistic(city, host_name, config):
+    '''card统计入库'''
+
+    today_data_count = CardStatistic.query.filter_by(host_name = host_name, date_time = date.today()).count()
+
+    if today_data_count:
+        logging.info('card_statistic host: {} today is saved'.format(host_name))
+        return
+
+    card_statistic_data = get_card_statistic(config)
+    for item in card_statistic_data:
+
+        #存入数据库
+        card_statistic = CardStatistic(
+            city = city,
+            host_name = host_name,
+            host_ip = item[1],
+            card_type = item[2],
+            card_num = item[3]
+        )
+
+        db.session.add(card_statistic)
+    db.session.commit()
+    db.session.close()
+
+def save_mda_detail(city, host_name, config):
+    '''mda明细入库'''
+
+    today_data_count = MdaDetail.query.filter_by(host_name = host_name, date_time = date.today()).count()
+
+    if today_data_count:
+        logging.info('mda_detail host: {} today is saved'.format(host_name))
+        return
+
+    mda_detail_data = get_mda_detail(config)
+    for item in mda_detail_data:
+        #存入数据库
+        mda_detail = MdaDetail(
+            city = city,
+            host_name = host_name,
+            host_ip = item[1],
+            slot = item[2],
+            mda = item[3],
+            equipped_type = item[4],
+            admin_state = item[5],
+            operational_state = item[6],
+            serial_number = item[7],
+            time_of_last_boot = item[8],
+            temperature = item[9],
+            temperature_threshold = item[10],
+            is_abnormal = item[11]
+        )
+
+        db.session.add(mda_detail)
+    db.session.commit()
+    db.session.close()
+
+def save_mda_statistic(city, host_name, config):
+    '''mda统计入库'''
+
+    today_data_count = MdaStatistic.query.filter_by(host_name = host_name, date_time = date.today()).count()
+
+    if today_data_count:
+        logging.info('mda_statistic host: {} today is saved'.format(host_name))
+        return
+
+    mda_statistic_data = get_mda_statistic(config)
+    for item in mda_statistic_data:
+
+        #存入数据库
+        mda_statistic = MdaStatistic(
+            city = city,
+            host_name = host_name,
+            host_ip = item[0],
+            card_type = item[1],
+            card_num = item[2]
+        )
+
+        db.session.add(mda_statistic)
+    db.session.commit()
+    db.session.close()
+
+def save_load_statistic(city, host_name, config):
+    '''业务负荷统计表-按端口统计入库'''
+
+    today_data_count = LoadStatistic.query.filter_by(host_name = host_name, date_time = date.today()).count()
+
+    if today_data_count:
+        logging.info('load_statistic host: {} today is saved'.format(host_name))
+        return
+
+    res = get_statistic_data(config)
+    for item in res:
+
+        #存入数据库
+        load_statistic = LoadStatistic(
+            city = city,
+            host_name = host_name,
+            host_ip = item[2],
+            port = item[1],
+            port_dk = item[3],
+            in_utilization = item[4],
+            out_utilization = item[5],
+            ies_3000_user_num = item[6],
+            ies_3000_utilization = item[7],
+            vprn_4015_user_num = item[8],
+            vprn_4015_utilization = item[9]
+        )
+
+        db.session.add(load_statistic)
+    db.session.commit()
+    db.session.close()
+
+def save_load_statistic_host(city, host_name, config):
+    '''业务负荷统计表-按设备统计入库'''
+
+    today_data_count = LoadStatisticHost.query.filter_by(host_name = host_name, date_time = date.today()).count()
+
+    if today_data_count:
+        logging.info('load_statistic_host host: {} today is saved'.format(host_name))
+        return
+
+    load_statistic_host_data = get_statistic_host_data(city)
+    for item in load_statistic_host_data:
+
+        #存入数据库
+        load_statistic = LoadStatisticHost(
+            city = city,
+            host_name = host_name,
+            host_ip = item[0],
+            ies_3000_num = item[1],
+            ies_3000_pool_utilization = item[2],
+            vprn_4015_num = item[3],
+            vprn_4015_pool_utilization = item[4]
+        )
+
+        db.session.add(load_statistic)
+    db.session.commit()
+    db.session.close()
+
+def save_address_collect(city, host_name, config):
+    '''地址采集数据入库'''
+
+    today_data_count = AddressCollect.query.filter_by(host_name = host_name, date_time = date.today()).count()
+
+    if today_data_count:
+        logging.info('address_collect host: {} today is saved'.format(host_name))
+        return
+
+    res = get_address_data(config)
+
+    for item in res:
+        #存入数据库
+        address_collect = AddressCollect(
+            host_name = host_name,
+            host_ip = item[0],
+            ip_type = item[1],
+            function_type = item[2],
+            is_use = item[3],
+            ip = item[4].strNormal(0),
+            gateway = item[5],
+            mask = item[6],
+            interface_name = item[7],
+            sap_id = item[8],
+            next_hop = item[9],
+            ies_vprn_id = item[10],
+            vpn_rd = item[11],
+            vpn_rt = item[12],
+            description = item[13]
+        )
+
+        db.session.add(address_collect)
+    db.session.commit()
+    db.session.close()
+
+
 
 @main.route('/db_test')
 def db_test():
@@ -824,6 +1106,7 @@ def db_test():
 
     db.session.add(address_collect)
     db.session.commit()
+    db.session.close()
 
 
     a = AddressCollect.query.first()

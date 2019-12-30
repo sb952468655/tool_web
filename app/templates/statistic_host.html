@@ -17,12 +17,12 @@
         <tbody>
             {% for item in load_statistic_host_data %}
                 <tr>
-                    <th>{{ item[0] }}</th>
-                    <th>{{ item[1] }}</th>
-                    <th>{{ item[2] }}</th>
-                    <th>{{ item[3] }}</th>
-                    <th>{{ item[4] }}</th>
-                    <th>{{ item[5] }}</th>
+                    <th>{{ item.host_name }}</th>
+                    <th>{{ item.host_ip }}</th>
+                    <th>{{ item.ies_3000_num }}</th>
+                    <th>{{ item.ies_3000_pool_utilization }}</th>
+                    <th>{{ item.vprn_4015_num }}</th>
+                    <th>{{ item.vprn_4015_pool_utilization }}</th>
                 </tr>
             {% endfor %}
         </tbody>

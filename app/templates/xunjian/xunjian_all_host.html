@@ -17,8 +17,8 @@
             <div class="panel-heading">{{ item[0] }}</div>
             <div class="panel-body">
                 {% for j in item[1] %}
-                    <h2>{{ j[2] }}</h2>
-                    <pre class="pre-scrollable">{{ j[1] }}</pre><br>
+                    <h2>{{ j.check_item }}</h2>
+                    <pre class="pre-scrollable">{{ j.err }}</pre><br>
                 {% endfor %}
             </div>
         </div>

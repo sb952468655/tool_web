@@ -33,7 +33,7 @@ def xunjian(config, config_old):
         msg, err, check_item = func(config)
         
         warn_item = [msg, err, check_item]
-        warn_res.append(warn_item)    
+        warn_res.append(warn_item)
 
     return warn_res
 

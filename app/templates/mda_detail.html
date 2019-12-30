@@ -25,18 +25,18 @@
         <tbody>
             {% for item in mda_detail_data %}
                 <tr>
-                    <th>{{ item[0] }}</th>
-                    <th>{{ item[1] }}</th>
-                    <th>{{ item[2] }}</th>
-                    <th>{{ item[3] }}</th>
-                    <th>{{ item[4] }}</th>
-                    <th>{{ item[5] }}</th>
-                    <th>{{ item[6] }}</th>
-                    <th>{{ item[7] }}</th>
-                    <th>{{ item[8] }}</th>
-                    <th>{{ item[9] }}</th>
-                    <th>{{ item[10] }}</th>
-                    <th>{{ item[11] }}</th>
+                    <th>{{ item.host_name }}</th>
+                    <th>{{ item.host_ip }}</th>
+                    <th>{{ item.slot }}</th>
+                    <th>{{ item.mda }}</th>
+                    <th>{{ item.equipped_type }}</th>
+                    <th>{{ item.admin_state }}</th>
+                    <th>{{ item.operational_state }}</th>
+                    <th>{{ item.serial_number }}</th>
+                    <th>{{ item.time_of_last_boot }}</th>
+                    <th>{{ item.temperature }}</th>
+                    <th>{{ item.temperature_threshold }}</th>
+                    <th>{{ item.is_abnormal }}</th>
                 </tr>
             {% endfor %}
         </tbody>

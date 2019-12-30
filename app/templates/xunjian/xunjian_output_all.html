@@ -9,9 +9,9 @@
         <div class="panel-heading">{{ host_name.split('.')[0] }}</div>
         <div class="panel-body">
             {% for item in xunjian_data %}
-                <h2>{{ item[2]}}</h2>
-                <pre class="pre-scrollable">{{ item[1]}}</pre><br>
-                <pre class="pre-scrollable">{{ item[0]}}</pre><br><br>
+                <h2>{{ item.check_item }}</h2>
+                <pre class="pre-scrollable">{{ item.err }}</pre><br>
+                <pre class="pre-scrollable">{{ item.msg }}</pre><br><br>
             {% endfor %}
         </div>
     </div>
