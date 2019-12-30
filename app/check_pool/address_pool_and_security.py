@@ -134,6 +134,8 @@ def address_range_check(config):
             err_info = '   subnet {}\n   address-range {} {}\n'.format(item[1], item[2], item[3])
             err.append('地址范围错误\n\n' + err_info + '\n   请检查 address-range ' +  item[2] + ' ' + item[3] + '\n')
 
+    if err == '':
+        err = '检查通过'
     return err
 
 def address_is_include_pool(config):
@@ -186,6 +188,8 @@ def address_is_include_pool(config):
 
                 if not is_in:
                     err.append('vprn %s address %s 不在 pool 的网段中\n   请检查 \"%s\" 配置\n' % (address[0], address_ip, address_ip))
+    if err == '':
+        err = '检查通过'
     return err
 
 
@@ -205,7 +209,8 @@ def gi_address_check(config):
                     if res_gi_address not in res_addresss:
                         err += 'gi-address %s 不在 address 中\n\n' % res_gi_address
 
-
+    if err == '':
+        err = '检查通过'
     return err
 
 
@@ -257,6 +262,10 @@ def pool_address_prefix_list(config):
         
         for item in err_ips:
             err.append('dhcp pool, 网关地址, 路由发布地址不一致\n   请检查 \"address {}\" 配置\n'.format(item))
+
+    if err == '':
+        err = '检查通过'
+
     return err
 
 
@@ -306,6 +315,9 @@ def address_pool_and_security(config):
     #安全检查
     err += check_security(config)
 
+    if err == '':
+        err = '检查通过'
+
     return err
 
 def ies_3000_inside_check(config):
@@ -350,4 +362,7 @@ def ies_3000_inside_check(config):
         for item in err_ips:
             if item not in res_ies_1000_address:
                 err.append('ies 3000 sub interface下的私网地址与 Nat 中 inside 地址不一致\n   请检查 \"address {}\"\n'.format(item))
+
+    if err == '':
+        err = '检查通过'
     return err

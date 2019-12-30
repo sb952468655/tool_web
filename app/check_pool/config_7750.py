@@ -10,6 +10,7 @@ PAT = {
     'pim': r'(?s)(pim\n.*?\n {8}exit)',
     'address': r'address (\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/\d\d)',
     'address2': r'address (\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})/\d\d',
+    'server': r'server (\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})',
     'gi-address': r'gi-address (\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})',
     'subnet': r'(?s)(subnet (\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/\d\d) create\n.*?address-range (\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}) (\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}))',
     'pool': r'(?s)( pool "(.*?)".*?create ?\n.*?\n {16}exit)',
@@ -21,17 +22,17 @@ PAT = {
 #根据参数生成正则表达式
 def generate_pat(_type, head, space_num, name=None):
     if _type == 0:
-        pat = r'(?s)(%(head)s (\d{1,10})( name ".{1,30}")? customer \d{1,6} create.*?\n%(space)sexit)'
+        pat = r'(?s)(%(head)s (\d{1,10})( name ".{1,30}")? customer \d{1,6} create.*+\n%(space)sexit)'
     elif _type == 1:
-        pat = r'(?s)(%(head)s "(.*?)" create.*?\n%(space)sexit)'
+        pat = r'(?s)(%(head)s "(.*?)" create.*+\n%(space)sexit)'
     elif _type == 2:
-        pat = r'(?s)(%(head)s\n.*?\n%(space)sexit)'
+        pat = r'(?s)(%(head)s\n.*+\n%(space)sexit)'
     elif _type == 3:
-        pat = r'(?s)(echo "%(head)s"\n.*?\n%(space)sexit)'
+        pat = r'(?s)(echo "%(head)s"\n.*+\n%(space)sexit)'
     elif _type == 4:
-        pat = r'(?s)(%(head)s (.*?) create.*?\n%(space)sexit)'
+        pat = r'(?s)(%(head)s (.*?) create.*+\n%(space)sexit)'
     elif _type == 5:
-        pat = r'(?s)(%(head)s (.*?)\n.*?\n%(space)sexit)'
+        pat = r'(?s)(%(head)s (.*?)\n.*+\n%(space)sexit)'
 
     pat = pat % {'head': head, 'space': ' '*space_num}
     if name != None and name != '':
