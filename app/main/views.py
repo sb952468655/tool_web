@@ -26,7 +26,7 @@ def index():
     return redirect(url_for('main.city_list'))
 
 
-@main.route('/report_port/<host_name>')
+@main.route('/report_port/<host_name>', methods=['GET', 'POST'])
 def report_port(host_name):
     '''统计报表-端口明细'''
 
@@ -36,11 +36,33 @@ def report_port(host_name):
     from .report import get_report_data, get_device_name, get_port_ggl, get_ip
 
     page = request.args.get('page', 1, type=int)
+    if request.method == 'POST':
+        session['search_port_detail_port'] = ''
+        session['search_port_detail_date'] = ''
+        search_port_detail_port = request.form.get('port')
+        search_port_detail_date = request.form.get('date')
+
+        if search_port_detail_port:
+            session['search_port_detail_port'] = search_port_detail_port
+        if search_port_detail_date:
+            session['search_port_detail_date'] = datetime.strptime(search_port_detail_date,'%Y-%m-%d').date()
+
+
     count = CardPort1.query.filter_by(host_name = host_name, date_time = date.today()).count()
     if count == 0:
         abort(404)
 
-    pageination = CardPort1.query.filter_by(host_name = host_name, date_time = date.today()).paginate(
+    #搜索
+    cardport1 = CardPort1.query
+    if session.get('search_port_detail_port'):
+        cardport1 = cardport1.filter(CardPort1.port == session.get('search_port_detail_port'))
+    if session.get('search_port_detail_date'):
+        cardport1 = cardport1.filter(CardPort1.date_time == session.get('search_port_detail_date'))
+    else:
+        cardport1 = cardport1.filter(CardPort1.date_time == date.today())
+
+    cardport1 = cardport1.filter(CardPort1.host_name == host_name)
+    pageination = cardport1.paginate(
         page, per_page = current_app.config['FLASKY_POSTS_PER_PAGE'],
         error_out = False
     )
@@ -750,6 +772,9 @@ def save_xunjian(city, host_name, config_new, config_old):
         return
 
     xunjian_data = mobile.xunjian(config_new, config_old)
+    if xunjian_data:
+        logging.info('host: {} {} begin save'.format(host_name, 'xunjian_data'))
+
     for msg, err, check_item in xunjian_data:
         xunjian = XunJian(
             city = city,
@@ -809,6 +834,10 @@ def save_port_detail(city, host_name, config):
         else:
             res.append(item + ['','','','', ip, '', ''])
 
+
+    if res:
+        logging.info('host: {} {} begin save'.format(host_name, 'port_detail'))
+
     for item in res:
 
         #存入数据库
@@ -850,6 +879,9 @@ def save_port_statistic(city, host_name, config):
         return
 
     port_statistic_data = get_port_statistic(config)
+    if port_statistic_data:
+        logging.info('host: {} {} begin save'.format(host_name, 'port_statistic_data'))
+
     for item in port_statistic_data:
 
         #存入数据库
@@ -877,6 +909,9 @@ def save_card_detail(city, host_name, config):
         return
 
     card_detail_data = get_card_detail(config)
+    if card_detail_data:
+        logging.info('host: {} {} begin save'.format(host_name, 'card_detail_data'))
+
     for item in card_detail_data:
         #存入数据库
         card_detail = CardDetail(
@@ -907,6 +942,9 @@ def save_card_statistic(city, host_name, config):
         return
 
     card_statistic_data = get_card_statistic(config)
+    if card_statistic_data:
+        logging.info('host: {} {} begin save'.format(host_name, 'card_statistic_data'))
+
     for item in card_statistic_data:
 
         #存入数据库
@@ -932,6 +970,9 @@ def save_mda_detail(city, host_name, config):
         return
 
     mda_detail_data = get_mda_detail(config)
+    if mda_detail_data:
+        logging.info('host: {} {} begin save'.format(host_name, 'mda_detail_data'))
+
     for item in mda_detail_data:
         #存入数据库
         mda_detail = MdaDetail(
@@ -964,6 +1005,9 @@ def save_mda_statistic(city, host_name, config):
         return
 
     mda_statistic_data = get_mda_statistic(config)
+    if mda_statistic_data:
+        logging.info('host: {} {} begin save'.format(host_name, 'mda_statistic_data'))
+
     for item in mda_statistic_data:
 
         #存入数据库
@@ -989,6 +1033,9 @@ def save_load_statistic(city, host_name, config):
         return
 
     res = get_statistic_data(config)
+    if res:
+        logging.info('host: {} {} begin save'.format(host_name, 'load_statistic_data'))
+
     for item in res:
 
         #存入数据库
@@ -1020,6 +1067,9 @@ def save_load_statistic_host(city, host_name, config):
         return
 
     load_statistic_host_data = get_statistic_host_data(city)
+    if load_statistic_host_data:
+        logging.info('host: {} {} begin save'.format(host_name, 'load_statistic_host_data'))
+
     for item in load_statistic_host_data:
 
         #存入数据库
@@ -1047,6 +1097,8 @@ def save_address_collect(city, host_name, config):
         return
 
     res = get_address_data(config)
+    if res:
+        logging.info('host: {} {} begin save'.format(host_name, 'address_collect_data'))
 
     for item in res:
         #存入数据库
