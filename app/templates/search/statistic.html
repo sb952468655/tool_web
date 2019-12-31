@@ -1,0 +1,63 @@
+{% extends "search/statistic_base.html" %}
+{% import "_macros.html" as macros %}
+
+{% block data_content %}
+    <form class="form-inline" method="post" action="{{ url_for('main.load_statistic_search', load_name = 'load_statistic') }}">
+        <div class="form-group">
+            <label>设备名称</label>
+            <input type="text" class="form-control" id="load_statistic_host_name"  name="load_statistic_host_name">
+        </div>
+        <div class="form-group">
+          <label>设备ip</label>
+          <input type="text" class="form-control" id="load_statistic_host_ip"  name="load_statistic_host_ip">
+        </div>
+        <div class="form-group">
+            <label>日期</label>
+            <input type="text" class="form-control" id="load_statistic_date"  name="load_statistic_date">
+        </div>
+        <button type="submit" class="btn btn-default">搜索</button>
+    </form><br>
+
+    <table class="table table-striped table-condensed" style="min-width:2000px;" >
+        <thead>
+            <tr>
+                <th>日期</th>
+                <th>设备名</th>
+                <th>设备IP</th>
+                <th>port</th>
+                <th>端口带宽</th>
+                <th>带宽in利用率</th>
+                <th>带宽out利用率</th>
+                <th>ies 3000用户数量</th>
+                <th>ies 3000地址池利用率</th>
+                <th>vprn 4015用户数量</th>
+                <th>vprn 4015地址池利用率</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in load_statistic_data %}
+                <tr>
+                    <th>{{ item.date_time.strftime('%Y-%m-%d') }}</th>
+                    <th>{{ item.host_name.split('.')[0] }}</th>
+                    <th>{{ item.host_ip }}</th>
+                    <th>{{ item.port }}</th>
+                    <th>{{ item.port_dk }}</th>
+                    <th>{{ item.in_utilization }}</th>
+                    <th>{{ item.out_utilization }}</th>
+                    <th>{{ item.ies_3000_user_num }}</th>
+                    <th>{{ item.ies_3000_utilization }}</th>
+                    <th>{{ item.vprn_4015_user_num }}</th>
+                    <th>{{ item.vprn_4015_utilization }}</th>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
+
+{% block pageination %}
+    {% if pageination %}
+    <div class="pagination">
+        {{ macros.pagination_widget(pageination, 'main.load_statistic_search', load_name='load_statistic') }}
+    </div>
+    {% endif %}
+{% endblock %}

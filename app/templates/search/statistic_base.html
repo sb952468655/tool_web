@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %} 业务负载统计搜索 {% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+    <h1>{% block page_header %} 业务负载统计搜索 {% endblock %}</h1>
+</div>
+
+<div class="row">
+    <div class="col-md-2">
+        <ul class="nav nav-pills nav-stacked">
+            {% if load_name == 'load_statistic' %}
+                <li role="presentation" class="active"><a href="{{ url_for('main.load_statistic_search', load_name = 'load_statistic') }}">按端口统计用户数量</a></li>
+            {% else %}
+            <li role="presentation" ><a href="{{ url_for('main.load_statistic_search', load_name = 'load_statistic') }}">按端口统计用户数量</a></li>
+            {% endif %}
+            {% if load_name == 'load_statistic_host' %}
+                <li role="presentation" class="active"><a href="{{ url_for('main.load_statistic_search', load_name = 'load_statistic_host') }}">按设备统计用户数量</a></li>
+            {% else %}
+                <li role="presentation" ><a href="{{ url_for('main.load_statistic_search', load_name = 'load_statistic_host') }}">按设备统计用户数量</a></li>
+            {% endif %}
+        </ul>
+    </div>
+    <div class="col-md-10">
+        <div style="overflow:scroll">
+            {% block data_content %}
+            {% endblock %}
+        </div>
+        {% block pageination %}
+        {% endblock %}
+    </div>
+
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<style>
+    td { word-wrap:break-word; }
+</style>
+{% endblock %}

@@ -719,6 +719,424 @@ def load_statistic_host(host_name):
         action = 'load_statistic_host', 
         host_name=host_name)
 
+@main.route('/report_port_search/<report_name>', methods=['GET', 'POST'])
+def report_port_search(report_name):
+    '''报表搜索'''
+
+    page = request.args.get('page', 1, type=int)
+    if request.method == 'POST':
+        session['search_port_detail_port'] = ''
+        session['search_port_detail_date'] = ''
+        session['search_port_detail_host_name'] = ''
+
+        session['search_port_statistic_host_name'] = ''
+        session['search_port_statistic_host_ip'] = ''
+        session['search_port_statistic_date'] = ''
+
+        session['search_card_detail_host_name'] = ''
+        session['search_card_detail_host_ip'] = ''
+        session['search_card_detail_date'] = ''
+
+        session['search_card_statistic_host_name'] = ''
+        session['search_card_statistic_host_ip'] = ''
+        session['search_card_statistic_date'] = ''
+
+        session['search_mda_detail_host_name'] = ''
+        session['search_mda_detail_host_ip'] = ''
+        session['search_mda_detail_date'] = ''
+
+        session['search_mda_statistic_host_name'] = ''
+        session['search_mda_statistic_host_ip'] = ''
+        session['search_mda_statistic_date'] = ''
+
+        session['search_address_collect_host_name'] = ''
+        session['search_address_collect_host_ip'] = ''
+        session['search_address_collect_date'] = ''
+
+
+        search_port_detail_port = request.form.get('port')
+        search_port_detail_date = request.form.get('date')
+        search_port_detail_host_name = request.form.get('host_name')
+
+        search_port_statistic_host_ip = request.form.get('port_statistic_host_ip')
+        search_port_statistic_date = request.form.get('port_statistic_date')
+        search_port_statistic_host_name = request.form.get('port_statistic_host_name')
+
+        search_card_detail_host_ip = request.form.get('card_detail_host_ip')
+        search_card_detail_date = request.form.get('card_detail_date')
+        search_card_detail_host_name = request.form.get('card_detail_host_name')
+
+        search_card_statistic_host_ip = request.form.get('card_statistic_host_ip')
+        search_card_statistic_date = request.form.get('card_statistic_date')
+        search_card_statistic_host_name = request.form.get('card_statistic_host_name')
+
+        search_mda_detail_host_ip = request.form.get('mda_detail_host_ip')
+        search_mda_detail_date = request.form.get('mda_detail_date')
+        search_mda_detail_host_name = request.form.get('mda_detail_host_name')
+
+        search_mda_statistic_host_ip = request.form.get('mda_statistic_host_ip')
+        search_mda_statistic_date = request.form.get('mda_statistic_date')
+        search_mda_statistic_host_name = request.form.get('mda_statistic_host_name')
+
+        search_address_collect_host_ip = request.form.get('address_collect_host_ip')
+        search_address_collect_date = request.form.get('address_collect_date')
+        search_address_collect_host_name = request.form.get('address_collect_host_name')
+
+        if search_port_detail_port:
+            session['search_port_detail_port'] = search_port_detail_port
+        if search_port_detail_host_name:
+            session['search_port_detail_host_name'] = search_port_detail_host_name
+        if search_port_detail_date:
+            session['search_port_detail_date'] = datetime.strptime(search_port_detail_date,'%Y-%m-%d').date()
+
+        if search_port_statistic_host_ip:
+            session['search_port_statistic_host_ip'] = search_port_statistic_host_ip
+        if search_port_statistic_date:
+            session['search_port_statistic_date'] = datetime.strptime(search_port_statistic_date,'%Y-%m-%d').date()
+        if search_port_statistic_host_name:
+            session['search_port_statistic_host_name'] = search_port_statistic_host_name
+
+        if search_card_detail_host_ip:
+            session['search_card_detail_host_ip'] = search_card_detail_host_ip
+        if search_card_detail_date:
+            session['search_card_detail_date'] = datetime.strptime(search_card_detail_date,'%Y-%m-%d').date()
+        if search_card_detail_host_name:
+            session['search_card_detail_host_name'] = search_card_detail_host_name
+
+        if search_card_statistic_host_ip:
+            session['search_card_statistic_host_ip'] = search_card_statistic_host_ip
+        if search_card_statistic_date:
+            session['search_card_statistic_date'] = datetime.strptime(search_card_statistic_date,'%Y-%m-%d').date()
+        if search_card_statistic_host_name:
+            session['search_card_statistic_host_name'] = search_card_statistic_host_name
+
+        if search_mda_detail_host_ip:
+            session['search_mda_detail_host_ip'] = search_mda_detail_host_ip
+        if search_mda_detail_date:
+            session['search_mda_detail_date'] = datetime.strptime(search_mda_detail_date,'%Y-%m-%d').date()
+        if search_mda_detail_host_name:
+            session['search_mda_detail_host_name'] = search_mda_detail_host_name
+
+        if search_mda_statistic_host_ip:
+            session['search_mda_statistic_host_ip'] = search_mda_statistic_host_ip
+        if search_mda_statistic_date:
+            session['search_mda_statistic_date'] = datetime.strptime(search_mda_statistic_date,'%Y-%m-%d').date()
+        if search_mda_statistic_host_name:
+            session['search_mda_statistic_host_name'] = search_mda_statistic_host_name
+
+        if search_address_collect_host_ip:
+            session['search_address_collect_host_ip'] = search_address_collect_host_ip
+        if search_address_collect_date:
+            session['search_address_collect_date'] = datetime.strptime(search_address_collect_date,'%Y-%m-%d').date()
+        if search_address_collect_host_name:
+            session['search_address_collect_host_name'] = search_address_collect_host_name
+
+    #端口明细
+    if report_name == 'port_detail':
+        count = CardPort1.query.filter_by(date_time = date.today()).count()
+        if count == 0:
+            abort(404)
+
+        #搜索
+        cardport1 = CardPort1.query
+        if session.get('search_port_detail_port'):
+            cardport1 = cardport1.filter(CardPort1.port == session.get('search_port_detail_port'))
+        if session.get('search_port_detail_host_name'):
+            cardport1 = cardport1.filter(CardPort1.host_name == session.get('search_port_detail_host_name'))
+        if session.get('search_port_detail_date'):
+            cardport1 = cardport1.filter(CardPort1.date_time == session.get('search_port_detail_date'))
+        else:
+            cardport1 = cardport1.filter(CardPort1.date_time == date.today())
+
+        pageination = cardport1.paginate(
+            page, per_page = current_app.config['FLASKY_POSTS_PER_PAGE'],
+            error_out = False
+        )
+        card_data = pageination.items
+
+        return render_template('search/report.html', 
+            card_data = card_data, 
+            report_name = 'port_detail', 
+            pageination = pageination)
+
+    #端口统计
+    elif report_name == 'port_statistic':
+        count = PortStatistic.query.filter_by(date_time = date.today()).count()
+        if count == 0:
+            abort(404)
+
+         #搜索
+        port_statistic = PortStatistic.query
+        if session.get('search_port_statistic_host_ip'):
+            port_statistic = port_statistic.filter(PortStatistic.host_ip == session.get('search_port_statistic_host_ip'))
+        if session.get('search_port_statistic_host_name'):
+            port_statistic = port_statistic.filter(PortStatistic.host_name == session.get('search_port_statistic_host_name'))
+        if session.get('search_port_statistic_date'):
+            port_statistic = port_statistic.filter(PortStatistic.date_time == session.get('search_port_statistic_date'))
+        else:
+            port_statistic = port_statistic.filter(PortStatistic.date_time == date.today())
+
+
+        pageination = port_statistic.paginate(
+            page, per_page = current_app.config['FLASKY_POSTS_PER_PAGE'],
+            error_out = False
+        )
+        port_statistic_data = pageination.items
+
+        return render_template('search/port_statistic.html', 
+            port_statistic_data = port_statistic_data,
+            report_name = 'port_statistic', 
+            pageination = pageination)
+
+    #card明细
+    elif report_name == 'card_detail':
+        count = CardDetail.query.filter_by(date_time = date.today()).count()
+        if count == 0:
+            abort(404)
+
+         #搜索
+        card_detail = CardDetail.query
+        if session.get('search_card_detail_host_ip'):
+            card_detail = card_detail.filter(CardDetail.host_ip == session.get('search_card_detail_host_ip'))
+        if session.get('search_card_detail_host_name'):
+            card_detail = card_detail.filter(CardDetail.host_name == session.get('search_card_detail_host_name'))
+        if session.get('search_card_detail_date'):
+            card_detail = card_detail.filter(CardDetail.date_time == session.get('search_card_detail_date'))
+        else:
+            card_detail = card_detail.filter(CardDetail.date_time == date.today())
+
+
+        pageination = card_detail.paginate(
+            page, per_page = current_app.config['FLASKY_POSTS_PER_PAGE'],
+            error_out = False
+        )
+        card_detail_data = pageination.items
+
+        return render_template('search/card_detail.html', 
+            card_detail_data = card_detail_data,
+            report_name = 'card_detail', 
+            pageination = pageination)
+
+    #card统计
+    elif report_name == 'card_statistic':
+        count = CardStatistic.query.filter_by(date_time = date.today()).count()
+        if count == 0:
+            abort(404)
+
+        #搜索
+        card_statistic = CardStatistic.query
+        if session.get('search_card_statistic_host_ip'):
+            card_statistic = card_statistic.filter(CardStatistic.host_ip == session.get('search_card_statistic_host_ip'))
+        if session.get('search_card_statistic_host_name'):
+            card_statistic = card_statistic.filter(CardStatistic.host_name == session.get('search_card_statistic_host_name'))
+        if session.get('search_card_statistic_date'):
+            card_statistic = card_statistic.filter(CardStatistic.date_time == session.get('search_card_statistic_date'))
+        else:
+            card_statistic = card_statistic.filter(CardStatistic.date_time == date.today())
+
+
+        pageination = card_statistic.paginate(
+            page, per_page = current_app.config['FLASKY_POSTS_PER_PAGE'],
+            error_out = False
+        )
+        card_statistic_data = pageination.items
+
+        return render_template('search/card_statistic.html', 
+            card_statistic_data = card_statistic_data,
+            report_name = 'card_statistic', 
+            pageination = pageination)
+
+    #mda明细
+    elif report_name == 'mda_detail':
+
+        count = MdaDetail.query.filter_by(date_time = date.today()).count()
+        if count == 0:
+            abort(404)
+
+         #搜索
+        mda_detail = MdaDetail.query
+        if session.get('search_mda_detail_host_ip'):
+            mda_detail = mda_detail.filter(MdaDetail.host_ip == session.get('search_mda_detail_host_ip'))
+        if session.get('search_mda_detail_host_name'):
+            mda_detail = mda_detail.filter(MdaDetail.host_name == session.get('search_mda_detail_host_name'))
+        if session.get('search_mda_detail_date'):
+            mda_detail = mda_detail.filter(MdaDetail.date_time == session.get('search_mda_detail_date'))
+        else:
+            mda_detail = mda_detail.filter(MdaDetail.date_time == date.today())
+
+
+        pageination = mda_detail.paginate(
+            page, per_page = current_app.config['FLASKY_POSTS_PER_PAGE'],
+            error_out = False
+        )
+        mda_detail_data = pageination.items
+
+        return render_template('search/mda_detail.html', 
+            mda_detail_data = mda_detail_data,
+            report_name = 'mda_detail', 
+            pageination = pageination)
+
+    #mda统计
+    elif report_name == 'mda_statistic':
+        
+        count = MdaStatistic.query.filter_by(date_time = date.today()).count()
+        if count == 0:
+            abort(404)
+
+        #搜索
+        mda_statistic = MdaStatistic.query
+        if session.get('search_mda_statistic_host_ip'):
+            mda_statistic = mda_statistic.filter(MdaStatistic.host_ip == session.get('search_mda_statistic_host_ip'))
+        if session.get('search_mda_statistic_host_name'):
+            mda_statistic = mda_statistic.filter(MdaStatistic.host_name == session.get('search_mda_statistic_host_name'))
+        if session.get('search_mda_statistic_date'):
+            mda_statistic = mda_statistic.filter(MdaStatistic.date_time == session.get('search_mda_statistic_date'))
+        else:
+            mda_statistic = mda_statistic.filter(MdaStatistic.date_time == date.today())
+
+
+        pageination = mda_statistic.paginate(
+            page, per_page = current_app.config['FLASKY_POSTS_PER_PAGE'],
+            error_out = False
+        )
+        mda_statistic_data = pageination.items
+
+        return render_template('search/mda_statistic.html', 
+            mda_statistic_data = mda_statistic_data,
+            report_name = 'mda_statistic', 
+            pageination = pageination)
+
+    #地址采集
+    elif report_name == 'address_collect':
+        
+        count = AddressCollect.query.filter_by(date_time = date.today()).count()
+        if count == 0:
+            abort(404)
+
+        #搜索
+        address_collect = AddressCollect.query
+        if session.get('search_address_collect_host_ip'):
+            address_collect = address_collect.filter(AddressCollect.host_ip == session.get('search_address_collect_host_ip'))
+        if session.get('search_address_collect_host_name'):
+            address_collect = address_collect.filter(AddressCollect.host_name == session.get('search_address_collect_host_name'))
+        if session.get('search_address_collect_date'):
+            address_collect = address_collect.filter(AddressCollect.date_time == session.get('search_address_collect_date'))
+        else:
+            address_collect = address_collect.filter(AddressCollect.date_time == date.today())
+
+
+        pageination = address_collect.paginate(
+            page, per_page = current_app.config['FLASKY_POSTS_PER_PAGE'],
+            error_out = False
+        )
+        address_collect_data = pageination.items
+
+        return render_template('search/address_collect.html', 
+            address_data = address_collect_data,
+            report_name = 'address_collect', 
+            pageination = pageination)
+
+@main.route('/load_statistic_search/<load_name>', methods=['GET', 'POST'])
+def load_statistic_search(load_name):
+    '''业务负载搜索'''
+
+    page = request.args.get('page', 1, type=int)
+    if request.method == 'POST':
+        session['search_load_statistic_host_ip'] = ''
+        session['search_load_statistic_date'] = ''
+        session['search_load_statistic_host_name'] = ''
+
+        session['search_load_statistic_host_host_name'] = ''
+        session['search_load_statistic_host_host_ip'] = ''
+        session['search_load_statistic_host_date'] = ''
+
+        search_load_statistic_host_ip = request.form.get('load_statistic_host_ip')
+        search_load_statistic_date = request.form.get('load_statistic_date')
+        search_load_statistic_host_name = request.form.get('load_statistic_host_name')
+
+        search_load_statistic_host_host_ip = request.form.get('load_statistic_host_host_ip')
+        search_load_statistic_host_date = request.form.get('load_statistic_host_date')
+        search_load_statistic_host_host_name = request.form.get('load_statistic_host_host_name')
+
+        if search_load_statistic_host_ip:
+            session['search_load_statistic_host_ip'] = search_load_statistic_host_ip
+        if search_load_statistic_host_name:
+            session['search_load_statistic_host_name'] = search_load_statistic_host_name
+        if search_load_statistic_date:
+            session['search_load_statistic_date'] = datetime.strptime(search_load_statistic_date,'%Y-%m-%d').date()
+
+        if search_load_statistic_host_host_ip:
+            session['search_load_statistic_host_host_ip'] = search_load_statistic_host_host_ip
+        if search_load_statistic_host_date:
+            session['search_load_statistic_host_date'] = datetime.strptime(search_load_statistic_host_date,'%Y-%m-%d').date()
+        if search_load_statistic_host_host_name:
+            session['search_load_statistic_host_host_name'] = search_load_statistic_host_host_name
+
+
+    if load_name == 'load_statistic':
+    
+        count = LoadStatistic.query.filter_by(date_time = date.today()).count()
+        if count == 0:
+            abort(404)
+
+        #搜索
+        load_statistic = LoadStatistic.query
+        if session.get('search_load_statistic_host_ip'):
+            load_statistic = load_statistic.filter(LoadStatistic.host_ip == session.get('search_load_statistic_host_ip'))
+        if session.get('search_load_statistic_host_name'):
+            load_statistic = load_statistic.filter(LoadStatistic.host_name == session.get('search_load_statistic_host_name'))
+        if session.get('search_load_statistic_date'):
+            load_statistic = load_statistic.filter(LoadStatistic.date_time == session.get('search_load_statistic_date'))
+        else:
+            load_statistic = load_statistic.filter(LoadStatistic.date_time == date.today())
+
+
+        pageination = load_statistic.paginate(
+            page, per_page = current_app.config['FLASKY_POSTS_PER_PAGE'],
+            error_out = False
+        )
+        load_statistic_data = pageination.items
+
+        return render_template('search/statistic.html', 
+            load_statistic_data = load_statistic_data,
+            report_name = 'load_statistic', 
+            pageination = pageination)
+    else:
+        
+        count = LoadStatisticHost.query.filter_by(date_time = date.today()).count()
+        if count == 0:
+            abort(404)
+
+        #搜索
+        load_statistic_host = LoadStatisticHost.query
+        if session.get('search_load_statistic_host_host_ip'):
+            load_statistic_host = load_statistic_host.filter(LoadStatisticHost.host_ip == session.get('search_load_statistic_host_host_ip'))
+        if session.get('search_load_statistic_host_host_name'):
+            a = session.get('search_load_statistic_host_host_name')
+            load_statistic_host = load_statistic_host.filter(LoadStatisticHost.host_name == session.get('search_load_statistic_host_host_name'))
+        if session.get('search_load_statistic_host_date'):
+            load_statistic_host = load_statistic_host.filter(LoadStatisticHost.date_time == session.get('search_load_statistic_host_date'))
+        else:
+            load_statistic_host = load_statistic_host.filter(LoadStatisticHost.date_time == date.today())
+
+
+        pageination = load_statistic_host.paginate(
+            page, per_page = current_app.config['FLASKY_POSTS_PER_PAGE'],
+            error_out = False
+        )
+        load_statistic_host_data = pageination.items
+
+        return render_template('search/statistic_host.html', 
+            load_statistic_host_data = load_statistic_host_data,
+            report_name = 'load_statistic_host', 
+            pageination = pageination)
+
+@main.route('/xunjian_search')
+def xunjian_search():
+    '''巡检搜索'''
+
+    return '巡检搜索'
+
 @main.route('/save_db')
 def save_db():
     '''把所有数据入库'''
@@ -1014,9 +1432,9 @@ def save_mda_statistic(city, host_name, config):
         mda_statistic = MdaStatistic(
             city = city,
             host_name = host_name,
-            host_ip = item[0],
-            card_type = item[1],
-            card_num = item[2]
+            host_ip = item[1],
+            card_type = item[2],
+            card_num = item[3]
         )
 
         db.session.add(mda_statistic)
@@ -1076,11 +1494,11 @@ def save_load_statistic_host(city, host_name, config):
         load_statistic = LoadStatisticHost(
             city = city,
             host_name = host_name,
-            host_ip = item[0],
-            ies_3000_num = item[1],
-            ies_3000_pool_utilization = item[2],
-            vprn_4015_num = item[3],
-            vprn_4015_pool_utilization = item[4]
+            host_ip = item[1],
+            ies_3000_num = item[2],
+            ies_3000_pool_utilization = item[3],
+            vprn_4015_num = item[4],
+            vprn_4015_pool_utilization = item[5]
         )
 
         db.session.add(load_statistic)

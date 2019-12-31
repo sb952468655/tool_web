@@ -1,0 +1,101 @@
+{% extends "search/report_base.html" %}
+{% import "_macros.html" as macros %}
+
+{% block report_content %}
+    <form class="form-inline" method="post" action="{{ url_for('main.report_port_search', report_name = 'port_detail') }}">
+        <div class="form-group">
+            <label>设备名称</label>
+            <input type="text" class="form-control" id="host_name"  name="host_name">
+        </div>
+        <div class="form-group">
+          <label>port</label>
+          <input type="text" class="form-control" id="port"  name="port">
+        </div>
+        <div class="form-group">
+            <label>日期</label>
+            <input type="text" class="form-control" id="date"  name="date">
+        </div>
+        <button type="submit" class="btn btn-default">搜索</button>
+    </form><br>
+    <table class="table table-condensed" style="min-width:2000px;" >
+        <thead>
+            <tr>
+                <th>日期</th>
+                <th>设备名</th>
+                <th>设备IP</th>
+                <th>port</th>
+                <th>端口带宽</th>
+                <th>Admin State</th>
+                <th>Link State</th>
+                <th>Port State</th>
+                <th>CfgMTU</th>
+                <th>OperMTU</th>
+                <th>LAG</th>
+                <th>PortMode</th>
+                <th>PortEncp</th>
+                <th>PortType</th>
+                <th>C/QS/S/XFP/MDIMDX</th>
+                <th>收光功率</th>
+                <th>发光功率</th>
+                <th>收光门限</th>
+                <th>发光门限</th>
+                <th>是否存在异常</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in card_data %}
+                {% if item.is_abnormal == '否' or item.is_abnormal == '' %}
+                <tr>
+                {% else %}
+                <tr bgcolor="#FFFF00">
+                {% endif %}
+                    <th>{{ item.date_time.strftime('%Y-%m-%d') }}</th>
+                    <th>{{ item.host_name.split('.')[0] }}</th>
+                    <th>{{ item.host_ip }}</th>
+                    <th>{{ item.port }}</th>
+                    <th>{{ item.port_dk }}</th>
+                    <th>{{ item.admin_state }}</th>
+                    {% if item.admin_state == 'Up' and item.link_state == 'No' %}
+                    <th bgcolor="#FF0000">{{ item.link_state }}</th>
+                    {% else %}
+                    <th>{{ item.link_state }}</th>
+                    {% endif %}
+                    {% if item.admin_state == 'Up' and item.port_state != 'Up' %}
+                    <th bgcolor="#FF0000">{{ item.port_state }}</th>
+                    {% else %}
+                    <th>{{ item.port_state }}</th>
+                    {% endif %}
+                    <th>{{ item.cfg_mtu }}</th>
+                    <th>{{ item.oper_mtu }}</th>
+                    <th>{{ item.lag }}</th>
+                    <th>{{ item.port_mode }}</th>
+                    <th>{{ item.port_encp }}</th>
+                    <th>{{ item.port_type }}</th>
+                    <th>{{ item.c_qs_s_xfp_mdimdx }}</th>
+                    {% if item.admin_state != 'Up' or item.link_state != 'Yes' or item.port_state != 'Up' or item.output_power == '' or (item.output_power|float >= item.output_warn.split('|')[1]|float and item.output_power|float <= item.output_warn.split('|')[0]|float) %}
+                        <th>{{ item.output_power }}</th>
+                    {% else %}
+                        <th bgcolor="#FF0000">{{ item.output_power }}</th>
+                    {% endif %}
+                    {% if item.admin_state != 'Up' or item.link_state != 'Yes' or item.port_state != 'Up' or item.optical_power == '' or (item.optical_power|float >= item.optical_warn.split('|')[1]|float and item.optical_power|float <= item.optical_warn.split('|')[0]|float) %}
+                        <th>{{ item.optical_power }}</th>
+                    {% else %}
+                        <th bgcolor="#FF0000">{{ item.optical_power }}</th>
+                    {% endif %}
+                    <th>{{ item.output_warn }}</th>
+                    <th>{{ item.optical_warn }}</th>
+                    <th>{{ item.is_abnormal }}</th>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
+
+{% block pageination %}
+    {% if pageination %}
+    <div class="pagination">
+        {{ macros.pagination_widget(pageination, 'main.report_port_search', report_name = 'port_detail') }}
+    </div>
+    {% endif %}
+{% endblock %}
+

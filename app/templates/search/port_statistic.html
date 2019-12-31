@@ -1,0 +1,58 @@
+{% extends "search/report_base.html" %}
+{% import "_macros.html" as macros %}
+
+{% block title %} 端口统计 {% endblock %}
+{% block page_header %} 端口统计 {% endblock %}
+
+{% block report_content %}
+    <form class="form-inline" method="post" action="{{ url_for('main.report_port_search', report_name = 'port_statistic') }}">
+        <div class="form-group">
+            <label>设备名称</label>
+            <input type="text" class="form-control" id="port_statistic_host_name"  name="port_statistic_host_name">
+        </div>
+        <div class="form-group">
+          <label>设备ip</label>
+          <input type="text" class="form-control" id="port_statistic_host_ip"  name="port_statistic_host_ip">
+        </div>
+        <div class="form-group">
+            <label>日期</label>
+            <input type="text" class="form-control" id="port_statistic_date"  name="port_statistic_date">
+        </div>
+        <button type="submit" class="btn btn-default">搜索</button>
+    </form><br>
+    <table class="table table-striped table-condensed">
+        <thead>
+            <tr>
+                <th>日期</th>
+                <th>设备名</th>
+                <th>设备IP</th>
+                <th>端口类型</th>
+                <th>数量</th>
+                <th>已使用</th>
+                <th>剩余</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in port_statistic_data %}
+                <tr>
+                    <th>{{ item.date_time.strftime('%Y-%m-%d') }}</th>
+                    <th>{{ item.host_name }}</th>
+                    <th>{{ item.host_ip }}</th>
+                    <th>{{ item.port_type }}</th>
+                    <th>{{ item.port_num }}</th>
+                    <th>{{ item.used_num }}</th>
+                    <th>{{ item.unused_num }}</th>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
+
+
+{% block pageination %}
+    {% if pageination %}
+    <div class="pagination">
+        {{ macros.pagination_widget(pageination, 'main.report_port_search', report_name = 'port_statistic') }}
+    </div>
+    {% endif %}
+{% endblock %}

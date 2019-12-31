@@ -9,9 +9,17 @@
         <div class="page-header">
             <h1>设备</h1>
         </div>
-        {% if action == 'xunjian'%}
+        {% if action == 'xunjian' %}
         <a class="btn btn-default btn-sm" href="{{ url_for('main.xj_report_all_host') }}">设备巡检报告</a>
+        <a class="btn btn-default btn-sm" href="{{ url_for('main.xunjian_search') }}">搜索</a>
         {% endif %}
+        {% if action == 'report_port' %}
+        <a class="btn btn-default btn-sm" href="{{ url_for('main.report_port_search', report_name = 'port_detail') }}">搜索</a>
+        {% endif %}
+        {% if action == 'load_statistic' %}
+        <a class="btn btn-default btn-sm" href="{{ url_for('main.load_statistic_search', load_name = 'load_statistic') }}">搜索</a>
+        {% endif %}
+
         <table class="table table-striped table-condensed" >
             <thead>
                 <tr>

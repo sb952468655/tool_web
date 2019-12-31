@@ -1,0 +1,68 @@
+{% extends "search/report_base.html" %}
+{% import "_macros.html" as macros %}
+
+{% block title %} card明细 {% endblock %}
+{% block page_header %} card明细 {% endblock %}
+
+{% block report_content %}
+    <form class="form-inline" method="post" action="{{ url_for('main.report_port_search', report_name = 'card_detail') }}">
+        <div class="form-group">
+            <label>设备名称</label>
+            <input type="text" class="form-control" id="card_detail_host_name"  name="card_detail_host_name">
+        </div>
+        <div class="form-group">
+          <label>设备ip</label>
+          <input type="text" class="form-control" id="card_detail_host_ip"  name="card_detail_host_ip">
+        </div>
+        <div class="form-group">
+            <label>日期</label>
+            <input type="text" class="form-control" id="card_detail_date"  name="card_detail_date">
+        </div>
+        <button type="submit" class="btn btn-default">搜索</button>
+    </form><br>
+    <table class="table table-striped table-condensed" style="min-width:2000px">
+        <thead>
+            <tr>
+                <th>日期</th>
+                <th>设备名</th>
+                <th>设备IP</th>
+                <th>Slot</th>
+                <th>Equipped Type</th>
+                <th>Admin State</th>
+                <th>Operational State</th>
+                <th>Serial number</th>
+                <th>Time of last boot</th>
+                <th>Temperature</th>
+                <th>Temperature threshold</th>
+                <th>是否存在异常</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in card_detail_data %}
+                <tr>
+                    <th>{{ item.date_time.strftime('%Y-%m-%d') }}</th>
+                    <th>{{ item.host_name }}</th>
+                    <th>{{ item.host_ip }}</th>
+                    <th>{{ item.slot }}</th>
+                    <th>{{ item.card_type}}</th>
+                    <th>{{ item.admin_state }}</th>
+                    <th>{{ item.operational_state }}</th>
+                    <th>{{ item.serial_number }}</th>
+                    <th>{{ item.time_of_last_boot }}</th>
+                    <th>{{ item.temperature }}</th>
+                    <th>{{ item.temperature_threshold }}</th>
+                    <th>{{ item.is_abnormal }}</th>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
+
+{% block pageination %}
+    {% if pageination %}
+    <div class="pagination">
+        {{ macros.pagination_widget(pageination, 'main.report_port_search', report_name = 'card_detail') }}
+    </div>
+    {% endif %}
+{% endblock %}
+
