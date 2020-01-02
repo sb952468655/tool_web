@@ -17,7 +17,7 @@ from urllib.request import quote, unquote
 from .. import db
 from ..models import *
 from .report import *
-from .common import get_log, get_host, get_today_log_name, get_city_list, get_host_logs
+from .common import get_log, get_host, get_today_log_name, get_city_list, get_host_logs, get_log_from_date
 sys.path.append('../')
 
 @main.route('/')
@@ -541,7 +541,7 @@ def host_list(action):
     
     
     host_data = get_host(city)
-
+    host_data = [(index, host) for index, host in enumerate(host_data)]
     if action == 'config_backup':
         return redirect(url_for('main.config_backup'))
 
@@ -1099,10 +1099,10 @@ def load_statistic_search(load_name):
 
         return render_template('search/statistic.html', 
             load_statistic_data = load_statistic_data,
-            report_name = 'load_statistic', 
+            load_name = 'load_statistic', 
             pageination = pageination)
     else:
-        
+        #业务负载统计，按设备统计
         count = LoadStatisticHost.query.filter_by(date_time = date.today()).count()
         if count == 0:
             abort(404)
@@ -1128,13 +1128,119 @@ def load_statistic_search(load_name):
 
         return render_template('search/statistic_host.html', 
             load_statistic_host_data = load_statistic_host_data,
-            report_name = 'load_statistic_host', 
+            load_name = 'load_statistic_host', 
             pageination = pageination)
 
-@main.route('/xunjian_search')
-def xunjian_search():
+@main.route('/xunjian_search/<xunjian_name>', methods= ['GET', 'POST'])
+def xunjian_search(xunjian_name):
     '''巡检搜索'''
 
+    host_list = get_host(session.get('city'))
+    page = request.args.get('page', 1, type=int)
+    count = XunJian.query.filter_by(date_time = date.today()).count()
+    if count == 0:
+        abort(404)
+
+    if request.method == 'POST':
+        session['search_xunjian_date'] = ''
+        session['search_xunjian_host_name'] = ''
+
+        session['search_xunjian_all_date'] = ''
+        session['search_xunjian_all_host_name'] = ''
+
+        session['search_xunjian_log_date'] = ''
+        session['search_xunjian_log_host_name'] = ''
+
+        search_xunjian_date = request.form.get('xunjian_date')
+        search_xunjian_host_name = request.form.get('xunjian_host_name')
+
+        search_xunjian_all_date = request.form.get('xunjian_all_date')
+        search_xunjian_all_host_name = request.form.get('xunjian_all_host_name')
+
+        search_xunjian_log_date = request.form.get('xunjian_log_date')
+        search_xunjian_log_host_name = request.form.get('xunjian_log_host_name')
+
+        if search_xunjian_date:
+            session['search_xunjian_date'] = search_xunjian_date
+        if search_xunjian_host_name:
+            session['search_xunjian_host_name'] = search_xunjian_host_name
+        else:
+            session['search_xunjian_host_name'] = host_list[0]
+
+        if search_xunjian_all_date:
+            session['search_xunjian_all_date'] = search_xunjian_all_date
+        if search_xunjian_all_host_name:
+            session['search_xunjian_all_host_name'] = search_xunjian_all_host_name
+
+        if search_xunjian_log_date:
+            session['search_xunjian_log_date'] = search_xunjian_log_date
+        if search_xunjian_log_host_name:
+            session['search_xunjian_log_host_name'] = search_xunjian_log_host_name
+
+    if xunjian_name == 'xunjian':
+        #设备巡检报告
+
+        #搜索
+        xunjian = XunJian.query
+        if session.get('search_xunjian_host_name'):
+            xunjian = xunjian.filter(XunJian.host_name == session.get('search_xunjian_host_name'))
+        else:
+            xunjian = xunjian.filter(XunJian.host_name == host_list[0])
+
+        if session.get('search_xunjian_date'):
+            xunjian = xunjian.filter(XunJian.date_time == session.get('search_xunjian_date'))
+        else:
+            xunjian = xunjian.filter(XunJian.date_time == date.today())
+
+        xunjian_data = xunjian.all()
+
+        return render_template('search/xunjian.html', 
+            xunjian_data = xunjian_data,
+            xunjian_name = 'xunjian',
+            host_list = host_list)
+
+    elif xunjian_name == 'xunjian_all':
+        #巡检输出
+
+        #搜索
+        xunjian = XunJian.query
+        if session.get('search_xunjian_all_host_name'):
+            xunjian = xunjian.filter(XunJian.host_name == session.get('search_xunjian_all_host_name'))
+        else:
+            xunjian = xunjian.filter(XunJian.host_name == host_list[0])
+        if session.get('search_xunjian_all_date'):
+            xunjian = xunjian.filter(XunJian.date_time == session.get('search_xunjian_all_date'))
+        else:
+            xunjian = xunjian.filter(XunJian.date_time == date.today())
+
+        xunjian_data = xunjian.all()
+
+        return render_template('search/xunjian_all.html',
+            xunjian_all_data = xunjian_data,
+            xunjian_name = 'xunjian_all',
+            host_list = host_list)
+
+    else:
+        #全量输出
+        city = ''
+        host_name = ''
+        date_str = ''
+        log_str = ''
+
+        city = session.get('city')
+        host_name = session.get('search_xunjian_log_host_name')
+        date_str = session.get('search_xunjian_log_date')
+
+        if city and host_name and date_str:
+            log_str = get_log_from_date(city, host_name, date_str)
+        
+
+        return render_template('search/xunjian_log.html', 
+            log_str = log_str,
+            xunjian_name = 'xunjian_log',
+            host_list = host_list)
+        
+    
     return '巡检搜索'
 
 @main.route('/save_db')
@@ -1191,15 +1297,17 @@ def save_xunjian(city, host_name, config_new, config_old):
 
     xunjian_data = mobile.xunjian(config_new, config_old)
     if xunjian_data:
-        logging.info('host: {} {} begin save'.format(host_name, 'xunjian_data'))
-
+        logging.info('host: {} {} begin save, date: {}'.format(host_name, 'xunjian_data', date.today().strftime('%Y-%m-%d')))
+        
+    today = date.today()
     for msg, err, check_item in xunjian_data:
         xunjian = XunJian(
             city = city,
             host_name = host_name,
             check_item = check_item,
             err = err,
-            msg = msg
+            msg = msg,
+            date_time = today
         )
 
         db.session.add(xunjian)
@@ -1226,6 +1334,7 @@ def save_port_detail(city, host_name, config):
         if item[-1] != 'MDX GIGE-T ' and item[-1] != 'MDI GIGE-T ':
             ggl_port.append(item[0])
             port_is_ok = '否'
+
             #判断端口是否有异常
             if item[2] == 'Up' and item[3] == 'No' and item[4] != 'Up':
                 port_is_ok = '是'

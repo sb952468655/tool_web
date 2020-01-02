@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %} 设备巡检 {% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+    <h1>{% block page_header %} 设备巡检 {% endblock %}</h1>
+</div>
+
+<div class="row">
+    <div class="col-md-2">
+        <ul class="nav nav-pills nav-stacked">
+            {% if xunjian_name == 'xunjian' %}
+                <li role="presentation" class="active"><a href="{{ url_for('main.xunjian_search', xunjian_name = 'xunjian' ) }}">单设备巡检报告</a></li>
+            {% else %}
+            <li role="presentation" ><a href="{{ url_for('main.xunjian_search', xunjian_name = 'xunjian' ) }}">单设备巡检报告</a></li>
+            {% endif %}
+            {% if xunjian_name == 'xunjian_all' %}
+                <li role="presentation" class="active"><a href="{{ url_for('main.xunjian_search', xunjian_name = 'xunjian_all' ) }}">单设备巡检输出</a></li>
+            {% else %}
+                <li role="presentation" ><a href="{{ url_for('main.xunjian_search', xunjian_name = 'xunjian_all' ) }}">单设备巡检输出</a></li>
+            {% endif %}
+            {% if xunjian_name == 'xunjian_log' %}
+                <li role="presentation" class="active"><a href="{{ url_for('main.xunjian_search', xunjian_name = 'xunjian_log' ) }}">单设备全量输出</a></li>
+            {% else %}
+                <li role="presentation" ><a href="{{ url_for('main.xunjian_search', xunjian_name = 'xunjian_log' ) }}">单设备全量输出</a></li>
+            {% endif %}
+        </ul>
+    </div>
+    <div class="col-md-10">
+        <div style="overflow:scroll">
+            {% block xunjian_content %}
+            {% endblock %}
+        </div>
+        {% block pageination %}
+        {% endblock %}
+    </div>
+</div>
+
+{% endblock %}

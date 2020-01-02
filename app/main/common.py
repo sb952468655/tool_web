@@ -34,6 +34,24 @@ def get_log(city, host, date = None):
 
     return log_str
 
+def get_log_from_date(city, host, date):
+    '''根据设备名和日期获取log'''
+
+    p_log_datetime = r'7750_(\d{4})(\d{2})(\d{2})-(\d{2})(\d{2})(\d{2})-UTC'
+    logs = get_host_logs(city, host)
+    
+    for i in logs:
+        res = re.search(p_log_datetime, i)
+        real_date_time = datetime.datetime(int(res.group(1)), int(res.group(2)), int(res.group(3)), \
+            int(res.group(4)), int(res.group(5)), int(res.group(6))) + datetime.timedelta(hours=8)
+
+        real_date_str = real_date_time.strftime('%Y-%m-%d')
+        if real_date_str == date:
+            log_str = open(os.path.join(g_log_path, city, host, i)).read()
+            return log_str
+
+    return ''
+
 def get_today_log_name(city, host):
     '''根据设备名称生成当天log名称'''
 

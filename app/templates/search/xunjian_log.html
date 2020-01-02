@@ -1,0 +1,31 @@
+{% extends "search/xunjian_base.html" %}
+
+{% block title %} 单设备全量输出 {% endblock %}
+
+{% block xunjian_content %}
+    <form class="form-inline" method="post" action="{{ url_for('main.xunjian_search', xunjian_name = 'xunjian_log') }}">
+        <div class="form-group">
+            <label>设备名称</label>
+            <select class="form-control" name = "xunjian_log_host_name">
+                {% for i in host_list %}
+                    <option>{{ i }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label>日期</label>
+            <input type="text" class="form-control" id="xunjian_log_date"  name="xunjian_log_date">
+        </div>
+        <button type="submit" class="btn btn-default">搜索</button>
+    </form><br>
+
+    <div class="panel panel-default">
+        <div class="panel-heading"></div>
+        <div class="panel-body">
+            <pre class="pre-scrollable">{{ log_str }}</pre>
+        </div>
+    </div>
+{% endblock %}
+
+
+
