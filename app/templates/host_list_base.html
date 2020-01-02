@@ -30,7 +30,7 @@
             <tbody>
                 {% for index, item in host_data %}
                     <tr>
-                        <th>{{ index }}</th>
+                        <th>{{ index + 1 }}</th>
                         <th>{{ item.split('.')[0] }}</th>
                         <th>
                             {% if action == 'report_port'%}

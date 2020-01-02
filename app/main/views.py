@@ -1298,7 +1298,7 @@ def save_xunjian(city, host_name, config_new, config_old):
     xunjian_data = mobile.xunjian(config_new, config_old)
     if xunjian_data:
         logging.info('host: {} {} begin save, date: {}'.format(host_name, 'xunjian_data', date.today().strftime('%Y-%m-%d')))
-        
+
     today = date.today()
     for msg, err, check_item in xunjian_data:
         xunjian = XunJian(
@@ -1365,6 +1365,7 @@ def save_port_detail(city, host_name, config):
     if res:
         logging.info('host: {} {} begin save'.format(host_name, 'port_detail'))
 
+    today = date.today()
     for item in res:
 
         #存入数据库
@@ -1388,7 +1389,8 @@ def save_port_detail(city, host_name, config):
             output_power = item[13],
             optical_warn = item[14],
             output_warn = item[15],
-            is_abnormal = item[17]
+            is_abnormal = item[17],
+            date_time = today
         )
 
         db.session.add(card_port)
@@ -1409,6 +1411,7 @@ def save_port_statistic(city, host_name, config):
     if port_statistic_data:
         logging.info('host: {} {} begin save'.format(host_name, 'port_statistic_data'))
 
+    today = date.today()
     for item in port_statistic_data:
 
         #存入数据库
@@ -1419,7 +1422,8 @@ def save_port_statistic(city, host_name, config):
             port_type = item[1],
             port_num = item[2],
             used_num = item[3],
-            unused_num = item[4]
+            unused_num = item[4],
+            date_time = today
         )
 
         db.session.add(port_statistic)
@@ -1439,6 +1443,7 @@ def save_card_detail(city, host_name, config):
     if card_detail_data:
         logging.info('host: {} {} begin save'.format(host_name, 'card_detail_data'))
 
+    today = date.today()
     for item in card_detail_data:
         #存入数据库
         card_detail = CardDetail(
@@ -1452,7 +1457,8 @@ def save_card_detail(city, host_name, config):
             time_of_last_boot = item[7],
             temperature = item[8],
             temperature_threshold = item[9],
-            is_abnormal = item[10]
+            is_abnormal = item[10],
+            date_time = today
         )
 
         db.session.add(card_detail)
@@ -1472,6 +1478,7 @@ def save_card_statistic(city, host_name, config):
     if card_statistic_data:
         logging.info('host: {} {} begin save'.format(host_name, 'card_statistic_data'))
 
+    today = date.today()
     for item in card_statistic_data:
 
         #存入数据库
@@ -1480,7 +1487,8 @@ def save_card_statistic(city, host_name, config):
             host_name = host_name,
             host_ip = item[1],
             card_type = item[2],
-            card_num = item[3]
+            card_num = item[3],
+            date_time = today
         )
 
         db.session.add(card_statistic)
@@ -1500,6 +1508,7 @@ def save_mda_detail(city, host_name, config):
     if mda_detail_data:
         logging.info('host: {} {} begin save'.format(host_name, 'mda_detail_data'))
 
+    today = date.today()
     for item in mda_detail_data:
         #存入数据库
         mda_detail = MdaDetail(
@@ -1515,7 +1524,8 @@ def save_mda_detail(city, host_name, config):
             time_of_last_boot = item[8],
             temperature = item[9],
             temperature_threshold = item[10],
-            is_abnormal = item[11]
+            is_abnormal = item[11],
+            date_time = today
         )
 
         db.session.add(mda_detail)
@@ -1535,6 +1545,7 @@ def save_mda_statistic(city, host_name, config):
     if mda_statistic_data:
         logging.info('host: {} {} begin save'.format(host_name, 'mda_statistic_data'))
 
+    today = date.today()
     for item in mda_statistic_data:
 
         #存入数据库
@@ -1543,7 +1554,8 @@ def save_mda_statistic(city, host_name, config):
             host_name = host_name,
             host_ip = item[1],
             card_type = item[2],
-            card_num = item[3]
+            card_num = item[3],
+            date_time = today
         )
 
         db.session.add(mda_statistic)
@@ -1563,6 +1575,7 @@ def save_load_statistic(city, host_name, config):
     if res:
         logging.info('host: {} {} begin save'.format(host_name, 'load_statistic_data'))
 
+    today = date.today()
     for item in res:
 
         #存入数据库
@@ -1577,7 +1590,8 @@ def save_load_statistic(city, host_name, config):
             ies_3000_user_num = item[6],
             ies_3000_utilization = item[7],
             vprn_4015_user_num = item[8],
-            vprn_4015_utilization = item[9]
+            vprn_4015_utilization = item[9],
+            date_time = today
         )
 
         db.session.add(load_statistic)
@@ -1597,6 +1611,7 @@ def save_load_statistic_host(city, host_name, config):
     if load_statistic_host_data:
         logging.info('host: {} {} begin save'.format(host_name, 'load_statistic_host_data'))
 
+    today = date.today()
     for item in load_statistic_host_data:
 
         #存入数据库
@@ -1607,7 +1622,8 @@ def save_load_statistic_host(city, host_name, config):
             ies_3000_num = item[2],
             ies_3000_pool_utilization = item[3],
             vprn_4015_num = item[4],
-            vprn_4015_pool_utilization = item[5]
+            vprn_4015_pool_utilization = item[5],
+            date_time = today
         )
 
         db.session.add(load_statistic)
@@ -1627,6 +1643,7 @@ def save_address_collect(city, host_name, config):
     if res:
         logging.info('host: {} {} begin save'.format(host_name, 'address_collect_data'))
 
+    today = date.today()
     for item in res:
         #存入数据库
         address_collect = AddressCollect(
@@ -1644,7 +1661,8 @@ def save_address_collect(city, host_name, config):
             ies_vprn_id = item[10],
             vpn_rd = item[11],
             vpn_rt = item[12],
-            description = item[13]
+            description = item[13],
+            date_time = today
         )
 
         db.session.add(address_collect)
