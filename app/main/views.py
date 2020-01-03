@@ -1,7 +1,7 @@
-import os, sys, zipfile, time, logging, re
+import os, sys, zipfile, time, logging, re, time
 from sqlite3 import OperationalError
 from datetime import date, datetime
-from flask import render_template, session, redirect, url_for, current_app, request, abort, g, Response
+from flask import render_template, session, redirect, url_for, current_app, request, abort, g, Response, flash
 import openpyxl
 from openpyxl.styles import Alignment, PatternFill
 import docx
@@ -18,6 +18,7 @@ from .. import db
 from ..models import *
 from .report import *
 from .common import get_log, get_host, get_today_log_name, get_city_list, get_host_logs, get_log_from_date
+from .forms import CaseUploadForm
 sys.path.append('../')
 
 @main.route('/')
@@ -718,6 +719,55 @@ def load_statistic_host(host_name):
         load_statistic_host_data = load_statistic_host_data, 
         action = 'load_statistic_host', 
         host_name=host_name)
+
+@main.route('/case_lib')
+def case_lib():
+    '''案例库'''
+
+    page = request.args.get('page', 1, type=int)
+    count = CaseLib.query.count()
+    if count == 0:
+        abort(404)
+
+    pageination = CaseLib.query.paginate(
+        page, per_page = current_app.config['FLASKY_POSTS_PER_PAGE'],
+        error_out = False
+    )
+    case_lib_data = pageination.items
+    case_lib_data = [(index, item) for index, item in enumerate(case_lib_data) ]
+
+    return render_template('case_lib/case_lib.html',
+        case_lib_data = case_lib_data)
+
+@main.route('/case_upload/nokia2020' , methods=['GET', 'POST'])
+def case_upload():
+    '''案例上传'''
+
+    form = CaseUploadForm()
+    if form.validate_on_submit():
+        f = form.upload_file.data
+        file_name = form.name.data
+        random_name = str(time.time()) + '.' +f.filename.split('.')[-1]
+        f.save(os.path.join('app', 'static', 'caselib', random_name))
+        # flash('上传成功')
+        url = url_for('static', filename = os.path.join('caselib', random_name))
+        url2 = unquote(url, encoding='utf-8')
+        today = date.today()
+        #上传信息入库
+        case_lib = CaseLib(
+            file_name = file_name,
+            file_url = url2,
+            date_time = today
+        )
+
+        db.session.add(case_lib)
+        db.session.commit()
+
+        return redirect(url_for('main.case_upload'))
+
+    return render_template('case_lib/case_upload.html',
+        form = form)
+
 
 @main.route('/report_port_search/<report_name>', methods=['GET', 'POST'])
 def report_port_search(report_name):

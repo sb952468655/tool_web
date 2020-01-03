@@ -1,13 +1,25 @@
 {% extends "base.html" %}
 {% import "bootstrap/wtf.html" as wtf %}
 
-{% block title %} 设备 {% endblock %}
+{% block title %}
+{% if action == 'xunjian' %} 设备巡检 {% endif %}
+{% if action == 'report_port' %} 统计报表 {% endif %}
+{% if action == 'load_statistic' %} 业务负荷 {% endif %}
+{% if action == 'check_config' %} 配置检查 {% endif %}
+{% if action == 'config_backup' %} config备份 {% endif %}
+{% endblock %}
 
 {% block page_content %}
 <div class="row">
     <div class="col-md-6">
         <div class="page-header">
-            <h1>设备</h1>
+            <h1>
+                {% if action == 'xunjian' %} 设备巡检 {% endif %}
+                {% if action == 'report_port' %} 统计报表 {% endif %}
+                {% if action == 'load_statistic' %} 业务负荷 {% endif %}
+                {% if action == 'check_config' %} 配置检查 {% endif %}
+                {% if action == 'config_backup' %} config备份 {% endif %}
+            </h1>
         </div>
         {% if action == 'xunjian' %}
         <a class="btn btn-default btn-sm" href="{{ url_for('main.xj_report_all_host') }}">设备巡检报告</a>
