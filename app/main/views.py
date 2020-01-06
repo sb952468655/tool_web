@@ -428,7 +428,7 @@ def xj_report(city, host_name, type):
         style='report-normal')
 
     for item in warn_data:
-        if 'Temperature' in item.err:
+        if '板卡温度高' in item.err:
             doc.add_paragraph('2，板卡温度高建议清洗防尘网。',
             style='report-normal')
         break
@@ -720,16 +720,35 @@ def load_statistic_host(host_name):
         action = 'load_statistic_host', 
         host_name=host_name)
 
-@main.route('/case_lib')
+@main.route('/case_lib', methods= ['GET', 'POST'])
 def case_lib():
-    '''案例库'''
+    '''经典案例'''
 
     page = request.args.get('page', 1, type=int)
     count = CaseLib.query.count()
     if count == 0:
         abort(404)
 
-    pageination = CaseLib.query.paginate(
+    if request.method == 'POST':
+        session['search_case_lib_keyword'] = ''
+        session['search_case_lib_date'] = ''
+
+        search_case_lib_keyword = request.form.get('keyword')
+        search_case_lib_date = request.form.get('date')
+
+        if search_case_lib_keyword:
+            session['search_case_lib_keyword'] = search_case_lib_keyword
+        if search_case_lib_date:
+            session['search_case_lib_date'] = datetime.strptime(search_case_lib_date,'%Y-%m-%d').date()
+
+    case_lib = CaseLib.query
+    if session.get('search_case_lib_keyword'):
+        case_lib = case_lib.filter(CaseLib.file_name.like("%" + session.get('search_case_lib_keyword') + "%"))
+    if session.get('search_case_lib_date'):
+        case_lib = case_lib.filter(CaseLib.date_time == session.get('search_case_lib_date'))
+
+
+    pageination = case_lib.paginate(
         page, per_page = current_app.config['FLASKY_POSTS_PER_PAGE'],
         error_out = False
     )
@@ -737,7 +756,8 @@ def case_lib():
     case_lib_data = [(index, item) for index, item in enumerate(case_lib_data) ]
 
     return render_template('case_lib/case_lib.html',
-        case_lib_data = case_lib_data)
+        case_lib_data = case_lib_data,
+        pageination = pageination)
 
 @main.route('/case_upload/nokia2020' , methods=['GET', 'POST'])
 def case_upload():
