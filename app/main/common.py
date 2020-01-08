@@ -17,7 +17,6 @@ def get_log_from_ftp(host_name, save_path):
     ftp = myFtp('211.138.102.229')
     ftp.Login('ftp-asb', 'Asb201730')
     log_name = ftp.DownLoadFileFromName(host_name, save_path, '/home/ftp-asb/js/')  # 从目标目录下载到本地目录d盘
-    ftp.close()
     return log_name
 
 
