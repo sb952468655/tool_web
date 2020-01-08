@@ -1,5 +1,6 @@
 import os, datetime, logging, re
 from .config import g_log_path
+from .ftp import myFtp
 
 def get_host(city):
     '''获取设备列表'''
@@ -10,6 +11,15 @@ def get_host(city):
         break
 
     return host_data
+
+def get_log_from_ftp(host_name, save_path):
+    '''从ftp服务器获取log'''
+    ftp = myFtp('211.138.102.229')
+    ftp.Login('ftp-asb', 'Asb201730')
+    log_name = ftp.DownLoadFileFromName(host_name, save_path, '/home/ftp-asb/js/')  # 从目标目录下载到本地目录d盘
+    ftp.close()
+    return log_name
+
 
 def get_log(city, host, date = None):
     '''根据节点，设备名称， 日期获取log'''
@@ -23,14 +33,24 @@ def get_log(city, host, date = None):
         if date != None:
             if is_yesday_log(i):
                 log_str = open(os.path.join(g_log_path, city, host, i)).read()
+                if len(log_str) < 100:
+                    log_str = ''
                 break
         else:
             if is_today_log(i):
                 log_str = open(os.path.join(g_log_path, city, host, i)).read()
+                if len(log_str) < 100:
+                    log_str = ''
                 break
     
-    if not log_str:
+    if not log_str and not date:
         logging.error('host: {} today log not found'.format(host))
+        logging.error('begin download log from ftp server')
+
+        save_path = os.path.join(os.getcwd() ,'app', 'static', 'logs', city, host)
+        log_name = get_log_from_ftp(host, save_path)
+        if log_name:
+            log_str = open(os.path.join(g_log_path, city, host, log_name)).read()
 
     return log_str
 

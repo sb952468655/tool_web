@@ -1385,23 +1385,23 @@ def save_db():
             yesterday_log = get_log(i, j, 1)
             if today_log:
                 #端口明细
-                # save_port_detail(i, j, today_log)
+                save_port_detail(i, j, today_log)
                 #端口统计
-                # save_port_statistic(i, j, today_log)
+                save_port_statistic(i, j, today_log)
                 #card明细
-                # save_card_detail(i, j, today_log)
+                save_card_detail(i, j, today_log)
                 #card统计
-                # save_card_statistic(i, j, today_log)
+                save_card_statistic(i, j, today_log)
                 #mda明细
-                # save_mda_detail(i, j, today_log)
-                #mda统计
-                # save_mda_statistic(i, j, today_log)
+                save_mda_detail(i, j, today_log)
+                # mda统计
+                save_mda_statistic(i, j, today_log)
                 #业务负载统计-按端口统计
-                # save_load_statistic(i, j, today_log)
+                save_load_statistic(i, j, today_log)
                 #业务负载统计-按设备统计
-                # save_load_statistic_host(i, j, today_log)
+                save_load_statistic_host(i, j, today_log)
                 #地址采集
-                # save_address_collect(i, j, today_log)
+                save_address_collect(i, j, today_log)
                 #组巡
                 save_zuxun(i, j, today_log)
 

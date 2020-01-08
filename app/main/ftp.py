@@ -43,6 +43,7 @@ class myFtp:
         return
 
     def DownLoadFileFromName(self, file_name, LocalDir, RemoteDir):
+        log_name = ''
         if not os.path.exists(LocalDir):
             os.makedirs(LocalDir)
         self.ftp.cwd(RemoteDir)
@@ -50,6 +51,7 @@ class myFtp:
         print("RemoteNames", RemoteNames)
         for file in RemoteNames:
             if file_name in file:
+                log_name = file
                 Local = os.path.join(LocalDir, file)
                 print(self.ftp.nlst(file))
                 if file.find(".") == -1:
@@ -59,7 +61,7 @@ class myFtp:
                 else:
                     self.DownLoadFile(Local, file)
         self.ftp.cwd("..")
-        return
+        return log_name
 
     def close(self):
         self.ftp.quit()
