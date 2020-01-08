@@ -1,0 +1,30 @@
+{% extends "zuxun/zuxun_base.html" %}
+
+{% block zuxun_content %}
+    <form class="form-inline" method="post" action="{{ url_for('main.zuxun_all', host_name = host_name) }}">
+        <div class="form-group">
+            <label>设备名称</label>
+            <select class="form-control" name = "host_name">
+                {% for i in host_list %}
+                    <option>{{ i }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label>日期</label>
+            <input type="text" class="form-control" name="date">
+        </div>
+        <button type="submit" class="btn btn-default">搜索</button>
+    </form><br>
+    <div class="panel panel-default">
+        <div class="panel-heading"></div>
+        <div class="panel-body">
+            {% for item in zuxun_data %}
+                <pre class="pre-scrollable">{{ item.err }}</pre><br>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}
+
+
+

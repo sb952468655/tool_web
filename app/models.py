@@ -236,3 +236,16 @@ class CaseLib(db.Model):
 
     def __repr__(self):
         return '<CaseLib %r>' % self.file_name
+
+class ZuXun(db.Model):
+    '''组巡表'''
+
+    __tablename__ = 'zuxun'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    city = db.Column(db.String(64)) #地市名
+    host_name = db.Column(db.String(64)) #设备名
+    err = db.Column(db.Text) #错误提示
+    date_time = db.Column(db.Date, default = date.today())
+
+    def __repr__(self):
+        return '<ZuXun %r>' % self.host_name

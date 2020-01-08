@@ -1,0 +1,16 @@
+{% extends "zuxun/zuxun_base.html" %}
+
+{% block zuxun_content %}
+
+    <div class="panel panel-default">
+        <div class="panel-heading">{{ zuxun_data[0].host_name }}</div>
+        <div class="panel-body">
+            {% for item in zuxun_data %}
+                <pre class="pre-scrollable">{{ item.err}}</pre><br>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}
+
+
+

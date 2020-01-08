@@ -1,4 +1,5 @@
 import os, sys, zipfile, time, logging, re, time
+from urllib.request import quote, unquote
 from sqlite3 import OperationalError
 from datetime import date, datetime
 from flask import render_template, session, redirect, url_for, current_app, request, abort, g, Response, flash
@@ -10,10 +11,10 @@ from docx.shared import RGBColor
 from . import main
 from ..check_pool import all_check
 from ..inspection import mobile
+from ..zuxun.zuxun import zuxun_check
 from .config import g_city_to_name, g_log_path, g_backup_path
 from .address import get_address_data
 from .statistic import get_statistic_data, get_statistic_host_data
-from urllib.request import quote, unquote
 from .. import db
 from ..models import *
 from .report import *
@@ -788,6 +789,65 @@ def case_upload():
     return render_template('case_lib/case_upload.html',
         form = form)
 
+@main.route('/zuxun/<host_name>')
+def zuxun(host_name):
+    '''组巡工具'''
+
+    city = session.get('city')
+    if not city:
+        return redirect(url_for('main.city_list'))
+
+    count = ZuXun.query.filter_by(host_name = host_name, date_time = date.today()).count()
+    if count == 0:
+        abort(404)
+
+    zuxun_data = ZuXun.query.filter_by(host_name = host_name, date_time = date.today()).all()
+
+
+    return render_template('zuxun/zuxun.html',
+        zuxun_data = zuxun_data, 
+        action = 'zuxun', 
+        host_name=host_name)
+
+@main.route('/zuxun_all/<host_name>', methods=['GET', 'POST'])
+def zuxun_all(host_name):
+    '''组巡搜索'''
+
+    host_list = get_host(session.get('city'))
+    count = ZuXun.query.filter_by(date_time = date.today()).count()
+    if count == 0:
+        abort(404)
+
+    if request.method == 'POST':
+        session['search_zuxun_date'] = ''
+        session['search_zuxun_host_name'] = ''
+
+        date_str = request.form.get('date')
+        host_name_str = request.form.get('host_name')
+
+        if date_str:
+            session['search_zuxun_date'] = datetime.strptime(date_str,'%Y-%m-%d').date()
+        if host_name_str:
+            session['search_zuxun_host_name'] = host_name_str
+        else:
+            session['search_zuxun_host_name'] = host_list[0]
+
+    #搜索
+    zuxun = ZuXun.query
+    if session.get('search_zuxun_host_name'):
+        zuxun = zuxun.filter(ZuXun.host_name == session.get('search_zuxun_host_name'))
+    if session.get('search_zuxun_date'):
+        zuxun = zuxun.filter(ZuXun.date_time == session.get('search_zuxun_date'))
+    else:
+        zuxun = zuxun.filter(ZuXun.date_time == date.today())
+
+    zuxun_data = zuxun.all()
+
+    return render_template('zuxun/zuxun_all.html',
+        zuxun_data = zuxun_data,
+        host_list = host_list,
+        action = 'zuxun_all',
+        host_name = host_name)
 
 @main.route('/report_port_search/<report_name>', methods=['GET', 'POST'])
 def report_port_search(report_name):
@@ -1325,23 +1385,25 @@ def save_db():
             yesterday_log = get_log(i, j, 1)
             if today_log:
                 #端口明细
-                save_port_detail(i, j, today_log)
+                # save_port_detail(i, j, today_log)
                 #端口统计
-                save_port_statistic(i, j, today_log)
+                # save_port_statistic(i, j, today_log)
                 #card明细
-                save_card_detail(i, j, today_log)
+                # save_card_detail(i, j, today_log)
                 #card统计
-                save_card_statistic(i, j, today_log)
+                # save_card_statistic(i, j, today_log)
                 #mda明细
-                save_mda_detail(i, j, today_log)
+                # save_mda_detail(i, j, today_log)
                 #mda统计
-                save_mda_statistic(i, j, today_log)
+                # save_mda_statistic(i, j, today_log)
                 #业务负载统计-按端口统计
-                save_load_statistic(i, j, today_log)
+                # save_load_statistic(i, j, today_log)
                 #业务负载统计-按设备统计
-                save_load_statistic_host(i, j, today_log)
+                # save_load_statistic_host(i, j, today_log)
                 #地址采集
-                save_address_collect(i, j, today_log)
+                # save_address_collect(i, j, today_log)
+                #组巡
+                save_zuxun(i, j, today_log)
 
             if today_log and yesterday_log:
                 save_xunjian(i, j, today_log, yesterday_log)
@@ -1739,6 +1801,30 @@ def save_address_collect(city, host_name, config):
     db.session.commit()
     db.session.close()
 
+def save_zuxun(city, host_name, config):
+    '''保存组巡数据'''
+
+    today_data_count = ZuXun.query.filter_by(host_name = host_name, date_time = date.today()).count()
+
+    if today_data_count:
+        logging.info('zuxun host: {} today is saved'.format(host_name))
+        return
+
+    res = zuxun_check(config)
+    if res:
+        logging.info('host: {} {} begin save'.format(host_name, 'zuxun'))
+
+    today = date.today()
+    zuxun = ZuXun(
+        city = city,
+        host_name = host_name,
+        err = res,
+        date_time = today
+    )
+
+    db.session.add(zuxun)
+    db.session.commit()
+    db.session.close()
 
 
 @main.route('/db_test')

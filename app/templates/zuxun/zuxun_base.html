@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %} 组巡 {% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+    <h1>{% block page_header %} 组巡 {% endblock %}</h1>
+</div>
+
+<div class="row">
+    <div class="col-md-2">
+        <ul class="nav nav-pills nav-stacked">
+            {% if request.path.startswith('/zuxun/') %}
+                <li role="presentation" class="active"><a href="{{ url_for('main.zuxun', host_name = host_name ) }}">单设备组巡</a></li>
+            {% else %}
+            <li role="presentation" ><a href="{{ url_for('main.zuxun', host_name = host_name ) }}">单设备组巡</a></li>
+            {% endif %}
+            {% if request.path.startswith('/zuxun_all/') %}
+                <li role="presentation" class="active"><a href="{{ url_for('main.zuxun_all', host_name = host_name) }}">搜索</a></li>
+            {% else %}
+                <li role="presentation" ><a href="{{ url_for('main.zuxun_all', host_name = host_name) }}">搜索</a></li>
+            {% endif %}
+        </ul>
+    </div>
+    <div class="col-md-10">
+        <div>
+            {% block zuxun_content %}
+            {% endblock %}
+        </div>
+        {% block pageination %}
+        {% endblock %}
+    </div>
+</div>
+
+{% endblock %}
