@@ -7,7 +7,7 @@
 {% if action == 'load_statistic' %} 业务负荷 {% endif %}
 {% if action == 'check_config' %} 配置检查 {% endif %}
 {% if action == 'config_backup' %} config备份 {% endif %}
-{% if action == 'zuxun' %} 组巡 {% endif %}
+{% if action == 'zuxun' %} 组巡协助 {% endif %}
 {% endblock %}
 
 {% block page_content %}
@@ -20,7 +20,7 @@
                 {% if action == 'load_statistic' %} 业务负荷 {% endif %}
                 {% if action == 'check_config' %} 配置检查 {% endif %}
                 {% if action == 'config_backup' %} config备份 {% endif %}
-                {% if action == 'zuxun' %} 组巡 {% endif %}
+                {% if action == 'zuxun' %} 组巡协助 {% endif %}
             </h1>
         </div>
         {% if action == 'xunjian' %}
@@ -63,7 +63,7 @@
                             <a class="btn btn-default btn-sm" href="{{ url_for('main.load_statistic',  host_name = item ) }}">业务负荷统计</a>
                             {% endif %}
                             {% if action == 'zuxun'%}
-                            <a class="btn btn-default btn-sm" href="{{ url_for('main.zuxun',  host_name = item ) }}">组巡</a>
+                            <a class="btn btn-default btn-sm" href="{{ url_for('main.zuxun',  host_name = item ) }}">组巡协助</a>
                             {% endif %}
                         </th>
                     </tr>

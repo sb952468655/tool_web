@@ -34,7 +34,7 @@
                 <tbody>
                     {% for index, item in case_lib_data %}
                         <tr>
-                            <th>{{ index + 1 }}</th>
+                            <th>{{ (pageination.page - 1) * pageination.per_page + index + 1 }}</th>
                             <th>{{ item.date_time }}</th>
                             <th>{{ item.describe }}</th>
                             <th>
