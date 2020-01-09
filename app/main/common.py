@@ -34,13 +34,15 @@ def get_log(city, host, date = None):
                 log_str = open(os.path.join(g_log_path, city, host, i)).read()
                 if len(log_str) < 100:
                     log_str = ''
-                break
+                else:
+                    break
         else:
             if is_today_log(i):
                 log_str = open(os.path.join(g_log_path, city, host, i)).read()
                 if len(log_str) < 100:
                     log_str = ''
-                break
+                else:
+                    break
     
     if not log_str and not date:
         logging.error('host: {} today log not found'.format(host))
