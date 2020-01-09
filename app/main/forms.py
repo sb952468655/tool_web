@@ -6,6 +6,6 @@ from flask_wtf.file import FileField, FileRequired, FileAllowed
 from wtforms import ValidationError
 
 class CaseUploadForm(FlaskForm):
-    name = StringField('文件描述', validators=[DataRequired()])
+    describe = StringField('文件描述', validators=[DataRequired()])
     upload_file = FileField('文件上传', validators=[FileRequired(), FileAllowed(['doc','docx','pdf'])])
     submit = SubmitField('提交')

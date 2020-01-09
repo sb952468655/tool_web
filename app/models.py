@@ -230,8 +230,9 @@ class CaseLib(db.Model):
 
     __tablename__ = 'case_lib'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    file_name = db.Column(db.String(128)) #文件名
+    describe = db.Column(db.Text) #文件描述
     file_url = db.Column(db.String(128)) #文件路径
+    file_name = db.Column(db.String(128)) #文件名
     date_time = db.Column(db.Date, default = date.today())
 
     def __repr__(self):

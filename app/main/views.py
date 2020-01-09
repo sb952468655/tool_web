@@ -748,17 +748,29 @@ def case_lib():
     if session.get('search_case_lib_date'):
         case_lib = case_lib.filter(CaseLib.date_time == session.get('search_case_lib_date'))
 
-
     pageination = case_lib.paginate(
         page, per_page = current_app.config['FLASKY_POSTS_PER_PAGE'],
         error_out = False
     )
+
     case_lib_data = pageination.items
     case_lib_data = [(index, item) for index, item in enumerate(case_lib_data) ]
 
     return render_template('case_lib/case_lib.html',
         case_lib_data = case_lib_data,
         pageination = pageination)
+
+@main.route('/case_delete/<id>')
+def case_delete(id):
+    '''案例删除'''
+
+    case = CaseLib.query.filter_by(id = id).first()
+    save_path = os.path.join('app', 'static', 'caselib', case.file_name)
+    os.remove(save_path)
+    db.session.delete(case)
+    db.session.commit()
+    
+    return redirect(url_for('main.case_lib'))
 
 @main.route('/case_upload/nokia2020' , methods=['GET', 'POST'])
 def case_upload():
@@ -767,7 +779,7 @@ def case_upload():
     form = CaseUploadForm()
     if form.validate_on_submit():
         f = form.upload_file.data
-        file_name = form.name.data
+        describe = form.describe.data
         random_name = str(time.time()) + '.' +f.filename.split('.')[-1]
         f.save(os.path.join('app', 'static', 'caselib', random_name))
         # flash('上传成功')
@@ -776,7 +788,8 @@ def case_upload():
         today = date.today()
         #上传信息入库
         case_lib = CaseLib(
-            file_name = file_name,
+            file_name = random_name,
+            describe = describe,
             file_url = url2,
             date_time = today
         )

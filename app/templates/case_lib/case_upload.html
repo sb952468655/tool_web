@@ -3,7 +3,7 @@
 {% block content %}
     <form method="post" enctype="multipart/form-data">
         {{ form.hidden_tag() }}
-        {{ form.name.label }} {{ form.name(id='name') }}<br>
+        {{ form.describe.label }} {{ form.describe(id='describe') }}<br>
         {{ form.upload_file.label }} {{ form.upload_file(id='upload_file') }}<br>
         {{ form.submit() }}<br>
     </form>

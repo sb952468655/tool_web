@@ -36,8 +36,11 @@
                         <tr>
                             <th>{{ index + 1 }}</th>
                             <th>{{ item.date_time }}</th>
-                            <th>{{ item.file_name }}</th>
-                            <th><a class="btn btn-default btn-sm" href="{{ item.file_url }}">下载</a></th>
+                            <th>{{ item.describe }}</th>
+                            <th>
+                                <a class="btn btn-default btn-sm" href="{{ item.file_url }}">下载</a>
+                                <a class="btn btn-default btn-sm" href="{{ url_for('main.case_delete', id = item.id) }}">删除</a>
+                            </th>
                         </tr>
                     {% endfor %}
                 </tbody>
