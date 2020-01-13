@@ -19,7 +19,7 @@ from .. import db
 from ..models import *
 from .report import *
 from .common import get_log, get_host, get_today_log_name, get_city_list, get_host_logs, get_log_from_date
-from .forms import CaseUploadForm
+from .forms import CaseUploadForm, ModelForm, ModelListCreateForm, ModelSelectForm
 sys.path.append('../')
 
 @main.route('/')
@@ -861,6 +861,199 @@ def zuxun_all(host_name):
         host_list = host_list,
         action = 'zuxun_all',
         host_name = host_name)
+
+@main.route('/model', methods=['GET', 'POST'])
+def model():
+    '''脚本自动生成-模板列表'''
+
+    page = request.args.get('page', 1, type=int)
+    count = GenerateConfig.query.count()
+    if count == 0:
+        abort(404)
+
+    generate_config = GenerateConfig.query
+    generate_config = generate_config.filter(GenerateConfig.model_type.in_([0,1]))
+
+    pageination = generate_config.paginate(
+        page, per_page = current_app.config['FLASKY_POSTS_PER_PAGE'],
+        error_out = False
+    )
+
+    model_data = pageination.items
+    model_data = [(index, item) for index, item in enumerate(model_data) ]
+    return render_template('generate_config/model.html',
+        model_data = model_data,
+        pageination = pageination)
+
+@main.route('/model_list', methods=['GET', 'POST'])
+def model_list():
+    '''脚本自动生成-模板组列表'''
+
+    page = request.args.get('page', 1, type=int)
+    count = GenerateConfig.query.count()
+    if count == 0:
+        abort(404)
+
+    generate_config = GenerateConfig.query
+    generate_config = generate_config.filter(GenerateConfig.model_type == 2)
+
+    pageination = generate_config.paginate(
+        page, per_page = current_app.config['FLASKY_POSTS_PER_PAGE'],
+        error_out = False
+    )
+
+    model_data = pageination.items
+    model_data = [(index, item) for index, item in enumerate(model_data) ]
+    return render_template('generate_config/model.html',
+        model_data = model_data,
+        pageination = pageination)
+
+@main.route('/generate_config', methods=['GET', 'POST'])
+def generate_config():
+    '''脚本自动生成-模板制作'''
+
+    return '模板制作'
+
+@main.route('/model_view/<id>')
+def model_view(id):
+    '''模板查看'''
+    model_data = GenerateConfig.query.filter_by(id=id).first()
+    return render_template('generate_config/model_view.html',
+        model_data = model_data)
+
+@main.route('/model_delete/<id>')
+def model_delete(id):
+    '''模板删除'''
+
+    model_data = GenerateConfig.query.filter_by(id=id).first()
+    db.session.delete(model_data)
+    db.session.commit()
+
+    if model_data.model_type == 2:
+        return redirect(url_for('main.model_list'))
+    else:
+        return redirect(url_for('main.model'))
+
+    # return redirect(url_for('main.model'))
+
+@main.route('/model_list_delete/<id>')
+def model_list_delete(id):
+    '''模板组删除'''
+
+    model_data = GenerateConfig.query.filter_by(id=id).first()
+    db.session.delete(model_data)
+    db.session.commit()
+
+    return redirect(url_for('main.model_list'))
+
+@main.route('/model_modify', methods=['GET', 'POST'])
+def model_modify():
+    '''模板修改'''
+
+    model_data = None
+    form = ModelForm()
+
+    if form.validate_on_submit():
+        model_data = GenerateConfig.query.filter_by(id=form.id.data).first()
+        model_data.name = form.name.data
+        model_data.content = form.content.data
+        db.session.add(model_data)
+        db.session.commit()
+        if model_data.model_type == 2:
+            return redirect(url_for('main.model_list'))
+        else:
+            return redirect(url_for('main.model'))
+
+
+    id = request.args.get('id', type=int)
+    if id:
+        model_data = GenerateConfig.query.filter_by(id=id).first()
+        if model_data.model_type == 0:
+            flash('内置模板无法删除')
+            return redirect(url_for('main.model'))
+        form.id.data = id
+        form.name.data = model_data.name
+        form.content.data = model_data.content
+
+    return render_template('generate_config/model_modify.html',
+        form = form)
+
+
+@main.route('/model_save_as', methods=['GET', 'POST'])
+def model_save_as():
+    '''模板另存'''
+
+    model_data = None
+    form = ModelForm()
+
+    if form.validate_on_submit():
+        model_data = GenerateConfig(
+            name = form.name.data,
+            content = form.content.data,
+            model_type = 1,
+            date_time = date.today()
+        )
+        db.session.add(model_data)
+        db.session.commit()
+        return redirect(url_for('main.model'))
+
+    id = request.args.get('id', type=int)
+    if id:
+        model_data = GenerateConfig.query.filter_by(id=id).first()
+        form.id.data = id
+        form.name.data = model_data.name
+        form.content.data = model_data.content
+
+    return render_template('generate_config/model_save_as.html',
+        form = form)
+
+@main.route('/create_model_list', methods=['GET', 'POST'])
+def create_model_list():
+    '''新建模板组'''
+
+    form = ModelListCreateForm()
+    model_data = GenerateConfig.query.filter_by(model_type=0).all()
+    form.model_names.choices = [(item.id, item.name) for item in model_data]
+
+    if form.validate_on_submit():
+        model_str = ''
+        for i in form.model_names.data:
+            model_data = GenerateConfig.query.filter_by(id=i).first()
+            model_str += model_data.content + '\n'
+
+        model_data = GenerateConfig(
+            name = form.name.data,
+            content = model_str,
+            model_type = 2,
+            date_time = date.today()
+        )
+        db.session.add(model_data)
+        db.session.commit()
+        return redirect(url_for('main.model_list'))
+
+    return render_template('generate_config/model_list_create.html',
+        form = form)
+
+@main.route('/model_select', methods=['GET', 'POST'])
+def model_select():
+    '''模板选择'''
+
+    form = ModelSelectForm()
+    model_data = GenerateConfig.query.all()
+    form.model_names.choices = [(item.id, item.name) for item in model_data]
+
+    if form.validate_on_submit():
+        model_str = ''
+        for i in form.model_names.data:
+            model_data = GenerateConfig.query.filter_by(id=i).first()
+            model_str += model_data.content + '\n'
+
+        return render_template('generate_config/result.html',
+        model_data = model_str)
+
+    return render_template('generate_config/select_model_form.html',
+        form = form)
+
 
 @main.route('/report_port_search/<report_name>', methods=['GET', 'POST'])
 def report_port_search(report_name):

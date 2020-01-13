@@ -250,3 +250,34 @@ class ZuXun(db.Model):
 
     def __repr__(self):
         return '<ZuXun %r>' % self.host_name
+
+class GenerateConfig(db.Model):
+    '''脚本自动生成表'''
+
+    __tablename__ = 'generate_config'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    name = db.Column(db.String(64)) #模板名称
+    content = db.Column(db.Text) #模板内容
+    model_type = db.Column(db.Integer) #模板类型（0 内置模板， 1 自定义模板， 2 模板组）
+    date_time = db.Column(db.Date, default = date.today()) #保存日期
+
+    @staticmethod
+    def save_default_model():
+        '''保存内置模板'''
+        from .main.config import g_config_model
+        today = date.today()
+        for i in g_config_model:
+            generate_config = GenerateConfig(
+                name = i[0],
+                content = i[1],
+                model_type = 0,
+                date_time = today
+            )
+
+            db.session.add(generate_config)
+
+        db.session.commit()
+        db.session.close()
+
+    def __repr__(self):
+        return '<GenerateConfig %r>' % self.name

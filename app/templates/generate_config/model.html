@@ -1,0 +1,57 @@
+{% extends "generate_config/base.html" %}
+
+{% block model_content %}
+{% if request.path == '/model_list' %}
+    <a class="btn btn-default" href="{{ url_for('main.create_model_list') }}" role="button">新建模板组</a>
+{% endif %}
+<table class="table table-striped table-condensed" style="min-width:2000px;" >
+    <thead>
+        <tr>
+            <th>序号</th>
+            <th>模板名称</th>
+            <th>类型</th>
+            <th>日期</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for index, item in model_data %}
+            <tr>
+                <th>{{ (pageination.page - 1) * pageination.per_page + index + 1 }}</th>
+                <th>{{ item.name }}</th>
+                <th>
+                    {% if item.model_type == 0 %}
+                        内置模板
+                    {% endif %}
+                    {% if item.model_type == 1 %}
+                        自定义模板
+                    {% endif %}
+                    {% if item.model_type == 2 %}
+                        模板组
+                    {% endif %}
+                </th>
+                <th>{{ item.date_time }}</th>
+                <th>
+                    <a class="btn btn-default" href="{{ url_for('main.model_view', id = item.id) }}" role="button">查看</a>
+                    <a class="btn btn-default" href="{{ url_for('main.model_modify', id = item.id) }}" role="button">修改</a>
+                    {% if request.path == '/model' %}
+                    <a class="btn btn-default" href="{{ url_for('main.model_save_as', id = item.id) }}" role="button">另存</a>
+                    {% endif %}
+                    <a class="btn btn-default" href="{{ url_for('main.model_delete', id = item.id) }}" role="button">删除</a>
+                </th>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
+
+{% block pageination %}
+    {% if pageination %}
+    <div class="pagination">
+        {{ macros.pagination_widget(pageination, 'main.model') }}
+    </div>
+    {% endif %}
+{% endblock %}
+
+
+

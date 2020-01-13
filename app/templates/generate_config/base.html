@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% import "_macros.html" as macros %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %} 脚本自动生成 {% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+    <h1>{% block page_header %} 脚本自动生成 {% endblock %}</h1>
+</div>
+
+<div class="row">
+    <div class="col-md-2">
+        <ul class="nav nav-pills nav-stacked">
+            {% if request.path == '/model' %}
+                <li role="presentation" class="active"><a href="{{ url_for('main.model') }}">模板</a></li>
+            {% else %}
+            <li role="presentation" ><a href="{{ url_for('main.model') }}">模板</a></li>
+            {% endif %}
+            {% if request.path.startswith('/model_list') %}
+                <li role="presentation" class="active"><a href="{{ url_for('main.model_list') }}">模板组</a></li>
+            {% else %}
+                <li role="presentation" ><a href="{{ url_for('main.model_list') }}">模板组</a></li>
+            {% endif %}
+            {% if request.path.startswith('/model_select') %} 
+                <li role="presentation" class="active"><a href="{{ url_for('main.model_select') }}">脚本制作</a></li>
+            {% else %}
+                <li role="presentation" ><a href="{{ url_for('main.model_select') }}">脚本制作</a></li>
+            {% endif %}
+        </ul>
+    </div>
+    <div class="col-md-6">
+        {% block model_content %}
+        {% endblock %}
+        {% block pageination %}
+        {% endblock %}
+    </div>
+</div>
+
+{% endblock %}

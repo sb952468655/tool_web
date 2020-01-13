@@ -32,6 +32,7 @@
                 <li><a href="{{ url_for('main.host_list', action = 'load_statistic') }}">业务负荷统计</a></li>
                 <li><a href="{{ url_for('main.case_lib') }}">典型案例</a></li>
                 <li><a href="{{ url_for('main.host_list', action = 'zuxun') }}">组巡协助</a></li>
+                <li><a href="{{ url_for('main.model') }}">脚本自动生成</a></li>
             </ul>
             <ul class="nav navbar-nav navbar-right">
                 <li>
@@ -59,8 +60,4 @@
 </div>
 {% endblock %}
 
-{% endblock %}
-
-{% block scripts %}
-{{ super() }}
 {% endblock %}

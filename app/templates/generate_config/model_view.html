@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}模板查看{% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+    <h1>模板查看</h1>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">{{ model_data.name }}</div>
+    <div class="panel-body">
+        <pre class="pre-scrollable">{{ model_data.content }}</pre>
+    </div>
+</div>
+{% endblock %}
+
+
