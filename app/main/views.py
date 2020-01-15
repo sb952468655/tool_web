@@ -13,6 +13,7 @@ from ..check_pool import all_check
 from ..inspection import mobile
 from ..zuxun.zuxun import zuxun_check
 from .config import g_city_to_name, g_log_path, g_backup_path
+from .gnenerate_config import parse_model, generate_config
 from .address import get_address_data
 from .statistic import get_statistic_data, get_statistic_host_data
 from .. import db
@@ -908,12 +909,6 @@ def model_list():
         model_data = model_data,
         pageination = pageination)
 
-@main.route('/generate_config', methods=['GET', 'POST'])
-def generate_config():
-    '''脚本自动生成-模板制作'''
-
-    return '模板制作'
-
 @main.route('/model_view/<id>')
 def model_view(id):
     '''模板查看'''
@@ -926,6 +921,10 @@ def model_delete(id):
     '''模板删除'''
 
     model_data = GenerateConfig.query.filter_by(id=id).first()
+    #内置模板无法删除
+    if model_data.model_type == 0:
+        flash('内置模板无法删除')
+        return redirect(url_for('main.model'))
     db.session.delete(model_data)
     db.session.commit()
 
@@ -954,9 +953,16 @@ def model_modify():
     form = ModelForm()
 
     if form.validate_on_submit():
+        #模板名称不能重复
+        model_from_name = GenerateConfig.query.filter_by(name=form.name.data).first()
+        if model_from_name and model_from_name.id != int(form.id.data):
+            flash('模板名称已存在，请重新输入')
+            return redirect(url_for('main.model_modify', id=form.id.data))
+
         model_data = GenerateConfig.query.filter_by(id=form.id.data).first()
         model_data.name = form.name.data
         model_data.content = form.content.data
+
         db.session.add(model_data)
         db.session.commit()
         if model_data.model_type == 2:
@@ -969,7 +975,7 @@ def model_modify():
     if id:
         model_data = GenerateConfig.query.filter_by(id=id).first()
         if model_data.model_type == 0:
-            flash('内置模板无法删除')
+            flash('内置模板无法修改')
             return redirect(url_for('main.model'))
         form.id.data = id
         form.name.data = model_data.name
@@ -987,6 +993,11 @@ def model_save_as():
     form = ModelForm()
 
     if form.validate_on_submit():
+        #模板名称不能重复
+        model_from_name = GenerateConfig.query.filter_by(name=form.name.data).first()
+        if model_from_name:
+            flash('模板名称已存在，请重新输入')
+            return redirect(url_for('main.model_save_as', id=form.id.data))
         model_data = GenerateConfig(
             name = form.name.data,
             content = form.content.data,
@@ -1016,6 +1027,11 @@ def create_model_list():
     form.model_names.choices = [(item.id, item.name) for item in model_data]
 
     if form.validate_on_submit():
+         #模板名称不能重复
+        model_from_name = GenerateConfig.query.filter_by(name=form.name.data).first()
+        if model_from_name:
+            flash('模板名称已存在，请重新输入')
+            return redirect(url_for('main.create_model_list'))
         model_str = ''
         for i in form.model_names.data:
             model_data = GenerateConfig.query.filter_by(id=i).first()
@@ -1039,8 +1055,12 @@ def model_select():
     '''模板选择'''
 
     form = ModelSelectForm()
-    model_data = GenerateConfig.query.all()
+    generate_config = GenerateConfig.query
+    generate_config = generate_config.filter(GenerateConfig.model_type.in_([0,1]))
+    model_data = generate_config.all()
     form.model_names.choices = [(item.id, item.name) for item in model_data]
+    model_list_data = GenerateConfig.query.filter_by(model_type = 2).all()
+    form.model_list_names.choices = [(item.id, item.name) for item in model_list_data]
 
     if form.validate_on_submit():
         model_str = ''
@@ -1048,11 +1068,32 @@ def model_select():
             model_data = GenerateConfig.query.filter_by(id=i).first()
             model_str += model_data.content + '\n'
 
-        return render_template('generate_config/result.html',
-        model_data = model_str)
+        for i in form.model_list_names.data:
+            model_data = GenerateConfig.query.filter_by(id=i).first()
+            model_str += model_data.content + '\n'
+
+        if model_str == '':
+            flash('请选择模板或模板组')
+            return redirect(url_for('main.model_select', form=form))
+        else:
+            session['model_str'] = model_str
+        titles = parse_model(model_str)
+        return render_template('generate_config/enter_value.html',
+        titles = titles)
 
     return render_template('generate_config/select_model_form.html',
         form = form)
+
+@main.route('/make_config', methods=['POST'])
+def make_config():
+    '''生成配置'''
+    
+    inputs = list(request.form.items(True))
+    model_str = session.get('model_str')
+    model_data = generate_config(model_str, inputs)
+
+    return render_template('generate_config/result.html',
+        model_data = model_data)
 
 
 @main.route('/report_port_search/<report_name>', methods=['GET', 'POST'])

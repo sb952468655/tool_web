@@ -22,5 +22,6 @@ class ModelListCreateForm(FlaskForm):
     submit = SubmitField('提交')
 
 class ModelSelectForm(FlaskForm):
-    model_names = SelectMultipleField('模板选择', validators=[DataRequired()], coerce=int, choices=[])
+    model_names = SelectMultipleField('模板', coerce=int, choices=[])
+    model_list_names = SelectMultipleField('模板组', coerce=int, choices=[])
     submit = SubmitField('提交')

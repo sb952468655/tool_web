@@ -20,6 +20,25 @@ g_city_to_name = {
     'xuzhou': '徐州'
 }
 
+g_port_10ge = r'''port @10ge_port_id@
+        description "@10ge_port_description@"
+        ethernet
+            mode access
+            encap-type qinq
+        exit
+        no shutdown
+    exit'''
+
+g_port_ge = r'''port @ge_port_id@
+        description "@ge_port_description@"
+        ethernet
+            mode access
+            encap-type qinq
+            no autonegotiate
+        exit
+        no shutdown
+    exit'''
+
 g_config_model = [
     ('10GE', '''/config
     port @10ge_port_id@

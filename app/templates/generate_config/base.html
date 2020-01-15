@@ -22,7 +22,7 @@
             {% else %}
                 <li role="presentation" ><a href="{{ url_for('main.model_list') }}">模板组</a></li>
             {% endif %}
-            {% if request.path.startswith('/model_select') %} 
+            {% if request.path.startswith('/model_select') or request.path.startswith('/make_config') %} 
                 <li role="presentation" class="active"><a href="{{ url_for('main.model_select') }}">脚本制作</a></li>
             {% else %}
                 <li role="presentation" ><a href="{{ url_for('main.model_select') }}">脚本制作</a></li>
