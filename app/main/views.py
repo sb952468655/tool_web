@@ -522,6 +522,7 @@ def xj_report_all_host():
 def city_list():
     '''地市列表'''
 
+    session['city'] = ''
     city_data = []
     citys = get_city_list()
     for i in citys:

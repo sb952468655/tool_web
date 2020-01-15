@@ -24,7 +24,7 @@
         </div>
         <div class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
-                <li><a href="#">主页</a></li>
+                <li><a href="{{ url_for('main.index') }}">主页</a></li>
                 <li><a href="{{ url_for('main.host_list', action = 'report_port') }}">统计报表</a></li>
                 <li><a href="{{ url_for('main.host_list', action = 'xunjian') }}">设备巡检</a></li>
                 <li><a href="{{ url_for('main.host_list', action = 'check_config') }}">配置检查</a></li>
