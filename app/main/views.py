@@ -1056,11 +1056,11 @@ def model_select():
 
     form = ModelSelectForm()
     generate_config = GenerateConfig.query
-    generate_config = generate_config.filter(GenerateConfig.model_type.in_([0,1]))
-    model_data = generate_config.all()
+    generate_config = generate_config.filter(GenerateConfig.model_type.in_([1,2]))
+    custom_model_data = generate_config.all()
+    form.custom_model_names.choices = [(item.id, item.name) for item in custom_model_data]
+    model_data = GenerateConfig.query.filter_by(model_type = 0).all()
     form.model_names.choices = [(item.id, item.name) for item in model_data]
-    model_list_data = GenerateConfig.query.filter_by(model_type = 2).all()
-    form.model_list_names.choices = [(item.id, item.name) for item in model_list_data]
 
     if form.validate_on_submit():
         model_str = ''
@@ -1068,7 +1068,7 @@ def model_select():
             model_data = GenerateConfig.query.filter_by(id=i).first()
             model_str += model_data.content + '\n'
 
-        for i in form.model_list_names.data:
+        for i in form.custom_model_names.data:
             model_data = GenerateConfig.query.filter_by(id=i).first()
             model_str += model_data.content + '\n'
 
