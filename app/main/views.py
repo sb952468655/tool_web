@@ -489,7 +489,10 @@ def xj_report_all_host():
             doc.add_paragraph()
             
             font = p_info.runs[0].font
-            font.color.rgb = RGBColor(0, 0, 255)
+            if '正常' in j.err:
+                font.color.rgb = RGBColor(0, 0, 255)
+            else:
+                font.color.rgb = RGBColor(255, 0, 0)
 
             font = p_warn.runs[0].font
             if 'port状态巡检' == j.check_item:
