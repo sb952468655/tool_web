@@ -8,7 +8,7 @@
     <h1>{% block page_header %} 典型案例 {% endblock %}</h1>
 </div>
 
-<form class="form-inline" method="post" action="{{ url_for('main.case_lib') }}">
+<form class="form-inline" method="post" action="{{ url_for('main.case_lib', from='case_lib') }}">
     <div class="form-group">
         <label>关键字</label>
         <input type="text" class="form-control" id="keyword"  name="keyword">
@@ -39,7 +39,6 @@
                             <th>{{ item.describe }}</th>
                             <th>
                                 <a class="btn btn-default btn-sm" href="{{ item.file_url }}">下载</a>
-                                <a class="btn btn-default btn-sm" href="{{ url_for('main.case_delete', id = item.id) }}">删除</a>
                             </th>
                         </tr>
                     {% endfor %}
@@ -51,7 +50,7 @@
 {% block pageination %}
     {% if pageination %}
     <div class="pagination">
-        {{ macros.pagination_widget(pageination, 'main.case_lib') }}
+        {{ macros.pagination_widget(pageination, 'main.case_lib', from='case_lib') }}
     </div>
     {% endif %}
 {% endblock %}

@@ -725,17 +725,16 @@ def load_statistic_host(host_name):
 
 @main.route('/case_lib', methods= ['GET', 'POST'])
 def case_lib():
-    '''经典案例'''
+    '''典型案例'''
 
     page = request.args.get('page', 1, type=int)
+    _from = request.args.get('from')
+    form = CaseUploadForm()
     count = CaseLib.query.count()
     if count == 0:
         abort(404)
 
     if request.method == 'POST':
-        session['search_case_lib_keyword'] = ''
-        session['search_case_lib_date'] = ''
-
         search_case_lib_keyword = request.form.get('keyword')
         search_case_lib_date = request.form.get('date')
 
@@ -746,9 +745,12 @@ def case_lib():
 
     case_lib = CaseLib.query
     if session.get('search_case_lib_keyword'):
-        case_lib = case_lib.filter(CaseLib.file_name.like("%" + session.get('search_case_lib_keyword') + "%"))
+        case_lib = case_lib.filter(CaseLib.describe.like("%" + session.get('search_case_lib_keyword') + "%"))
+        session['search_case_lib_keyword'] = ''
     if session.get('search_case_lib_date'):
         case_lib = case_lib.filter(CaseLib.date_time == session.get('search_case_lib_date'))
+        session['search_case_lib_date'] = ''
+
 
     pageination = case_lib.paginate(
         page, per_page = current_app.config['FLASKY_POSTS_PER_PAGE'],
@@ -758,9 +760,14 @@ def case_lib():
     case_lib_data = pageination.items
     case_lib_data = [(index, item) for index, item in enumerate(case_lib_data) ]
 
-    return render_template('case_lib/case_lib.html',
+    if _from == 'case_lib':
+        url = 'case_lib/case_lib.html'
+    else:
+        url = 'case_lib/case_upload.html'
+    return render_template(url,
         case_lib_data = case_lib_data,
-        pageination = pageination)
+        pageination = pageination,
+        form=form)
 
 @main.route('/case_delete/<id>')
 def case_delete(id):
@@ -772,12 +779,13 @@ def case_delete(id):
     db.session.delete(case)
     db.session.commit()
     
-    return redirect(url_for('main.case_lib'))
+    return redirect(url_for('main.case_upload'))
 
 @main.route('/case_upload/nokia2020' , methods=['GET', 'POST'])
 def case_upload():
     '''案例上传'''
 
+    page = request.args.get('page', 1, type=int)
     form = CaseUploadForm()
     if form.validate_on_submit():
         f = form.upload_file.data
@@ -801,8 +809,19 @@ def case_upload():
 
         return redirect(url_for('main.case_upload'))
 
+
+    pageination = CaseLib.query.paginate(
+        page, per_page = current_app.config['FLASKY_POSTS_PER_PAGE'],
+        error_out = False
+    )
+
+    case_lib_data = pageination.items
+    case_lib_data = [(index, item) for index, item in enumerate(case_lib_data) ]
+
     return render_template('case_lib/case_upload.html',
-        form = form)
+        form = form,
+        case_lib_data = case_lib_data,
+        pageination = pageination)
 
 @main.route('/zuxun/<host_name>')
 def zuxun(host_name):
