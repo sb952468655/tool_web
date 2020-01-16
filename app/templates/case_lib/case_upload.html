@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% import "bootstrap/wtf.html" as wtf %}
 {% import "_macros.html" as macros %}
 
 {% block page_content %}
@@ -10,12 +11,7 @@
             <div class="panel panel-default">
                 <div class="panel-heading">案例上传</div>
                 <div class="panel-body">
-                    <form method="post" enctype="multipart/form-data">
-                        {{ form.hidden_tag() }}
-                        {{ form.describe.label }} {{ form.describe(id='describe') }}<br>
-                        {{ form.upload_file.label }} {{ form.upload_file(id='upload_file') }}<br>
-                        {{ form.submit() }}<br>
-                    </form>
+                    {{ wtf.quick_form(form) }}
                 </div>
             </div>
             <form class="form-inline" method="post" action="{{ url_for('main.case_lib', from='case_upload') }}">
