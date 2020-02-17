@@ -1820,11 +1820,11 @@ def save_port_statistic(city, host_name, config):
         port_statistic = PortStatistic(
             city = city,
             host_name = host_name,
-            host_ip = item[0],
-            port_type = item[1],
-            port_num = item[2],
-            used_num = item[3],
-            unused_num = item[4],
+            host_ip = item[1],
+            port_type = item[2],
+            port_num = item[3],
+            used_num = item[4],
+            unused_num = item[5],
             date_time = today
         )
 
@@ -2095,6 +2095,15 @@ def save_zuxun(city, host_name, config):
     db.session.add(zuxun)
     db.session.commit()
     db.session.close()
+
+
+@main.route('/make_excel/<host_name>/<table_name>')
+def make_excel(host_name, table_name):
+    '''统计报表生成表格'''
+
+    tabel_obj = None
+    if table_name == 'port_statistic':
+        count = PortStatistic.query.filter_by(date_time = date.today()).count()
 
 
 @main.route('/db_test')
