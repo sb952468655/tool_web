@@ -61,7 +61,7 @@ def get_port_statistic(config):
                 ge_10_used_num += 1
             else:
                 ge_10_free_num += 1
-        if item[10].startswith('GIGE'):
+        elif 'GIGE' in item[10]:
             ge_num += 1
             if item[1] == 'Up' and item[2] == 'Yes' and item[3] == 'Up':
                 ge_used_num += 1
