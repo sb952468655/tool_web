@@ -726,6 +726,36 @@ def load_statistic_host(host_name):
         action = 'load_statistic_host', 
         host_name=host_name)
 
+@main.route('/install_base/<host_name>')
+def install_base(host_name):
+    '''installbase统计表'''
+
+    count = InstallBase.query.filter_by(date_time = date.today()).count()
+    if count == 0:
+        abort(404)
+
+    install_base_data = InstallBase.query.filter_by(date_time = date.today()).all()
+
+    return render_template('report/install_base.html',
+        data = install_base_data,
+        action = 'install_base',
+        host_name = host_name)
+
+@main.route('/net_flow/<host_name>')
+def net_flow(host_name):
+    '''重要网络流量统计'''
+
+    count = NetFlow.query.filter_by(date_time = date.today()).count()
+    if count == 0:
+        abort(404)
+
+    net_flow_data = NetFlow.query.filter_by(date_time = date.today()).all()
+
+    return render_template('report/net_flow.html',
+        data = net_flow_data,
+        action = 'net_flow',
+        host_name = host_name)
+
 @main.route('/case_lib', methods= ['GET', 'POST'])
 def case_lib():
     '''典型案例'''
@@ -1674,6 +1704,8 @@ def save_db():
                 save_address_collect(i, j, today_log)
                 #组巡
                 save_zuxun(i, j, today_log)
+                #重要网络流量
+                save_netflow(i, j, today_log)
 
             if today_log and yesterday_log:
                 save_xunjian(i, j, today_log, yesterday_log)
@@ -1684,6 +1716,9 @@ def save_db():
                     logging.info('host: {} not found today log'.format(j))
                 if not yesterday_log:
                     logging.info('host: {} not found yesterday log'.format(j))
+
+    #installbase统计
+    save_install_base()
 
     return '数据保存成功'
 
@@ -2093,6 +2128,77 @@ def save_zuxun(city, host_name, config):
     )
 
     db.session.add(zuxun)
+    db.session.commit()
+    db.session.close()
+
+def save_netflow(city, host_name, config):
+    '''保存重要网络流量数据'''
+
+    today_data_count = NetFlow.query.filter_by(site_name = host_name, date_time = date.today()).count()
+
+    if today_data_count:
+        logging.info('netflow host: {} today is saved'.format(host_name))
+        return
+
+    res = get_netflow(config)
+    if res:
+        logging.info('host: {} {} begin save'.format(host_name, 'netflow'))
+
+    today = date.today()
+    netflow = NetFlow(
+        carrier = 'CMCC',
+        province = 'JS',
+        city = city,
+        network = 'CMNET',
+        site_name = host_name,
+        port_num_10g = res[0],
+        port_utilization_10g = res[1],
+        port_num_100g = res[2],
+        port_utilization_100g = res[3],
+        pea_uplink_throughput_utilization = res[4],
+        date_time = today
+    )
+
+    db.session.add(netflow)
+    db.session.commit()
+    db.session.close()
+
+def save_install_base():
+    '''保存installbase数据'''
+
+    data = dict()
+    city_list = get_city_list()
+    for city in city_list:
+        for host in get_host(city):
+            today_log = get_log(city, host)
+            host_type, host_model, version, note = get_install_base(today_log)
+            key = host_type + ' ' + host_model + ' ' + version + ' ' + note
+            if key in data:
+                data[key] += 1
+            else:
+                data[key] = 1
+
+    today = date.today()
+    for k, v in data.items():
+        keys = k.split(' ')
+        host_type = keys[0] + ' ' + keys[1]
+
+        #存入数据库
+        install_base = InstallBase(
+            province = '江苏',
+            operator = '移动',
+            busines_type = '城域网',
+            net_type = 'BRAS',
+            host_type = keys[0] + ' ' + keys[1],
+            host_model = keys[2],
+            version = keys[3],
+            number = v,
+            note = keys[4],
+            date_time = today
+        )
+
+        db.session.add(install_base)
+
     db.session.commit()
     db.session.close()
 

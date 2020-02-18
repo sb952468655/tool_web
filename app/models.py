@@ -281,3 +281,42 @@ class GenerateConfig(db.Model):
 
     def __repr__(self):
         return '<GenerateConfig %r>' % self.name
+
+class InstallBase(db.Model):
+    '''InstallBase表'''
+
+    __tablename__ = 'install_base'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    province = db.Column(db.String(64)) #省份
+    operator = db.Column(db.String(64)) #运营商
+    busines_type = db.Column(db.String(64)) #业务类型
+    net_type = db.Column(db.String(64)) #网络类型
+    host_type = db.Column(db.String(64)) #设备类型
+    host_model = db.Column(db.String(64)) #设备型号
+    version = db.Column(db.String(64)) #版本
+    number = db.Column(db.Integer) #数量
+    note = db.Column(db.String(64)) #备注
+    date_time = db.Column(db.Date, default = date.today())
+
+    def __repr__(self):
+        return '<InstallBase %r>' % self.host_type
+
+class NetFlow(db.Model):
+    '''重要网络流量统计表'''
+
+    __tablename__ = 'net_flow'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    carrier = db.Column(db.String(64)) #Carrier
+    province = db.Column(db.String(64)) #省份
+    city = db.Column(db.String(64)) #地市
+    network = db.Column(db.String(64)) #网络
+    site_name = db.Column(db.String(64)) #设备名称
+    port_num_10g = db.Column(db.Integer) #10GE端口数量
+    port_utilization_10g = db.Column(db.String(64)) #10GE端口已用数量百分比
+    port_num_100g = db.Column(db.Integer) #100GE端口数量
+    port_utilization_100g = db.Column(db.String(64)) #100GE端口已用数量百分比
+    pea_uplink_throughput_utilization = db.Column(db.String(64)) #流量峰值利用率中选取最大的值。
+    date_time = db.Column(db.Date, default = date.today())
+
+    def __repr__(self):
+        return '<NetFlow %r>' % self.site_name

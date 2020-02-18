@@ -353,6 +353,81 @@ def get_mda_statistic(config):
 
     return mda_statistic_data
 
+def get_install_base(config):
+    '''获取install_base数据'''
+
+    host_type = ''
+    host_model = ''
+    version = ''
+    note = ''
+
+    p_system_type = r'System Type            : (7\d50) ([A-Z]{2,4})-(\d{2})'
+    p_system_version = r'System Version         : C-((\d{1,2})\.\d\.R\d)'
+
+    res_system_type = re.search(p_system_type, config)
+    res_system_version = re.search(p_system_version, config)
+
+    if res_system_type:
+        host_type = res_system_type.group(1) + ' ' + res_system_type.group(2)
+        host_model = res_system_type.group(2) + '-' + res_system_type.group(3)
+
+    if res_system_version:
+        t = res_system_version.groups()
+        version = 'R' + res_system_version.group(2)
+        note = res_system_version.group(1)
+
+
+    return (host_type, host_model, version, note)
+
+def get_netflow(config):
+    '''获取重要网络流量数据'''
+
+    ge_10_num = 0
+    ge_10_used_num = 0
+    ge_100_num = 0
+    ge_100_used_num = 0
+    port_utilization_10g = 0
+    port_utilization_100g = 0
+
+    p_interface_table = r'(?s)Interface Table \(Router: Base\)\n={79}.*?\n={79}'
+    p_port = r'Up        Up/Up       Network (\d{1,2}/\d{1,2}/\d{1,2})'
+    p_ethernet_interface = r'(?s)Interface {10}: (\d{1,2}/\d{1,2}/\d{1,2}) {19,22}Oper Speed.*?Utilization \(300 seconds\) {24,26}(\d{1,3}\.\d{2})% {16,18}(\d{1,3}\.\d{2})%'
+
+    res_interface_table = re.search(p_interface_table, config)
+    if res_interface_table:
+        res_port = re.findall(p_port, res_interface_table.group())
+
+        res_ethernet_interface = re.findall(p_ethernet_interface, config)
+        max_utilization = 0.00
+        for i in res_ethernet_interface:
+            if i[0] in res_port:
+                if float(i[1]) > max_utilization:
+                    max_utilization = float(i[1])
+                if float(i[2]) > max_utilization:
+                    max_utilization = float(i[2])
+
+        
+    #采集10GE, 100GE 端口使用情况
+    p_port_info = r'''(\d{1,2}/\d{1,2}/\d{1,2}) {6,9}(Up|Down) {2,4}(Yes|No) {2,3}(Up|Down) {4,6}(\d{4}) (\d{4}) {2,4}(-|\d{1,3}) (accs|netw) (null|qinq) (xgige|xcme) {2,3}((10GBASE-LR|10GBASE-ER|100GBASE-LR4\*)( {2}(\d{2}KM|\*))?)?'''
+    res_port = re.findall(p_port_info, config)
+    for item in res_port:
+        if item[10].startswith('100'):
+            ge_100_num += 1
+            if item[1] == 'Up' and item[2] == 'Yes' and item[3] == 'Up':
+                ge_100_used_num += 1
+        else:
+            ge_10_num += 1
+            if item[1] == 'Up' and item[2] == 'Yes' and item[3] == 'Up':
+                ge_10_used_num += 1
+
+    if ge_10_num > 0:
+        port_utilization_10g = round(ge_10_used_num * 100/ge_10_num, 2)
+    if ge_100_num > 0:
+        port_utilization_100g = round(ge_100_used_num * 100/ge_100_num, 2)
+
+    return (ge_10_num, str(port_utilization_10g)+'%', ge_100_num, str(port_utilization_100g)+'%', str(max_utilization)+'%')
+
+
 def get_host_name(config):
     '''获取设备名称'''
 

@@ -1,0 +1,39 @@
+{% extends "report_port.html" %}
+
+{% block title %} 重要网络流量统计表 {% endblock %}
+{% block page_header %} 重要网络流量统计表 {% endblock %}
+
+{% block report_content %}
+    <table class="table table-striped table-condensed">
+        <thead>
+            <tr>
+                <th>Carrier</th>
+                <th>Province</th>
+                <th>City</th>
+                <th>Network</th>
+                <th>Site Name</th>
+                <th>10G Port Num</th>
+                <th>10G Port Utilization</th>
+                <th>100G Port Num</th>
+                <th>100G Port Utilization</th>
+                <th>Peak Uplink Throughput Utilization</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in data %}
+                <tr>
+                    <th>{{ item.carrier }}</th>
+                    <th>{{ item.province }}</th>
+                    <th>{{ item.city }}</th>
+                    <th>{{ item.network }}</th>
+                    <th>{{ item.site_name }}</th>
+                    <th>{{ item.port_num_10g }}</th>
+                    <th>{{ item.port_utilization_10g }}</th>
+                    <th>{{ item.port_num_100g }}</th>
+                    <th>{{ item.port_utilization_100g }}</th>
+                    <th>{{ item.pea_uplink_throughput_utilization }}</th>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

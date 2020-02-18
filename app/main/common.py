@@ -1,4 +1,6 @@
 import os, datetime, logging, re
+import openpyxl
+from openpyxl.styles import Alignment, PatternFill
 from .config import g_log_path
 from .ftp import myFtp
 
@@ -135,3 +137,33 @@ def is_yesday_log(log_name):
         return True
     else:
         return False
+
+
+def make_excel(file_name, labels, data):
+    '''根据参数生成表格'''
+
+    letters = [
+        'A','B','C','D','E','F','G','H','I',
+        'J','K','L','M','N','O','P''Q','R',
+        'S','T','U','V','W','X','Y','Z'
+    ]
+    excel = openpyxl.Workbook()
+    sheet = excel.active
+    for index, label in enumerate(labels):
+        sheet['{}1'.format(letters[index])] = label
+
+
+    # sheet.column_dimensions['A'].width = 40.0
+    # sheet.column_dimensions['B'].width = 20.0
+    # sheet.column_dimensions['N'].width = 20.0
+    # sheet.column_dimensions['Q'].width = 15.0
+    # sheet.column_dimensions['R'].width = 15.0
+    cur_row = 2
+
+    for item in data:
+        for index, j in enumerate(item):
+            sheet[letters[index] + str(cur_row)] = j
+
+        cur_row += 1
+    
+    excel.save(file_name)
