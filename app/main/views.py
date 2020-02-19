@@ -458,7 +458,7 @@ def download_excel(host_name, table_name):
                 i[0], i[1], i[2], i[3], i[4]
             ))
     elif table_name == 'install_base':
-        file_name = 'install_base.xlsx'
+        file_name = 'Install+base+统计表-{}-江苏.xlsx'.format(date.today().strftime('%Y%m%d'))
         labels = [
             '省份', '运营商', '业务类型', '网络类型', '设备类型', '设备型号', '版本', '数量', '备注'
         ]
@@ -477,7 +477,7 @@ def download_excel(host_name, table_name):
                 i.note
             ))
     elif table_name == 'net_flow':
-        file_name = 'net_flow.xlsx'
+        file_name = '重要网络流量统计-{} 江苏.xlsx'.format(date.today().strftime('%Y%m%d'))
         labels = [
             'Carrier', 'Province', 'City', 'Network', 'Site Name'
             , '10G Port Num', '10G Port Utilization', '100G Port Num'
