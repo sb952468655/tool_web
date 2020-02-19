@@ -152,12 +152,7 @@ def make_excel(file_name, labels, data):
     for index, label in enumerate(labels):
         sheet['{}1'.format(letters[index])] = label
 
-
     # sheet.column_dimensions['A'].width = 40.0
-    # sheet.column_dimensions['B'].width = 20.0
-    # sheet.column_dimensions['N'].width = 20.0
-    # sheet.column_dimensions['Q'].width = 15.0
-    # sheet.column_dimensions['R'].width = 15.0
     cur_row = 2
 
     for item in data:

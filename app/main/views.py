@@ -19,7 +19,7 @@ from .statistic import get_statistic_data, get_statistic_host_data
 from .. import db
 from ..models import *
 from .report import *
-from .common import get_log, get_host, get_today_log_name, get_city_list, get_host_logs, get_log_from_date
+from .common import get_log, get_host, get_today_log_name, get_city_list, get_host_logs, get_log_from_date, make_excel
 from .forms import CaseUploadForm, ModelForm, ModelListCreateForm, ModelSelectForm
 sys.path.append('../')
 
@@ -343,6 +343,168 @@ def generate_excel(host_name):
     excel.save(os.path.join('app','static', 'port.xlsx'))
 
     return redirect(url_for('static', filename='port.xlsx'))
+
+@main.route('/download_excel/<host_name>/<table_name>')
+def download_excel(host_name, table_name):
+    '''生成excel，并生成下载链接'''
+
+    data = []
+    labels = []
+    file_name = ''
+
+    if table_name == 'port_statistic':
+        file_name = 'port_statistic.xlsx'
+        labels = [
+            '设备名', '设备IP', '端口类型', '数量', '已使用', '剩余'
+        ]
+
+        port_statistic_data = PortStatistic.query.filter_by(host_name = host_name, date_time = date.today()).all()
+        for i in port_statistic_data:
+            data.append((
+                i.host_name,
+                i.host_ip,
+                i.port_type,
+                i.port_num,
+                i.used_num,
+                i.unused_num
+            ))
+
+    elif table_name == 'card_detail':
+        file_name = 'card_detail.xlsx'
+        labels = [
+            '设备名', '设备IP', 'Slot', 'Equipped Type', 'Admin State'
+            , 'Operational State', 'Serial number', 'Time of last boot'
+            , 'Temperature', 'Temperature threshold', '是否存在异常'
+        ]
+
+        card_detail_data = CardDetail.query.filter_by(host_name = host_name, date_time = date.today()).all()
+        for i in card_detail_data:
+            data.append((
+                i.host_name,
+                i.host_ip,
+                i.slot,
+                i.card_type,
+                i.admin_state,
+                i.operational_state,
+                i.serial_number,
+                i.time_of_last_boot,
+                i.temperature,
+                i.temperature_threshold,
+                i.is_abnormal
+            ))
+    elif table_name == 'card_statistic':
+        file_name = 'card_statistic.xlsx'
+        labels = [
+            '设备名', '设备IP', 'card类型', '数量'
+        ]
+
+        card_statistic_data = CardStatistic.query.filter_by(host_name = host_name, date_time = date.today()).all()
+        for i in card_statistic_data:
+            data.append((
+                i.host_name,
+                i.host_ip,
+                i.card_type,
+                i.card_num
+            ))
+    elif table_name == 'mda_detail':
+        file_name = 'mda_detail.xlsx'
+        labels = [
+            '设备名', '设备IP', 'Slot', 'Mda', 'Equipped Type', 'Admin State'
+            , 'Operational State', 'Serial number', 'Time of last boot'
+            , 'Temperature', 'Temperature threshold', '是否存在异常'
+        ]
+
+        mda_detail_data = MdaDetail.query.filter_by(host_name = host_name, date_time = date.today()).all()
+        for i in mda_detail_data:
+            data.append((
+                i.host_name,
+                i.host_ip,
+                i.slot,
+                i.mda,
+                i.equipped_type,
+                i.admin_state,
+                i.operational_state,
+                i.serial_number,
+                i.time_of_last_boot,
+                i.temperature,
+                i.temperature_threshold,
+                i.is_abnormal
+            ))
+    elif table_name == 'mda_statistic':
+        file_name = 'mda_statistic.xlsx'
+        labels = [
+            '设备名', '设备IP', 'MDA类型', '数量'
+        ]
+
+        card_statistic_data = CardStatistic.query.filter_by(host_name = host_name, date_time = date.today()).all()
+        for i in card_statistic_data:
+            data.append((
+                i.host_name,
+                i.host_ip,
+                i.card_type,
+                i.card_num
+            ))
+    elif table_name == 'host_list':
+        file_name = 'host_list.xlsx'
+        city = session.get('city')
+        host_list_data = get_host_list(city)
+
+        labels = [
+            '设备名', '设备IP', '版本', '设备启动时间', '设备配置保存时间'
+        ]
+
+        for i in host_list_data:
+            data.append((
+                i[0], i[1], i[2], i[3], i[4]
+            ))
+    elif table_name == 'install_base':
+        file_name = 'install_base.xlsx'
+        labels = [
+            '省份', '运营商', '业务类型', '网络类型', '设备类型', '设备型号', '版本', '数量', '备注'
+        ]
+
+        install_base_data = InstallBase.query.filter_by(date_time = date.today()).all()
+        for i in install_base_data:
+            data.append((
+                i.province,
+                i.operator,
+                i.busines_type,
+                i.net_type,
+                i.host_type,
+                i.host_model,
+                i.version,
+                i.number,
+                i.note
+            ))
+    elif table_name == 'net_flow':
+        file_name = 'net_flow.xlsx'
+        labels = [
+            'Carrier', 'Province', 'City', 'Network', 'Site Name'
+            , '10G Port Num', '10G Port Utilization', '100G Port Num'
+            , '100G Port Utilization', 'Peak Uplink Throughput Utilization'
+        ]
+
+        net_flow_data = NetFlow.query.filter_by(date_time = date.today()).all()
+        for i in net_flow_data:
+            data.append((
+                i.carrier,
+                i.province,
+                i.city,
+                i.network,
+                i.site_name,
+                i.port_num_10g,
+                i.port_utilization_10g,
+                i.port_num_100g,
+                i.port_utilization_100g,
+                i.pea_uplink_throughput_utilization
+            ))
+
+    save_path = os.path.join('app','static', file_name)
+    if labels and data:
+        make_excel(save_path, labels, data)
+        return redirect(url_for('static', filename=file_name))
+    else:
+        abort(404)
 
 @main.route('/xj_log_export/<host_name>')
 def xj_log_export(host_name):
@@ -2201,16 +2363,6 @@ def save_install_base():
 
     db.session.commit()
     db.session.close()
-
-
-@main.route('/make_excel/<host_name>/<table_name>')
-def make_excel(host_name, table_name):
-    '''统计报表生成表格'''
-
-    tabel_obj = None
-    if table_name == 'port_statistic':
-        count = PortStatistic.query.filter_by(date_time = date.today()).count()
-
 
 @main.route('/db_test')
 def db_test():
