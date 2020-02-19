@@ -2328,11 +2328,11 @@ def save_netflow(city, host_name, config):
 def save_install_base():
     '''保存installbase数据'''
 
-    today_data_count = InstallBase.query.filter_by(date_time = date.today()).count()
+    # today_data_count = InstallBase.query.filter_by(date_time = date.today()).count()
 
-    if today_data_count:
-        logging.info('installbase today is saved')
-        return
+    # if today_data_count:
+    #     logging.info('installbase today is saved')
+    #     return
 
     data = dict()
     city_list = get_city_list()
@@ -2349,6 +2349,8 @@ def save_install_base():
     today = date.today()
     for k, v in data.items():
         keys = k.split(' ')
+        if len(keys) != 5:
+            continue
         host_type = keys[0] + ' ' + keys[1]
 
         #存入数据库
