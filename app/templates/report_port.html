@@ -51,16 +51,19 @@
             {% else %}
                 <li role="presentation" ><a href="{{ url_for('main.host_list_data', host_name = host_name ) }}">设备清单统计</a></li>
             {% endif %}
-            {% if action == 'install_base' %}
-                <li role="presentation" class="active"><a href="{{ url_for('main.install_base', host_name = host_name) }}">installbase统计</a></li>
-            {% else %}
-                <li role="presentation" ><a href="{{ url_for('main.install_base', host_name = host_name) }}">installbase统计</a></li>
+            {% if current_user.username == 'nokia' %}
+                {% if action == 'install_base' %}
+                    <li role="presentation" class="active"><a href="{{ url_for('main.install_base', host_name = host_name) }}">installbase统计</a></li>
+                {% else %}
+                    <li role="presentation" ><a href="{{ url_for('main.install_base', host_name = host_name) }}">installbase统计</a></li>
+                {% endif %}
+                {% if action == 'net_flow' %}
+                    <li role="presentation" class="active"><a href="{{ url_for('main.net_flow', host_name = host_name) }}">重要网络流量统计</a></li>
+                {% else %}
+                    <li role="presentation" ><a href="{{ url_for('main.net_flow', host_name = host_name) }}">重要网络流量统计</a></li>
+                {% endif %}
             {% endif %}
-            {% if action == 'net_flow' %}
-                <li role="presentation" class="active"><a href="{{ url_for('main.net_flow', host_name = host_name) }}">重要网络流量统计</a></li>
-            {% else %}
-                <li role="presentation" ><a href="{{ url_for('main.net_flow', host_name = host_name) }}">重要网络流量统计</a></li>
-            {% endif %}
+
         </ul>
     </div>
     <div class="col-md-10">

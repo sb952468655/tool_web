@@ -3,6 +3,7 @@ from urllib.request import quote, unquote
 from sqlite3 import OperationalError
 from datetime import date, datetime
 from flask import render_template, session, redirect, url_for, current_app, request, abort, g, Response, flash
+from flask_login import login_required, current_user
 import openpyxl
 from openpyxl.styles import Alignment, PatternFill
 import docx
@@ -24,12 +25,18 @@ from .forms import CaseUploadForm, ModelForm, ModelListCreateForm, ModelSelectFo
 sys.path.append('../')
 
 @main.route('/')
+@login_required
 def index():
     session['action'] = 'report_port'
-    return redirect(url_for('main.city_list'))
+    if current_user.username == 'nokia':
+        return redirect(url_for('main.city_list'))
+    else:
+        session['city'] = current_user.username
+        return redirect(url_for('main.host_list', action = 'report_port'))
 
 
 @main.route('/report_port/<host_name>', methods=['GET', 'POST'])
+@login_required
 def report_port(host_name):
     '''统计报表-端口明细'''
 
@@ -78,6 +85,7 @@ def report_port(host_name):
         pageination = pageination)
 
 @main.route('/host_list_data/<host_name>')
+@login_required
 def host_list_data(host_name):
     '''设备清单统计'''
     city = session.get('city')
@@ -86,6 +94,7 @@ def host_list_data(host_name):
     return render_template('host_list_data.html', host_name=host_name, host_list_data = host_list_data ,action='host_list_data')
 
 @main.route('/card_detail/<host_name>')
+@login_required
 def card_detail(host_name):
     '''card明细'''
 
@@ -100,6 +109,7 @@ def card_detail(host_name):
     return render_template('card_detail.html', host_name=host_name, card_detail_data = card_detail_data ,action='card_detail')
 
 @main.route('/card_statistic/<host_name>')
+@login_required
 def card_statistic(host_name):
     '''card统计'''
 
@@ -113,6 +123,7 @@ def card_statistic(host_name):
     return render_template('card_statistic.html', host_name=host_name, card_statistic_data = card_statistic_data ,action='card_statistic')
 
 @main.route('/mda_detail/<host_name>')
+@login_required
 def mda_detail(host_name):
     '''mda明细'''
 
@@ -126,6 +137,7 @@ def mda_detail(host_name):
     return render_template('mda_detail.html', host_name=host_name,  mda_detail_data = mda_detail_data ,action='mda_detail')
 
 @main.route('/mda_statistic/<host_name>')
+@login_required
 def mda_statistic(host_name):
     '''mda统计'''
 
@@ -139,6 +151,7 @@ def mda_statistic(host_name):
     return render_template('mda_statistic.html', host_name=host_name,  mda_statistic_data = mda_statistic_data ,action='mda_statistic')
 
 @main.route('/port_statistic/<host_name>')
+@login_required
 def port_statistic(host_name):
     '''port统计'''
 
@@ -153,6 +166,7 @@ def port_statistic(host_name):
 
 
 @main.route('/check_config/<host_name>')
+@login_required
 def check_config(host_name):
     '''配置检查'''
 
@@ -169,6 +183,7 @@ def check_config(host_name):
     return render_template('check.html', check_data=check_res, host_name=host_name)
 
 @main.route('/check_excel/<host_name>')
+@login_required
 def check_excel(host_name):
     '''配置检查生成表格'''
 
@@ -204,6 +219,7 @@ def check_excel(host_name):
 
 
 @main.route('/xunjian/<host_name>')
+@login_required
 def xunjian(host_name):
     '''巡检'''
 
@@ -221,6 +237,7 @@ def xunjian(host_name):
     return render_template('xunjian/xunjian.html', xunjian_data=warn_data, host_name = host_name, city = city)
 
 @main.route('/xunjian_output_all/<host_name>')
+@login_required
 def xunjian_output_all(host_name):
     '''设备巡检-全量输出'''
 
@@ -235,6 +252,7 @@ def xunjian_output_all(host_name):
     return render_template('xunjian/xunjian_output_all.html', xunjian_data=warn_data, host_name = host_name, city = city)
 
 @main.route('/xunjian_all_host')
+@login_required
 def xunjian_all_host():
     '''所有设备巡检'''
 
@@ -255,6 +273,7 @@ def xunjian_all_host():
     return render_template('xunjian/xunjian_all_host.html', xunjian_data=warn_data)
 
 @main.route('/auto_config')
+@login_required
 def auto_config():
     '''脚本自动配置'''
 
@@ -262,6 +281,7 @@ def auto_config():
 
 
 @main.route('/generate_excel/<host_name>')
+@login_required
 def generate_excel(host_name):
     '''端口明细生成表格'''
 
@@ -345,6 +365,7 @@ def generate_excel(host_name):
     return redirect(url_for('static', filename='port.xlsx'))
 
 @main.route('/download_excel/<host_name>/<table_name>')
+@login_required
 def download_excel(host_name, table_name):
     '''生成excel，并生成下载链接'''
 
@@ -507,6 +528,7 @@ def download_excel(host_name, table_name):
         abort(404)
 
 @main.route('/xj_log_export/<host_name>')
+@login_required
 def xj_log_export(host_name):
     '''巡检日志导出'''
 
@@ -522,6 +544,7 @@ def xj_log_export(host_name):
     return redirect(url_for('static', filename = 'backup/{}.log'.format(host_name)))
 
 @main.route('/xj_log/<host_name>')
+@login_required
 def xj_log(host_name):
     '''巡检log全量输出'''
 
@@ -535,6 +558,7 @@ def xj_log(host_name):
     return render_template('xunjian/xunjian_log.html', log_str = log_str, host_name = host_name)
 
 @main.route('/xj_report/<city>/<host_name>/<type>')
+@login_required
 def xj_report(city, host_name, type):
     '''生成巡检报告'''
 
@@ -606,6 +630,7 @@ def xj_report(city, host_name, type):
     return redirect(url_for('static', filename = report_name))
 
 @main.route('/xj_report_all_host')
+@login_required
 def xj_report_all_host():
     '''所有设备巡检，生成巡检报告'''
 
@@ -684,6 +709,7 @@ def xj_report_all_host():
 
 
 @main.route('/city_list')
+@login_required
 def city_list():
     '''地市列表'''
 
@@ -696,6 +722,7 @@ def city_list():
 
 
 @main.route('/host_list/<action>')
+@login_required
 def host_list(action):
     session['action'] = action
     if not session.get('city'):
@@ -718,6 +745,7 @@ def host_list(action):
 
 
 @main.route('/address_collect/<host_name>')
+@login_required
 def address_collect(host_name):
     '''三层接口和静态用户IP地址采集'''
 
@@ -744,6 +772,7 @@ def address_collect(host_name):
 
 
 @main.route('/address_mk_excel/<host_name>')
+@login_required
 def address_mk_excel(host_name):
     '''地址采集生成 excel 表格'''
     excel = openpyxl.Workbook()
@@ -798,6 +827,7 @@ def address_mk_excel(host_name):
 
 
 @main.route('/config_backup')
+@login_required
 def config_backup():
     '''config备份（下载到本地）'''
     host_data = []
@@ -812,9 +842,11 @@ def config_backup():
         if get_log(city, item):
             host_data.append((item, date_str))
         
+    host_data = [(index, host) for index, host in enumerate(host_data)]
     return render_template('back_up/config_backup_host_list.html', host_data=host_data)
 
 @main.route('/backup_list', methods=['POST'])
+@login_required
 def backup_list():
     '''获取需要备份的config列表'''
 
@@ -823,7 +855,15 @@ def backup_list():
         if not os.path.exists(os.path.join('app', 'static', 'backup')):
             os.makedirs(os.path.join('app', 'static', 'backup'))
 
-        file_name = str(time.time()) + '.zip'
+        host_num = len(get_host(city))
+        backup_data = request.form.to_dict()
+        if host_num == len(backup_data):
+            file_name = '{}-{}.zip'.format(g_city_to_name.get(city), date.today().strftime('%Y%m%d'))
+        elif len(backup_data) == 1:
+            keys = list(backup_data.keys())
+            file_name = '{}-{}.zip'.format(keys[0], date.today().strftime('%Y%m%d'))
+        else:
+            file_name = str(time.time()) + '.zip'
         zip_name = os.path.join('app', 'static', 'backup', file_name)
         zip = zipfile.ZipFile(zip_name, 'w', zipfile.ZIP_DEFLATED )
         
@@ -844,6 +884,7 @@ def backup_list():
 
 
 @main.route('/load_statistic/<host_name>')
+@login_required
 def load_statistic(host_name):
     '''业务负荷统计'''
     statistic_data = None
@@ -873,6 +914,7 @@ def load_statistic(host_name):
 
 
 @main.route('/load_statistic_host/<host_name>')
+@login_required
 def load_statistic_host(host_name):
     '''按设备统计用户数量'''
 
@@ -889,6 +931,7 @@ def load_statistic_host(host_name):
         host_name=host_name)
 
 @main.route('/install_base/<host_name>')
+@login_required
 def install_base(host_name):
     '''installbase统计表'''
 
@@ -904,6 +947,7 @@ def install_base(host_name):
         host_name = host_name)
 
 @main.route('/net_flow/<host_name>')
+@login_required
 def net_flow(host_name):
     '''重要网络流量统计'''
 
@@ -919,6 +963,7 @@ def net_flow(host_name):
         host_name = host_name)
 
 @main.route('/case_lib', methods= ['GET', 'POST'])
+@login_required
 def case_lib():
     '''典型案例'''
 
@@ -965,6 +1010,7 @@ def case_lib():
         form=form)
 
 @main.route('/case_delete/<id>')
+@login_required
 def case_delete(id):
     '''案例删除'''
 
@@ -977,6 +1023,7 @@ def case_delete(id):
     return redirect(url_for('main.case_upload'))
 
 @main.route('/case_upload/nokia2020' , methods=['GET', 'POST'])
+@login_required
 def case_upload():
     '''案例上传'''
 
@@ -1019,6 +1066,7 @@ def case_upload():
         pageination = pageination)
 
 @main.route('/zuxun/<host_name>')
+@login_required
 def zuxun(host_name):
     '''组巡工具'''
 
@@ -1039,6 +1087,7 @@ def zuxun(host_name):
         host_name=host_name)
 
 @main.route('/zuxun_all/<host_name>', methods=['GET', 'POST'])
+@login_required
 def zuxun_all(host_name):
     '''组巡搜索'''
 
@@ -1079,6 +1128,7 @@ def zuxun_all(host_name):
         host_name = host_name)
 
 @main.route('/model', methods=['GET', 'POST'])
+@login_required
 def model():
     '''脚本自动生成-模板列表'''
 
@@ -1102,6 +1152,7 @@ def model():
         pageination = pageination)
 
 @main.route('/model_list', methods=['GET', 'POST'])
+@login_required
 def model_list():
     '''脚本自动生成-模板组列表'''
 
@@ -1125,6 +1176,7 @@ def model_list():
         pageination = pageination)
 
 @main.route('/model_view/<id>')
+@login_required
 def model_view(id):
     '''模板查看'''
     model_data = GenerateConfig.query.filter_by(id=id).first()
@@ -1132,6 +1184,7 @@ def model_view(id):
         model_data = model_data)
 
 @main.route('/model_delete/<id>')
+@login_required
 def model_delete(id):
     '''模板删除'''
 
@@ -1151,6 +1204,7 @@ def model_delete(id):
     # return redirect(url_for('main.model'))
 
 @main.route('/model_list_delete/<id>')
+@login_required
 def model_list_delete(id):
     '''模板组删除'''
 
@@ -1161,6 +1215,7 @@ def model_list_delete(id):
     return redirect(url_for('main.model_list'))
 
 @main.route('/model_modify', methods=['GET', 'POST'])
+@login_required
 def model_modify():
     '''模板修改'''
 
@@ -1201,6 +1256,7 @@ def model_modify():
 
 
 @main.route('/model_save_as', methods=['GET', 'POST'])
+@login_required
 def model_save_as():
     '''模板另存'''
 
@@ -1234,6 +1290,7 @@ def model_save_as():
         form = form)
 
 @main.route('/create_model_list', methods=['GET', 'POST'])
+@login_required
 def create_model_list():
     '''新建模板组'''
 
@@ -1266,6 +1323,7 @@ def create_model_list():
         form = form)
 
 @main.route('/model_select', methods=['GET', 'POST'])
+@login_required
 def model_select():
     '''模板选择'''
 
@@ -1300,6 +1358,7 @@ def model_select():
         form = form)
 
 @main.route('/make_config', methods=['POST'])
+@login_required
 def make_config():
     '''生成配置'''
     
@@ -1312,6 +1371,7 @@ def make_config():
 
 
 @main.route('/report_port_search/<report_name>', methods=['GET', 'POST'])
+@login_required
 def report_port_search(report_name):
     '''报表搜索'''
 
@@ -1629,6 +1689,7 @@ def report_port_search(report_name):
             pageination = pageination)
 
 @main.route('/load_statistic_search/<load_name>', methods=['GET', 'POST'])
+@login_required
 def load_statistic_search(load_name):
     '''业务负载搜索'''
 
@@ -1724,6 +1785,7 @@ def load_statistic_search(load_name):
             pageination = pageination)
 
 @main.route('/xunjian_search/<xunjian_name>', methods= ['GET', 'POST'])
+@login_required
 def xunjian_search(xunjian_name):
     '''巡检搜索'''
 

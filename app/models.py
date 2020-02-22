@@ -1,5 +1,8 @@
-from . import db
 from datetime import datetime, date
+import hashlib
+from werkzeug.security import generate_password_hash, check_password_hash
+from . import db, login_manager
+from flask_login import UserMixin
 
 class AddressCollect(db.Model):
     '''地址采集表'''
@@ -320,3 +323,60 @@ class NetFlow(db.Model):
 
     def __repr__(self):
         return '<NetFlow %r>' % self.site_name
+
+class User(UserMixin, db.Model):
+    __tablename__ = 'users'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    username = db.Column(db.String(64), unique=True, index=True)
+    password_hash = db.Column(db.String(128))
+
+    @property
+    def password(self):
+        raise AttributeError('password is not a readable attribute')
+
+    @password.setter
+    def password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def verify_password(self, password):
+        return check_password_hash(self.password_hash, password)
+
+    @staticmethod
+    def insert_default_users():
+        changzhou = User(username='changzhou', password='changzhou')
+        huaian = User(username='huaian', password='huaian')
+        lianyungang = User(username='lianyungang', password='lianyungang')
+        nanjing = User(username='nanjing', password='nanjing')
+        nantong = User(username='nantong', password='nantong')
+        suqian = User(username='suqian', password='suqian')
+        suzhou = User(username='suzhou', password='suzhou')
+        taizhou = User(username='taizhou', password='taizhou')
+        wuxi = User(username='wuxi', password='wuxi')
+        xuzhou = User(username='xuzhou', password='xuzhou')
+        yancheng = User(username='yancheng', password='yancheng')
+        yangzhou = User(username='yangzhou', password='yangzhou')
+        zhenjiang = User(username='zhenjiang', password='zhenjiang')
+
+        #内部账号
+        nokia = User(username='nokia', password='nokia2020')
+
+        db.session.add(changzhou)
+        db.session.add(huaian)
+        db.session.add(lianyungang)
+        db.session.add(nanjing)
+        db.session.add(nantong)
+        db.session.add(suqian)
+        db.session.add(suzhou)
+        db.session.add(taizhou)
+        db.session.add(wuxi)
+        db.session.add(xuzhou)
+        db.session.add(yancheng)
+        db.session.add(yangzhou)
+        db.session.add(zhenjiang)
+        db.session.add(nokia)
+
+        db.session.commit()
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
