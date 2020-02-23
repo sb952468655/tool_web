@@ -16,9 +16,15 @@ def get_host(city):
 
 def get_log_from_ftp(host_name, save_path):
     '''从ftp服务器获取log'''
-    ftp = myFtp('211.138.102.229')
-    ftp.Login('ftp-asb', 'Asb201730')
-    log_name = ftp.DownLoadFileFromName(host_name, save_path, '/home/ftp-asb/js/')  # 从目标目录下载到本地目录d盘
+
+    try:
+        ftp = myFtp('211.138.102.229')
+        ftp.Login('ftp-asb', 'Asb201730')
+        log_name = ftp.DownLoadFileFromName(host_name, save_path, '/home/ftp-asb/js/')  # 从目标目录下载到本地目录d盘
+    except:
+        logging.error('{} get log from ftp error'.format(host_name))
+        log_name = ''
+        
     return log_name
 
 
@@ -113,7 +119,7 @@ def is_today_log(log_name):
     p_log_datetime = r'7750_(\d{4})(\d{2})(\d{2})-(\d{2})(\d{2})(\d{2})-UTC'
     res = re.search(p_log_datetime, log_name)
     real_date_time = datetime.datetime(int(res.group(1)), int(res.group(2)), int(res.group(3)), \
-        int(res.group(4)), int(res.group(5)), int(res.group(6))) + datetime.timedelta(hours=8)
+        int(res.group(4)), int(res.group(5)), int(res.group(6))) + datetime.timedelta(hours=8) + datetime.timedelta(days=1)
 
     today_time = datetime.datetime.now()
 
@@ -129,7 +135,7 @@ def is_yesday_log(log_name):
     p_log_datetime = r'7750_(\d{4})(\d{2})(\d{2})-(\d{2})(\d{2})(\d{2})-UTC'
     res = re.search(p_log_datetime, log_name)
     real_date_time = datetime.datetime(int(res.group(1)), int(res.group(2)), int(res.group(3)), \
-        int(res.group(4)), int(res.group(5)), int(res.group(6))) + datetime.timedelta(hours=8) + datetime.timedelta(days=1)
+        int(res.group(4)), int(res.group(5)), int(res.group(6))) + datetime.timedelta(hours=8) + datetime.timedelta(days=2)
 
     today_time = datetime.datetime.now()
 
