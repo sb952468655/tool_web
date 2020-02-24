@@ -2445,7 +2445,7 @@ def save_install_base():
             host_type, host_model, version, note = get_install_base(today_log)
             key = host_type + ' ' + host_model + ' ' + version + ' ' + note
             if not key.strip():
-                logging.info('{} get installbase err'.format(host_name))
+                logging.info('{} get installbase err'.format(host))
                 continue
             if key in data:
                 data[key] += 1
