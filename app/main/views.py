@@ -519,6 +519,45 @@ def download_excel(host_name, table_name):
                 i.port_utilization_100g,
                 i.pea_uplink_throughput_utilization
             ))
+    elif table_name == 'load_statistic':
+        file_name = '业务负荷统计表（按端口）.xlsx'
+        labels = [
+            '设备名', '设备IP', 'port', '端口带宽', '带宽in利用率'
+            , '带宽out利用率', 'ies 3000用户数量', 'ies 3000地址池利用率'
+            , 'vprn 4015用户数量', 'vprn 4015地址池利用率'
+        ]
+
+        load_statistic_data = LoadStatistic.query.filter_by(host_name = host_name, date_time = date.today()).all()
+        for i in load_statistic_data:
+            data.append((
+                i.host_name,
+                i.host_ip,
+                i.port,
+                i.port_dk,
+                i.in_utilization,
+                i.out_utilization,
+                i.ies_3000_user_num,
+                i.ies_3000_utilization,
+                i.vprn_4015_user_num,
+                i.vprn_4015_utilization
+            ))
+    elif table_name == 'load_statistic_host':
+        file_name = '业务负荷统计表（按设备）.xlsx'
+        labels = [
+            '设备名', '设备IP', 'ies 3000用户数量', 'ies 3000地址池利用率', 'vprn 4015用户数量'
+            , 'vprn 4015地址池利用率'
+        ]
+
+        load_statistic_host_data = LoadStatisticHost.query.filter_by(host_name = host_name, date_time = date.today()).all()
+        for i in load_statistic_host_data:
+            data.append((
+                i.host_name,
+                i.host_ip,
+                i.ies_3000_num,
+                i.ies_3000_pool_utilization,
+                i.vprn_4015_num,
+                i.vprn_4015_pool_utilization
+            ))
 
     save_path = os.path.join('app','static', file_name)
     if labels and data:
@@ -1032,7 +1071,8 @@ def case_upload():
     if form.validate_on_submit():
         f = form.upload_file.data
         describe = form.describe.data
-        random_name = str(time.time()) + '.' +f.filename.split('.')[-1]
+        # random_name = str(time.time()) + '.' +f.filename.split('.')[-1]
+        random_name = f.filename
         f.save(os.path.join('app', 'static', 'caselib', random_name))
         # flash('上传成功')
         url = url_for('static', filename = os.path.join('caselib', random_name))

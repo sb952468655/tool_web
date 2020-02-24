@@ -3,6 +3,7 @@
 {% import "_macros.html" as macros %}
 
 {% block data_content %}
+    <a class="btn btn-default" href="{{ url_for('main.download_excel', host_name = host_name, table_name = 'load_statistic_host') }}" role="button">生成表格</a>
     <table class="table table-striped table-condensed" style="min-width:2000px;" >
         <thead>
             <tr>
