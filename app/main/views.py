@@ -1173,9 +1173,6 @@ def model():
     '''脚本自动生成-模板列表'''
 
     page = request.args.get('page', 1, type=int)
-    count = GenerateConfig.query.count()
-    if count == 0:
-        abort(404)
 
     generate_config = GenerateConfig.query
     generate_config = generate_config.filter(GenerateConfig.model_type.in_([0,1]))
@@ -1197,9 +1194,6 @@ def model_list():
     '''脚本自动生成-模板组列表'''
 
     page = request.args.get('page', 1, type=int)
-    count = GenerateConfig.query.count()
-    if count == 0:
-        abort(404)
 
     generate_config = GenerateConfig.query
     generate_config = generate_config.filter(GenerateConfig.model_type == 2)
@@ -1405,9 +1399,22 @@ def make_config():
     inputs = list(request.form.items(True))
     model_str = session.get('model_str')
     model_data = generate_config(model_str, inputs)
-
+    session['model_data'] = model_data
     return render_template('generate_config/result.html',
         model_data = model_data)
+
+@main.route('/download_model_data')
+@login_required
+def download_model_data():
+    '''保存生成的配置'''
+
+    model_data = session.get('model_data')
+    with open(os.path.join('app','static', 'config.log'), 'w') as f:
+        f.write(model_data)
+
+    url = url_for('static', filename = 'config.log')
+    url2 = unquote(url, encoding='utf-8')
+    return redirect(url2)
 
 
 @main.route('/report_port_search/<report_name>', methods=['GET', 'POST'])
@@ -2441,7 +2448,7 @@ def save_install_base():
     for city in city_list:
         for host in get_host(city):
             today_log = get_log(city, host)
-            host_name = get_host_name(today_log)
+            # host_name = get_host_name(today_log)
             host_type, host_model, version, note = get_install_base(today_log)
             key = host_type + ' ' + host_model + ' ' + version + ' ' + note
             if not key.strip():
