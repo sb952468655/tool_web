@@ -34,10 +34,22 @@
                 </tbody>
             </table>
             {% if host_data %}
+                <a id="selectAll" class="btn btn-default">全选</a>
                 <button type="submit" class="btn btn-default">备份</button>
             {% endif %}
         </form>
     </div>
 </div>
 
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+  $(function() {
+    $("#selectAll").click(function(){ 
+      $("input").attr("checked","true");
+    })
+  });
+</script>
 {% endblock %}
