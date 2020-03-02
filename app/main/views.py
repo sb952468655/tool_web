@@ -745,6 +745,44 @@ def xj_report_all_host():
 
     return redirect(url_for('static', filename = report_name))
 
+@main.route('/xj_report_summary')
+@login_required
+def xj_report_summary():
+    '''所有设备巡检报告汇总'''
+
+    city = session.get('city')
+
+    count = XunJian.query.filter_by(city = city, date_time = date.today()).count()
+    if count == 0:
+        abort(404)
+
+    xunjian_data = XunJian.query.filter_by(city = city, date_time = date.today()).all()
+    file_name = '报告汇总.xlsx'
+    labels = [
+        '设备名', '检查项', '检查结果', '检查日期'
+    ]
+
+    data = []
+    for i in xunjian_data:
+        check_res = '正常'
+        if '正常' not in i.err:
+            check_res = '异常'
+
+        data.append((
+            i.host_name,
+            i.check_item,
+            check_res,
+            i.date_time.strftime('%Y-%m-%d')
+        ))
+
+    save_path = os.path.join('app','static', file_name)
+    if labels and data:
+        make_excel(save_path, labels, data)
+        return redirect(url_for('static', filename=file_name))
+    else:
+        abort(404)
+
+
 
 
 @main.route('/city_list')

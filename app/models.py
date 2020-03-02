@@ -205,7 +205,7 @@ class XunJian(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     city = db.Column(db.String(64)) #地市名
     host_name = db.Column(db.String(64)) #设备名
-    check_item = db.Column(db.String(128)) #设备名
+    check_item = db.Column(db.String(128)) #检查项
     err = db.Column(db.Text) #错误提示
     msg = db.Column(db.Text) #关键信息
     date_time = db.Column(db.Date, default = date.today())
