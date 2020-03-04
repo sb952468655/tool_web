@@ -13,7 +13,7 @@ from . import main
 from ..check_pool import all_check
 from ..inspection import mobile
 from ..zuxun.zuxun import zuxun_check
-from .config import g_city_to_name, g_log_path, g_backup_path
+from .config import g_city_to_name, g_log_path, g_backup_path, g_check_to_describe
 from .gnenerate_config import parse_model, generate_config
 from .address import get_address_data
 from .statistic import get_statistic_data, get_statistic_host_data
@@ -234,7 +234,7 @@ def xunjian(host_name):
     xunjian_data = XunJian.query.filter_by(host_name = host_name, date_time = date.today()).all()
     warn_data = [item for item in xunjian_data if item.err]
     
-    return render_template('xunjian/xunjian.html', xunjian_data=warn_data, host_name = host_name, city = city)
+    return render_template('xunjian/xunjian.html', xunjian_data=warn_data, host_name = host_name, city = city, check_to_describe = g_check_to_describe)
 
 @main.route('/xunjian_output_all/<host_name>')
 @login_required
@@ -249,7 +249,7 @@ def xunjian_output_all(host_name):
     xunjian_data = XunJian.query.filter_by(host_name = host_name, date_time = date.today()).all()
     warn_data = [item for item in xunjian_data if item.err]
     
-    return render_template('xunjian/xunjian_output_all.html', xunjian_data=warn_data, host_name = host_name, city = city)
+    return render_template('xunjian/xunjian_output_all.html', xunjian_data=warn_data, host_name = host_name, city = city, check_to_describe = g_check_to_describe)
 
 @main.route('/xunjian_all_host')
 @login_required

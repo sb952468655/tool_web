@@ -20,6 +20,36 @@ g_city_to_name = {
     'xuzhou': '徐州'
 }
 
+g_check_to_describe = {
+    '风扇SPEED巡检': '风扇转速大于50，提示异常',
+    '电源状态巡检': '检查电源Status 是否为 UP',
+    '系统LED状态巡检': '检查系统LED Critical, Major, Minor指示灯是否为off,不为off告警',
+    '系统CPU状态巡检': 'cpu利用率大于80告警',
+    '系统Memory状态巡检': '系统Memory资源消耗大于80%，告警',
+    'card状态巡检': '异常次数比前一天多，告警',
+    'MDA状态巡检': '异常次数比前一天多，告警',
+    'port状态巡检': '光功率超限检查， Ethernet-like Medium Statistics， Per Threshold MDA Discard Statistics， Queue Statistics状态检查',
+    'pppoe端口用户数比上一日异常检查': 'pppoe端口数为0，告警',
+    'CF卡状态巡检': 'CF卡 Operational state 不为UP告警',
+    '地址池空闲值巡检': '地址池空闲值低于20%，告警',
+    'NAT公网地址池空闲值巡检': 'NAT公网地址池空闲值低于10%，告警',
+    'FTP状态检查': 'FTP Admin状态不为Disabled，或Oper状态不为Down，告警',
+    '设备admin账号巡检': '配置不存在 no user "admin"，告警',
+    'sfm检查': '检查SFM Summary的值是否都为up',
+    'Subscriber Host超预警线检查': 'Allocated值大于100K时，告警',
+    'Total Subscribers 超预警线检查': 'Current值大于58K时，告警',
+    'config.cfg上次修改后是否为保存状态检查': 'Time Last Modified 大于 Time Last Saved，告警',
+    'show time时间检查': '与log上传时间对比超过300秒，告警',
+    '路由器全局interface状态巡检': '状态不为UP，告警',
+    'isis路由邻居状态巡检': '检查Rtr Base ISIS Instance 0 Adjacency状态是否为UP',
+    '缺省路由状态巡检': '检查缺省路由状态是否为Remote, BGP, 100',
+    'BGP邻居状态巡检': '检查BGP Neighbor状态是否为Established',
+    'mpls interface状态巡检': '检查MPLS Interfaces状态是否为UP',
+    'ldp session状态巡检': '检查ldp session状态是否为UP',
+    'system-resources巡检': 'system-resources资源利用率大于80%，告警',
+    'Nat地址资源利用率状态': 'nat pool "nat-pppoe"，nat pool "nat-iptv" 地址利用率大于60%，告警'
+}
+
 g_port_10ge = r'''port @10ge_port_id@
         description "@10ge_port_description@"
         ethernet
