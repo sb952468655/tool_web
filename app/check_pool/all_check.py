@@ -7,6 +7,7 @@ from .outside_pool import outside_pool_check
 from .subnet import subnet_check
 from .ipv6 import check4
 from .rule124 import ipv6_address_check
+from .common import *
 
 
 def all_check(config):
@@ -32,14 +33,12 @@ def all_check(config):
     # err.append(('检查黑洞路由与pool "nat-pppoe" 中的address-range 是否匹配',black_hole_address_range_check(config)))
     # err.append(('检查 inside subnet address 地址是否正确',inside_subnet_address_check(config)))
     # err.append(('检查outside pool 中的地址是否在黑洞路由中',outside_pool_check(config)))
-    check_item = '''ies 1000 subscriber-interface "iptv" 下的address必须要有：
-    1.gi-address必须是subscriber-interface "iptv" 下的address之一。
-    2.检查server 后面的地址是否为本机system地址
-    3.在pool iptv中有相应地址段即subnet
-    4.subnet的default-router以及address-range必须一致
-    5.nat inside的 l2-aware中必须要有相应的address'''
 
-    err.append((ies_1000_check(config), check_item))
+
+    err.append(ies_1000_check(config))
+    err.append(ies_3000_check(config))
+    err.append(nat_inside_check(config))
+    err.append(ies_1000_3000_outside_check(config))
 
     return err
 
@@ -53,14 +52,9 @@ def ies_1000_check(config):
 
     err = ''
     msg = ''
-    check_item = '''ies 1000 subscriber-interface "iptv" 下的address必须要有：
-    1.gi-address必须是subscriber-interface "iptv" 下的address之一。
-    2.检查server 后面的地址是否为本机system地址
-    3.在pool iptv中有相应地址段即subnet
-    4.subnet的default-router以及address-range必须一致
-    5.nat inside的 l2-aware中必须要有相应的address'''
+    check_item = '''检查ies 1000 subscriber-interface "iptv" 的地址是否与dhcp中地址一致'''
 
-    p_ies_1000 = r'(?s)(ies 1000( name "1000")? customer 1 create\n.+?\n {8}exit)'
+    p_ies_1000 = r'(?s)(ies 1000( name "1000")? customer \d{1,2} create\n.+?\n {8}exit)'
     # p_ies_1000 = generate_pat(0, 'ies', 8, '1000')
     
     p_system_address = r'(?s)interface "system"\n {12}address (\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/\d{1,2})'
@@ -134,7 +128,184 @@ def ies_1000_check(config):
     if err == '':
         err = '检查通过\n'
 
-    return err
+    return (check_item, err, msg)
+
+
+def ies_3000_check(config):
+    '''检查ies 3000 subscriber-interface "pppoe" 的地址是否与dhcp中地址一致'''
+
+    err = ''
+    msg = ''
+    check_item = '检查ies 3000 subscriber-interface "pppoe" 的地址是否与dhcp中地址一致'
+
+    p_ies_3000 = r'(?s)(ies 3000( name "3000")? customer \d{1,2} create\n.+?\n {8}exit)'
+    p_sub_interface_pppoe = r'(?s)subscriber-interface "pppoe" create\n.+?\n {12}exit'
+
+    res_ies_3000 = re.findall(p_ies_3000, config)
+    if res_ies_3000:
+        temp = res_ies_3000[1][0]
+        res_sub_interface_pppoe = re.search(p_sub_interface_pppoe, res_ies_3000[1][0])
+        if not res_sub_interface_pppoe:
+            err += '没有找到subscriber-interface "pppoe" '
+            return err
+        temp = res_sub_interface_pppoe.group()
+        res_ies_3000_address = re.findall(PAT['address'], temp)
+        res_dhcp_address = get_pool_ip(config)
+        if sorted(res_ies_3000_address) != sorted(res_dhcp_address):
+            err += 'ies 3000 subscriber-interface "pppoe" 的地址是否与dhcp中地址不一致，请检查'
+            msg = 'ies 3000 subscriber-interface "pppoe" 地址\n{}\ndhcp 地址\n{}\n\n'.format('\n'.join(res_ies_3000_address), '\n'.join(res_dhcp_address))
+
+    if err == '':
+        err = '检查通过\n'
+
+    return (check_item, err, msg)
+
+def nat_inside_check(config):
+    '''检查nat inside地址是否有缺漏
+    1.inside 中的私网地址必须在 subnet 和 address 中
+    2.subnet 和 address 中的公网地址必须一致'''
+
+    err = ''
+    msg = ''
+    check_item = '''检查nat inside地址是否有缺漏'''
+
+    subnets = get_pool_ip(config)
+    addresss = get_ies_address(config)
+    nat_addresss = get_nat_address(config)
+
+    subnet_nat = []
+    address_nat = []
+
+    subnet_address = []
+    if subnets == []:
+        err += '配置中没有找到pool中的subnet\n'
+    if addresss == []:
+        err += '配置中没有找到address\n\n'
+
+    if err != '':
+        return err
+
+    for item in subnets:
+        subnet_address.append(item)
+
+    if nat_addresss != []:
+
+        #获取subnet中的私网地址
+        
+        for subnet in subnet_address:
+            if nat_check(subnet):
+                subnet_nat.append(subnet)
+
+        #获取address中的私网地址
+        
+        for address in addresss:
+            if nat_check(address):
+                address_nat.append(address)
+
+        #subnet, address 去掉私网地址
+        for item in subnet_nat:
+            subnet_address.remove(item)
+        for item in address_nat:
+            addresss.remove(item)
+
+        if subnet_nat == []:
+            err += '   subnet 中没有发现私网地址\n\n'
+        if address_nat == []:
+            err += '   address 中没有发现私网地址\n\n'
+
+        if err != '':
+            return err
+
+        #检查nat中的私网地址是否在subnet和address地址中
+        for nat in nat_addresss:
+            if not address_is_in_list(nat, subnet_nat):
+                err += 'inside 地址 %s 不在 subnet 中\n   请检查 \"address  %s\"\n' % (nat, nat)
+            if not address_is_in_list(nat, address_nat):
+                err += 'inside 地址 %s 不在 address 中\n   请检查 \"address  %s\"\n' % (nat, nat)
+    else:
+        err += 'inside 没有找到，请维护人员核查\n\n'
+
+
+    #检查subnet中的公网地址和address中的公网地址是否一致
+    err_ips = address_include_each(subnet_address, addresss)
+    if err_ips != []:
+        for item in err_ips:
+            err += 'subnet中的公网地址和address中的公网地址不一致\n   请检查 \"address {}\"\n'.format(item)
+    
+    if err == '':
+        err = '检查通过\n'
+
+    return (check_item, err, msg)
+
+def ies_1000_3000_outside_check(config):
+    '''检查ies1000、3000公网地址是否正常发布'''
+
+    err = ''
+    msg = ''
+    check_item = '''检查ies1000、3000公网地址是否正常发布'''
+
+    p_ies_1000 = r'(?s)(ies 1000( name "1000")? customer \d{1,2} create\n.+?\n {8}exit)'
+    p_ies_3000 = r'(?s)(ies 3000( name "3000")? customer \d{1,2} create\n.+?\n {8}exit)'
+    p_out_side = r'(?s)outside.*?\n {12}exit'
+    # p_in_side = r'(?s)inside.*?\n {12}exit'
+    p_address_range = PAT['address_range']
+    p_address = PAT['address']
+
+    res_ies_1000 = re.findall(p_ies_1000, config)
+    res_ies_3000 = re.findall(p_ies_3000, config)
+    # res_inside = re.search(p_in_side, config)
+    res_outside = re.search(p_out_side, config)
+
+    # if res_inside:
+    #     res_inside_address = re.findall(p_address, res_inside.group())
+    # else:
+    #     err += '没有找到inside请检查\n'
+    if res_outside:
+        res_outside_address = re.findall(p_address_range, res_outside.group())
+    else:
+        err += '没有找到outside请检查\n'
+
+    
+
+    if res_ies_1000:
+        res_address = re.findall(p_address, res_ies_1000[1][0])
+        for address in res_address:
+            if not nat_check(address):
+                b_include = False
+                address_ip = IPy.IP(address, make_net=1)
+                for item in res_outside_address:
+                    ip_begin = '.'.join(item[0].split('.')[:-1]) + '.' + str(int(item[0].split('.')[-1]) - 1)
+                    ip_end = '.'.join(item[1].split('.')[:-1]) + '.' +str(int(item[1].split('.')[-1]) + 1)
+                    outside_ip = IPy.IP(ip_begin+'-'+ip_end, make_net=1)
+                    if address_ip in outside_ip:
+                        b_include = True
+                        break
+
+                if b_include == False:
+                    err += 'ies 1000 address {} 没有发布\n'.format(address)
+
+    if res_ies_3000:
+        res_address = re.findall(p_address, res_ies_3000[1][0])
+        for address in res_address:
+            if not nat_check(address):
+                b_include = False
+                address_ip = IPy.IP(address, make_net=1)
+                for item in res_outside_address:
+                    ip_begin = '.'.join(item[0].split('.')[:-1]) + '.' + str(int(item[0].split('.')[-1]) - 1)
+                    ip_end = '.'.join(item[1].split('.')[:-1]) + '.' +str(int(item[1].split('.')[-1]) + 1)
+                    outside_ip = IPy.IP(ip_begin+'-'+ip_end, make_net=1)
+                    if address_ip in outside_ip:
+                        b_include = True
+                        break
+
+                if b_include == False:
+                    err += 'ies 3000 address {} 没有发布\n'.format(address)
+
+    if err == '':
+        err = '检查通过\n'
+
+    return (check_item, err, msg)
+
 
 
 

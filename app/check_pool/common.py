@@ -41,7 +41,7 @@ def compare_ip(ip, ip_range):
 
 def get_pool_ip(config):
     p_dhcp = r'(?s)(echo "Local DHCP Server \(Base Router\) Configuration"\n.*?\n {4}exit)'
-    p_pool = generate_pat(1, 'pool', 16)
+    p_pool = r'(?s)(pool "(.*?)" create.*?\n {16}exit)'
     p_subnet = PAT['subnet']
     ips = []
     res_dhcp = re.search(p_dhcp, config)
@@ -49,7 +49,8 @@ def get_pool_ip(config):
         res_pool = re.findall(p_pool, res_dhcp.group())
         for item in res_pool:
             res_subnet = re.findall(p_subnet, item[0])
-            ips += res_subnet
+            for subnet in res_subnet:
+                ips.append(subnet[1])
 
     return ips
 
@@ -62,7 +63,6 @@ def get_nat_address(config):
         res = re.findall(PAT['address'], res_nat.group())
 
     return res
-
 
 def get_vprn_pool_ip(config):
     p_dhcp = r'(?s)(echo "Local DHCP Server \(Services\) Configuration"\n.*?\n {4}exit)'
@@ -90,6 +90,7 @@ def get_ies_address(config):
 
     config_7750 = Config_7750(config)
     p_sub_inter = PAT['subscriber_interface']
+    p_ies = r''
     res = []
     ies = config_7750.get_ies()
     for item in ies:
