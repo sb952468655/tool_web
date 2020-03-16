@@ -152,7 +152,7 @@ def ies_3000_check(config):
         res_ies_3000_address = re.findall(PAT['address'], temp)
         res_dhcp_address = get_pool_ip(config)
         if sorted(res_ies_3000_address) != sorted(res_dhcp_address):
-            err += 'ies 3000 subscriber-interface "pppoe" 的地址是否与dhcp中地址不一致，请检查'
+            err += 'ies 3000 subscriber-interface "pppoe" 的地址与dhcp中地址不一致，请检查'
             msg = 'ies 3000 subscriber-interface "pppoe" 地址\n{}\ndhcp 地址\n{}\n\n'.format('\n'.join(res_ies_3000_address), '\n'.join(res_dhcp_address))
 
     if err == '':
@@ -274,9 +274,11 @@ def ies_1000_3000_outside_check(config):
                 b_include = False
                 address_ip = IPy.IP(address, make_net=1)
                 for item in res_outside_address:
-                    ip_begin = '.'.join(item[0].split('.')[:-1]) + '.' + str(int(item[0].split('.')[-1]) - 1)
-                    ip_end = '.'.join(item[1].split('.')[:-1]) + '.' +str(int(item[1].split('.')[-1]) + 1)
+                    ip_begin = '.'.join(item[0].split('.')[:-1]) + '.0'
+                    # ip_end = '.'.join(item[1].split('.')[:-1]) + '.' +str(int(item[1].split('.')[-1]) + 1)
+                    ip_end = '.'.join(item[1].split('.')[:-1]) + '.255'
                     outside_ip = IPy.IP(ip_begin+'-'+ip_end, make_net=1)
+                    # outside_ip = IPy.IP(item[0]+'-'+item[1], make_net=1)
                     if address_ip in outside_ip:
                         b_include = True
                         break
@@ -291,8 +293,8 @@ def ies_1000_3000_outside_check(config):
                 b_include = False
                 address_ip = IPy.IP(address, make_net=1)
                 for item in res_outside_address:
-                    ip_begin = '.'.join(item[0].split('.')[:-1]) + '.' + str(int(item[0].split('.')[-1]) - 1)
-                    ip_end = '.'.join(item[1].split('.')[:-1]) + '.' +str(int(item[1].split('.')[-1]) + 1)
+                    ip_begin = '.'.join(item[0].split('.')[:-1]) + '.0'
+                    ip_end = '.'.join(item[1].split('.')[:-1]) + '.255'
                     outside_ip = IPy.IP(ip_begin+'-'+ip_end, make_net=1)
                     if address_ip in outside_ip:
                         b_include = True

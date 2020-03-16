@@ -217,12 +217,20 @@ def address_is_in_list(addr, ip_list):
 
 def nat_check(ip):
     '''判断地址是否为私网'''
+    nat_a = IPy.IP('10.0.0.0-10.255.255.255', make_net=1)
+    nat_b = IPy.IP('172.16.0.0-172.31.255.255', make_net=1)
+    nat_c = IPy.IP('192.168.0.0-192.168.255.255', make_net=1)
+    ip = IPy.IP(ip, make_net=1)
+    is_nat = False
+    if ip in nat_a or ip in nat_b or ip in nat_c:
+        is_nat = True
+    # ip_nums = ip.split('.')
+    # if ip_nums[0] == '100' and (42 <= int(ip_nums[1]) <= 113):
+    #     return True
+    # else:
+    #     return False
 
-    ip_nums = ip.split('.')
-    if ip_nums[0] == '100' and (42 <= int(ip_nums[1]) <= 113):
-        return True
-    else:
-        return False
+    return is_nat
 
 
 def get_outside_pool(config):
