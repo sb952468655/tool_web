@@ -8,7 +8,11 @@
             <label>设备名称</label>
             <select class="form-control" name = "host_name">
                 {% for i in host_list %}
+                    {% if i == host_name %}
+                    <option selected>{{ i }}</option>
+                    {% else %}
                     <option>{{ i }}</option>
+                    {% endif %}
                 {% endfor %}
             </select>
         </div>
