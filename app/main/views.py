@@ -962,13 +962,14 @@ def backup_list():
 
 
 
-@main.route('/load_statistic')
+@main.route('/load_statistic', methods=['POST', 'GET'])
 @login_required
 def load_statistic():
     '''业务负荷统计'''
     statistic_data = None
     page = request.args.get('page', 1, type=int)
     city = session.get('city')
+    host_list = get_host(session.get('city'))
     if not city:
         return redirect(url_for('main.city_list'))
 
@@ -976,7 +977,14 @@ def load_statistic():
     if count == 0:
         abort(404)
 
-    pageination = LoadStatistic.query.filter_by(city = city, date_time = date.today()).paginate(
+    if request.method == 'POST':
+        host_name = request.form.get('host_name')
+    else:
+        host_name = request.args.get('host_name')
+        if not host_name:
+            host_name = host_list[0]
+
+    pageination = LoadStatistic.query.filter_by(host_name = host_name, date_time = date.today()).paginate(
         page, per_page = current_app.config['FLASKY_POSTS_PER_PAGE'],
         error_out = False
     )
@@ -985,7 +993,9 @@ def load_statistic():
 
     return render_template('statistic.html',
         statistic_data = statistic_data,
+        host_list = host_list,
         action = 'load_statistic',
+        host_name = host_name,
         pageination = pageination)
 
 
