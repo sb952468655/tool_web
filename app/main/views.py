@@ -1000,7 +1000,7 @@ def load_statistic_host(host_name):
     if count == 0:
         abort(404)
 
-    load_statistic_host_data = LoadStatisticHost.query.filter_by(host_name = host_name, date_time = date.today()).all()
+    load_statistic_host_data = LoadStatisticHost.query.filter_by(city = city, date_time = date.today()).all()
 
     return render_template('statistic_host.html',
         load_statistic_host_data = load_statistic_host_data, 
@@ -2363,7 +2363,7 @@ def save_load_statistic_host(city, host_name, config):
         #存入数据库
         load_statistic = LoadStatisticHost(
             city = city,
-            host_name = host_name,
+            host_name = item[0],
             host_ip = item[1],
             ies_3000_num = item[2],
             ies_3000_pool_utilization = item[3],
