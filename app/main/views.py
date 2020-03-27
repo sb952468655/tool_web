@@ -527,7 +527,8 @@ def download_excel(host_name, table_name):
             , 'vprn 4015用户数量', 'vprn 4015地址池利用率'
         ]
 
-        load_statistic_data = LoadStatistic.query.filter_by(host_name = host_name, date_time = date.today()).all()
+        city = session.get('city')
+        load_statistic_data = LoadStatistic.query.filter_by(city = city, date_time = date.today()).all()
         for i in load_statistic_data:
             data.append((
                 i.host_name,
@@ -548,7 +549,8 @@ def download_excel(host_name, table_name):
             , 'vprn 4015地址池利用率'
         ]
 
-        load_statistic_host_data = LoadStatisticHost.query.filter_by(host_name = host_name, date_time = date.today()).all()
+        city = session.get('city')
+        load_statistic_host_data = LoadStatisticHost.query.filter_by(city = city, date_time = date.today()).all()
         for i in load_statistic_host_data:
             data.append((
                 i.host_name,
@@ -960,9 +962,9 @@ def backup_list():
 
 
 
-@main.route('/load_statistic/<host_name>')
+@main.route('/load_statistic')
 @login_required
-def load_statistic(host_name):
+def load_statistic():
     '''业务负荷统计'''
     statistic_data = None
     page = request.args.get('page', 1, type=int)
@@ -970,11 +972,11 @@ def load_statistic(host_name):
     if not city:
         return redirect(url_for('main.city_list'))
 
-    count = LoadStatistic.query.filter_by(host_name = host_name, date_time = date.today()).count()
+    count = LoadStatistic.query.filter_by(city = city, date_time = date.today()).count()
     if count == 0:
         abort(404)
 
-    pageination = LoadStatistic.query.filter_by(host_name = host_name, date_time = date.today()).paginate(
+    pageination = LoadStatistic.query.filter_by(city = city, date_time = date.today()).paginate(
         page, per_page = current_app.config['FLASKY_POSTS_PER_PAGE'],
         error_out = False
     )
@@ -982,21 +984,20 @@ def load_statistic(host_name):
 
 
     return render_template('statistic.html',
-        statistic_data = statistic_data, 
-        action = 'load_statistic', 
-        host_name=host_name,
+        statistic_data = statistic_data,
+        action = 'load_statistic',
         pageination = pageination)
 
 
 
 
-@main.route('/load_statistic_host/<host_name>')
+@main.route('/load_statistic_host')
 @login_required
-def load_statistic_host(host_name):
+def load_statistic_host():
     '''按设备统计用户数量'''
 
     city = session.get('city')
-    count = LoadStatisticHost.query.filter_by(host_name = host_name, date_time = date.today()).count()
+    count = LoadStatisticHost.query.filter_by(city = city, date_time = date.today()).count()
     if count == 0:
         abort(404)
 
@@ -1004,8 +1005,7 @@ def load_statistic_host(host_name):
 
     return render_template('statistic_host.html',
         load_statistic_host_data = load_statistic_host_data, 
-        action = 'load_statistic_host', 
-        host_name=host_name)
+        action = 'load_statistic_host')
 
 @main.route('/install_base/<host_name>')
 @login_required
