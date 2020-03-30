@@ -66,7 +66,7 @@ def get_log(city, host, date = None):
 def get_log_from_date(city, host, date):
     '''根据设备名和日期获取log'''
 
-    p_log_datetime = r'7750_(\d{4})(\d{2})(\d{2})-(\d{2})(\d{2})(\d{2})-UTC'
+    p_log_datetime = r'(\d{4})(\d{2})(\d{2})-(\d{2})(\d{2})(\d{2})-UTC'
     logs = get_host_logs(city, host)
     
     for i in logs:
@@ -116,7 +116,7 @@ def is_today_log(log_name):
     '''判断Log日期是否为今天
     将当前日期加八个小时'''
 
-    p_log_datetime = r'7750_(\d{4})(\d{2})(\d{2})-(\d{2})(\d{2})(\d{2})-UTC'
+    p_log_datetime = r'(\d{4})(\d{2})(\d{2})-(\d{2})(\d{2})(\d{2})-UTC'
     res = re.search(p_log_datetime, log_name)
     real_date_time = datetime.datetime(int(res.group(1)), int(res.group(2)), int(res.group(3)), \
         int(res.group(4)), int(res.group(5)), int(res.group(6))) + datetime.timedelta(hours=8) + datetime.timedelta(days=1)
@@ -132,7 +132,7 @@ def is_yesday_log(log_name):
     '''判断Log日期是否为昨天
     将当前日期加八个小时'''
 
-    p_log_datetime = r'7750_(\d{4})(\d{2})(\d{2})-(\d{2})(\d{2})(\d{2})-UTC'
+    p_log_datetime = r'(\d{4})(\d{2})(\d{2})-(\d{2})(\d{2})(\d{2})-UTC'
     res = re.search(p_log_datetime, log_name)
     real_date_time = datetime.datetime(int(res.group(1)), int(res.group(2)), int(res.group(3)), \
         int(res.group(4)), int(res.group(5)), int(res.group(6))) + datetime.timedelta(hours=8) + datetime.timedelta(days=2)
