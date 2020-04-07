@@ -51,6 +51,11 @@
             {% else %}
                 <li role="presentation" ><a href="{{ url_for('main.host_list_data', host_name = host_name ) }}">设备清单统计</a></li>
             {% endif %}
+            {% if action == 'special_line' %}
+                <li role="presentation" class="active"><a href="{{ url_for('special_line.index', host_name = host_name) }}">专线统计</a></li>
+            {% else %}
+                <li role="presentation" ><a href="{{ url_for('special_line.index', host_name = host_name) }}">专线统计</a></li>
+            {% endif %}
             {% if current_user.username == 'nokia' %}
                 {% if action == 'install_base' %}
                     <li role="presentation" class="active"><a href="{{ url_for('main.install_base', host_name = host_name) }}">installbase统计</a></li>
@@ -61,6 +66,16 @@
                     <li role="presentation" class="active"><a href="{{ url_for('main.net_flow', host_name = host_name) }}">重要网络流量统计</a></li>
                 {% else %}
                     <li role="presentation" ><a href="{{ url_for('main.net_flow', host_name = host_name) }}">重要网络流量统计</a></li>
+                {% endif %}
+                {% if action == 'all_card_detail' %}
+                    <li role="presentation" class="active"><a href="{{ url_for('main.all_card_detail') }}">全省板卡统计明细</a></li>
+                {% else %}
+                    <li role="presentation" ><a href="{{ url_for('main.all_card_detail') }}">全省板卡统计明细</a></li>
+                {% endif %}
+                {% if action == 'all_card_statistic' %}
+                    <li role="presentation" class="active"><a href="{{ url_for('main.all_card_statistic') }}">全省板卡统计汇总</a></li>
+                {% else %}
+                    <li role="presentation" ><a href="{{ url_for('main.all_card_statistic') }}">全省板卡统计汇总</a></li>
                 {% endif %}
             {% endif %}
 

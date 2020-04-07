@@ -233,7 +233,8 @@ def get_card_statistic(config):
     card_statistic_data = []
 
     p_card_summary = r'(?s)(Card Summary\n={79}\n.*?\n=)'
-    p_card_type = r'\w{1,2} {8,9}([\S]{5,20}) '
+    p_card_type = r'\w{1,2} {8,9}([\S]{4,20}) '
+
 
     host_name = get_host_name(config)
     host_ip = get_ip(config)
@@ -253,7 +254,40 @@ def get_card_statistic(config):
                 res_card_type.count(item)
             ))
 
-    return card_statistic_data
+    sfm = get_sfm(config)
+
+    return card_statistic_data + sfm
+
+def get_sfm(config):
+    '''sfm统计'''
+
+    sfm_data = []
+    sfm_list = []
+    p_card_type = r'\w{1,2} {8,9}([\S]{4,20}) '
+    p_fabric = r'(?s)(Fabric \d{1,2}\n={79}.*?\n={79})'
+
+    host_name = get_host_name(config)
+    host_ip = get_ip(config)
+
+    if not host_name or not host_ip:
+        return sfm_data
+
+    res_sfm = re.findall(p_fabric, config)
+    for i in res_sfm:
+        res_card_type = re.search(p_card_type, i)
+        if res_card_type:
+            sfm_list.append(res_card_type.group(1))
+
+    sfm_unique = list(set(sfm_list))
+    for item in sfm_unique:
+            sfm_data.append((
+                host_name,
+                host_ip,
+                item,
+                sfm_list.count(item)
+            ))
+
+    return sfm_data
 
 
 def get_mda_detail(config):

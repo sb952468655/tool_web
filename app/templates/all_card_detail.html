@@ -1,0 +1,72 @@
+{% extends "report_port.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %} 全省板卡统计明细 {% endblock %}
+{% block page_header %} 全省板卡统计明细 {% endblock %}
+
+{% block report_content %}
+    <form class="form-inline" method="post" action="{{ url_for('main.all_card_detail') }}">
+        <div class="form-group">
+            <label>地市选择</label>
+            <select class="form-control" name = "city">
+                {% if host_name == 'all' %}
+                <option selected value ="all">全省</option>
+                {% else %}
+                <option value ="all">全省</option>
+                {% endif %}
+                {% for k, v in city_list.items() %}
+                    {% if k == city %}
+                    <option selected value="{{ k }}">{{ v }}</option>
+                    {% else %}
+                    <option value="{{ k }}">{{ v }}</option>
+                    {% endif %}
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="btn btn-default">查看</button>
+        <a class="btn btn-default" href="{{ url_for('main.download_excel', host_name = 'ccc', table_name = 'all_card_detail', city = city) }}" role="button">生成表格</a>
+    </form><br>
+    <table class="table table-striped table-condensed" style="min-width:2000px">
+        <thead>
+            <tr>
+                <th>设备名</th>
+                <th>地市名</th>
+                <th>设备IP</th>
+                <th>Slot</th>
+                <th>Equipped Type</th>
+                <th>Admin State</th>
+                <th>Operational State</th>
+                <th>Serial number</th>
+                <th>Time of last boot</th>
+                <th>Temperature</th>
+                <th>Temperature threshold</th>
+                <th>是否存在异常</th>
+                <th>日期</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in card_detail_data %}
+                <tr>
+                    <th>{{ item.host_name }}</th>
+                    <th>{{ city_list[item.city] }}</th>
+                    <th>{{ item.host_ip }}</th>
+                    <th>{{ item.slot }}</th>
+                    <th>
+                        {{ item.card_type }}
+                        {{ item.equipped_type }}
+                    </th>
+                    <th>{{ item.admin_state }}</th>
+                    <th>{{ item.operational_state }}</th>
+                    <th>{{ item.serial_number }}</th>
+                    <th>{{ item.time_of_last_boot }}</th>
+                    <th>{{ item.temperature }}</th>
+                    <th>{{ item.temperature_threshold }}</th>
+                    <th>{{ item.is_abnormal }}</th>
+                    <th>{{ item.date_time.strftime("%Y/%m/%d") }}</th>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
+
+

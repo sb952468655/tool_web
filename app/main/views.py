@@ -35,51 +35,68 @@ def index():
         return redirect(url_for('main.host_list', action = 'report_port'))
 
 
-@main.route('/report_port/<host_name>', methods=['GET', 'POST'])
+@main.route('/report_port', methods=['GET', 'POST'])
 @login_required
-def report_port(host_name):
+def report_port():
     '''统计报表-端口明细'''
 
     card_data = []
+    page = request.args.get('page', 1, type=int)
     city = session.get('city')
+    host_list = get_host(city)
+    if not city:
+        return redirect(url_for('main.city_list'))
 
     from .report import get_report_data, get_device_name, get_port_ggl, get_ip
 
-    page = request.args.get('page', 1, type=int)
+    # if request.method == 'POST':
+    #     session['search_port_detail_port'] = ''
+    #     session['search_port_detail_date'] = ''
+    #     search_port_detail_port = request.form.get('port')
+    #     search_port_detail_date = request.form.get('date')
+
+    #     if search_port_detail_port:
+    #         session['search_port_detail_port'] = search_port_detail_port
+    #     if search_port_detail_date:
+    #         session['search_port_detail_date'] = datetime.strptime(search_port_detail_date,'%Y-%m-%d').date()
+
     if request.method == 'POST':
-        session['search_port_detail_port'] = ''
-        session['search_port_detail_date'] = ''
-        search_port_detail_port = request.form.get('port')
-        search_port_detail_date = request.form.get('date')
-
-        if search_port_detail_port:
-            session['search_port_detail_port'] = search_port_detail_port
-        if search_port_detail_date:
-            session['search_port_detail_date'] = datetime.strptime(search_port_detail_date,'%Y-%m-%d').date()
-
-
-    count = CardPort1.query.filter_by(host_name = host_name, date_time = date.today()).count()
-    if count == 0:
-        abort(404)
+        host_name = request.form.get('host_name')
+    else:
+        host_name = request.args.get('host_name')
+        if not host_name:
+            host_name = host_list[0]
 
     #搜索
-    cardport1 = CardPort1.query
-    if session.get('search_port_detail_port'):
-        cardport1 = cardport1.filter(CardPort1.port == session.get('search_port_detail_port'))
-    if session.get('search_port_detail_date'):
-        cardport1 = cardport1.filter(CardPort1.date_time == session.get('search_port_detail_date'))
-    else:
-        cardport1 = cardport1.filter(CardPort1.date_time == date.today())
+    # cardport1 = CardPort1.query
+    # if session.get('search_port_detail_port'):
+    #     cardport1 = cardport1.filter(CardPort1.port == session.get('search_port_detail_port'))
+    # if session.get('search_port_detail_date'):
+    #     cardport1 = cardport1.filter(CardPort1.date_time == session.get('search_port_detail_date'))
+    # else:
+    #     cardport1 = cardport1.filter(CardPort1.date_time == date.today())
 
-    cardport1 = cardport1.filter(CardPort1.host_name == host_name)
-    pageination = cardport1.paginate(
-        page, per_page = current_app.config['FLASKY_POSTS_PER_PAGE'],
-        error_out = False
-    )
+    # cardport1 = cardport1.filter(CardPort1.host_name == host_name)
+    # pageination = cardport1.paginate(
+    #     page, per_page = current_app.config['FLASKY_POSTS_PER_PAGE'],
+    #     error_out = False
+    # )
+    # card_data = pageination.items
+    if host_name == 'all':
+        pageination = CardPort1.query.filter_by(date_time = date.today()).paginate(
+            page, per_page = current_app.config['FLASKY_POSTS_PER_PAGE'],
+            error_out = False
+        )
+    else:
+        pageination = CardPort1.query.filter_by(host_name = host_name, date_time = date.today()).paginate(
+            page, per_page = current_app.config['FLASKY_POSTS_PER_PAGE'],
+            error_out = False
+        )
     card_data = pageination.items
 
     return render_template('report.html', 
         card_data = card_data, 
+        host_list = host_list,
         action = 'report_port', 
         host_name=host_name,
         pageination = pageination)
@@ -93,76 +110,178 @@ def host_list_data(host_name):
 
     return render_template('host_list_data.html', host_name=host_name, host_list_data = host_list_data ,action='host_list_data')
 
-@main.route('/card_detail/<host_name>')
+@main.route('/card_detail', methods=['GET', 'POST'])
 @login_required
-def card_detail(host_name):
+def card_detail():
     '''card明细'''
 
     city = session.get('city')
+    if not city:
+        return redirect(url_for('main.city_list'))
+    host_list = get_host(city)
+    
+    if request.method == 'POST':
+        host_name = request.form.get('host_name')
+    else:
+        host_name = request.args.get('host_name')
+        if not host_name:
+            host_name = host_list[0]
 
-    count = CardDetail.query.filter_by(host_name = host_name, date_time = date.today()).count()
-    if count == 0:
-        abort(404)
+    if host_name == 'all':
+        card_detail_data = CardDetail.query.filter_by(date_time = date.today()).all()
+    else:
+        card_detail_data = CardDetail.query.filter_by(host_name = host_name, date_time = date.today()).all()
 
-    card_detail_data = CardDetail.query.filter_by(host_name = host_name, date_time = date.today()).all()
+    return render_template('card_detail.html', host_name=host_name, host_list = host_list, card_detail_data = card_detail_data ,action='card_detail')
 
-    return render_template('card_detail.html', host_name=host_name, card_detail_data = card_detail_data ,action='card_detail')
-
-@main.route('/card_statistic/<host_name>')
+@main.route('/card_statistic', methods=['GET', 'POST'])
 @login_required
-def card_statistic(host_name):
+def card_statistic():
     '''card统计'''
 
     city = session.get('city')
-    count = CardStatistic.query.filter_by(host_name = host_name, date_time = date.today()).count()
-    if count == 0:
-        abort(404)
+    if not city:
+        return redirect(url_for('main.city_list'))
+    host_list = get_host(city)
 
-    card_statistic_data = CardStatistic.query.filter_by(host_name = host_name, date_time = date.today()).all()
+    if request.method == 'POST':
+        host_name = request.form.get('host_name')
+    else:
+        host_name = request.args.get('host_name')
+        if not host_name:
+            host_name = host_list[0]
 
-    return render_template('card_statistic.html', host_name=host_name, card_statistic_data = card_statistic_data ,action='card_statistic')
+    if host_name == 'all':
+        card_statistic_data = CardStatistic.query.filter_by(date_time = date.today()).all()
+    else:
+        card_statistic_data = CardStatistic.query.filter_by(host_name = host_name, date_time = date.today()).all()
 
-@main.route('/mda_detail/<host_name>')
+    return render_template('card_statistic.html', host_name=host_name, host_list = host_list, card_statistic_data = card_statistic_data ,action='card_statistic')
+
+
+@main.route('/all_card_statistic', methods=['GET', 'POST'])
 @login_required
-def mda_detail(host_name):
+def all_card_statistic():
+    '''全省板卡统计汇总'''
+
+    if request.method == 'POST':
+        city = request.form.get('city')
+    else:
+        city = request.args.get('city')
+        if not city:
+            city = 'all'
+
+    if city == 'all':
+        card_statistic_data = CardStatistic.query.filter_by(date_time = date.today()).all()
+        mda_statistic_data = MdaStatistic.query.filter_by(date_time = date.today()).all()
+    else:
+        card_statistic_data = CardStatistic.query.filter_by(city = city, date_time = date.today()).all()
+        mda_statistic_data = MdaStatistic.query.filter_by(city = city, date_time = date.today()).all()
+    
+    return render_template('all_card_statistic.html', 
+    city = city, 
+    city_list = g_city_to_name, 
+    card_statistic_data = card_statistic_data + mda_statistic_data, 
+    action='all_card_statistic')
+
+
+@main.route('/all_card_detail', methods=['GET', 'POST'])
+@login_required
+def all_card_detail():
+    '''全省板卡统计明细'''
+
+    if request.method == 'POST':
+        city = request.form.get('city')
+    else:
+        city = request.args.get('city')
+        if not city:
+            city = 'all'
+
+    if city == 'all':
+        card_data = CardDetail.query.filter_by(date_time = date.today()).all()
+        mda_data = MdaDetail.query.filter_by(date_time = date.today()).all()
+    else:
+        card_data = CardDetail.query.filter_by(city = city, date_time = date.today()).all()
+        mda_data = MdaDetail.query.filter_by(city = city, date_time = date.today()).all()
+    
+    return render_template('all_card_detail.html', 
+    city = city, 
+    city_list = g_city_to_name, 
+    card_detail_data = card_data + mda_data, 
+    action='all_card_detail')
+
+
+@main.route('/mda_detail', methods=['GET', 'POST'])
+@login_required
+def mda_detail():
     '''mda明细'''
 
     city = session.get('city')
-    count = MdaDetail.query.filter_by(host_name = host_name, date_time = date.today()).count()
-    if count == 0:
-        abort(404)
+    if not city:
+        return redirect(url_for('main.city_list'))
+    host_list = get_host(city)
 
-    mda_detail_data = MdaDetail.query.filter_by(host_name = host_name, date_time = date.today()).all()
+    if request.method == 'POST':
+        host_name = request.form.get('host_name')
+    else:
+        host_name = request.args.get('host_name')
+        if not host_name:
+            host_name = host_list[0]
 
-    return render_template('mda_detail.html', host_name=host_name,  mda_detail_data = mda_detail_data ,action='mda_detail')
+    if host_name == 'all':
+        mda_detail_data = MdaDetail.query.filter_by(date_time = date.today()).all()
+    else:
+        mda_detail_data = MdaDetail.query.filter_by(host_name = host_name, date_time = date.today()).all()
 
-@main.route('/mda_statistic/<host_name>')
+    return render_template('mda_detail.html', host_name=host_name, host_list = host_list, mda_detail_data = mda_detail_data ,action='mda_detail')
+
+@main.route('/mda_statistic', methods=['GET', 'POST'])
 @login_required
-def mda_statistic(host_name):
+def mda_statistic():
     '''mda统计'''
 
     city = session.get('city')
-    count = MdaStatistic.query.filter_by(host_name = host_name, date_time = date.today()).count()
-    if count == 0:
-        abort(404)
+    if not city:
+        return redirect(url_for('main.city_list'))
+    host_list = get_host(city)
 
-    mda_statistic_data = MdaStatistic.query.filter_by(host_name = host_name, date_time = date.today()).all()
+    if request.method == 'POST':
+        host_name = request.form.get('host_name')
+    else:
+        host_name = request.args.get('host_name')
+        if not host_name:
+            host_name = host_list[0]
 
-    return render_template('mda_statistic.html', host_name=host_name,  mda_statistic_data = mda_statistic_data ,action='mda_statistic')
+    if host_name == 'all':
+        mda_statistic_data = MdaStatistic.query.filter_by(date_time = date.today()).all()
+    else:
+        mda_statistic_data = MdaStatistic.query.filter_by(host_name = host_name, date_time = date.today()).all()
 
-@main.route('/port_statistic/<host_name>')
+    return render_template('mda_statistic.html', host_name=host_name, host_list = host_list, mda_statistic_data = mda_statistic_data, action='mda_statistic')
+
+@main.route('/port_statistic', methods=['GET', 'POST'])
 @login_required
-def port_statistic(host_name):
+def port_statistic():
     '''port统计'''
 
     city = session.get('city')
-    count = PortStatistic.query.filter_by(host_name = host_name, date_time = date.today()).count()
-    if count == 0:
-        abort(404)
+    host_list = get_host(session.get('city'))
+    if not city:
+        return redirect(url_for('main.city_list'))
 
-    port_statistic_data = PortStatistic.query.filter_by(host_name = host_name, date_time = date.today()).all()
+    if request.method == 'POST':
+        host_name = request.form.get('host_name')
+    else:
+        host_name = request.args.get('host_name')
+        if not host_name:
+            host_name = host_list[0]
 
-    return render_template('port_statistic.html', host_name=host_name,  port_statistic_data = port_statistic_data ,action='port_statistic')
+    if host_name == 'all':
+        port_statistic_data = PortStatistic.query.filter_by(date_time = date.today()).all()
+    else:
+        port_statistic_data = PortStatistic.query.filter_by(host_name = host_name, date_time = date.today()).all()
+
+    return render_template('port_statistic.html', host_name=host_name, host_list = host_list, port_statistic_data = port_statistic_data, action='port_statistic')
 
 
 @main.route('/check_config/<host_name>')
@@ -560,6 +679,73 @@ def download_excel(host_name, table_name):
                 i.vprn_4015_num,
                 i.vprn_4015_pool_utilization
             ))
+    elif table_name == 'all_card_statistic':
+        file_name = '全省板卡统计汇总.xlsx'
+        labels = [
+            '地市', '设备名', '设备IP', '板卡类型', '板卡数量'
+        ]
+
+        city = request.args.get('city')
+
+        if city == 'all':
+            card_data = CardStatistic.query.filter_by(date_time = date.today()).all()
+            mda_data = MdaStatistic.query.filter_by(date_time = date.today()).all()
+        else:
+            card_data = CardStatistic.query.filter_by(city = city, date_time = date.today()).all()
+            mda_data = MdaStatistic.query.filter_by(city = city, date_time = date.today()).all()
+
+        for i in card_data:
+            data.append((
+                g_city_to_name[i.city],
+                i.host_name,
+                i.host_ip,
+                i.card_type,
+                i.card_num
+            ))
+    elif table_name == 'all_card_detail':
+        file_name = '全省板卡统计明细.xlsx'
+        labels = [
+            '地市', '设备名', '设备IP', 'slot', '板卡类型', 'admin状态', 'operational状态', 'serial number', 'time of last boot', 'temperature', 'temperature threshold'
+        ]
+
+        city = request.args.get('city')
+
+        if city == 'all':
+            card_data = CardDetail.query.filter_by(date_time = date.today()).all()
+            mda_data = MdaDetail.query.filter_by(date_time = date.today()).all()
+        else:
+            card_data = CardDetail.query.filter_by(city = city, date_time = date.today()).all()
+            mda_data = MdaDetail.query.filter_by(city = city, date_time = date.today()).all()
+
+        for i in card_data:
+            data.append((
+                g_city_to_name[i.city],
+                i.host_name,
+                i.host_ip,
+                i.slot,
+                i.card_type,
+                i.admin_state,
+                i.operational_state,
+                i.serial_number,
+                i.time_of_last_boot,
+                i.temperature,
+                i.temperature_threshold
+            ))
+
+        for i in mda_data:
+            data.append((
+                g_city_to_name[i.city],
+                i.host_name,
+                i.host_ip,
+                i.slot,
+                i.equipped_type,
+                i.admin_state,
+                i.operational_state,
+                i.serial_number,
+                i.time_of_last_boot,
+                i.temperature,
+                i.temperature_threshold
+            ))
 
     save_path = os.path.join('app','static', file_name)
     if labels and data:
@@ -823,23 +1009,35 @@ def host_list(action):
     return render_template('host_list_base.html', host_data = host_data,  action = action)
 
 
-@main.route('/address_collect/<host_name>')
+@main.route('/address_collect', methods=['GET', 'POST'])
 @login_required
-def address_collect(host_name):
+def address_collect():
     '''三层接口和静态用户IP地址采集'''
 
     address_data = []
-    city = session.get('city')
     page = request.args.get('page', 1, type=int)
-    count = AddressCollect.query.filter_by(host_name = host_name, date_time = date.today()).count()
-    if count == 0:
-        abort(404)
+    city = session.get('city')
+    if not city:
+        return redirect(url_for('main.city_list'))
+    host_list = get_host(city)
 
+    if request.method == 'POST':
+        host_name = request.form.get('host_name')
+    else:
+        host_name = request.args.get('host_name')
+        if not host_name:
+            host_name = host_list[0]
 
-    pageination = AddressCollect.query.filter_by(host_name = host_name, date_time = date.today()).paginate(
-        page, per_page = current_app.config['FLASKY_POSTS_PER_PAGE'],
-        error_out = False
-    )
+    if host_name == 'all':
+        pageination = AddressCollect.query.filter_by(date_time = date.today()).paginate(
+            page, per_page = current_app.config['FLASKY_POSTS_PER_PAGE'],
+            error_out = False
+        )
+    else:
+        pageination = AddressCollect.query.filter_by(host_name = host_name, date_time = date.today()).paginate(
+            page, per_page = current_app.config['FLASKY_POSTS_PER_PAGE'],
+            error_out = False
+        )
     address_data = pageination.items
 
 
@@ -847,6 +1045,7 @@ def address_collect(host_name):
         address_data = address_data, 
         action = 'address_collect', 
         host_name=host_name,
+        host_list = host_list,
         pageination = pageination)
 
 
@@ -1591,6 +1790,7 @@ def report_port_search(report_name):
         if session.get('search_port_detail_host_name'):
             cardport1 = cardport1.filter(CardPort1.host_name == session.get('search_port_detail_host_name'))
         if session.get('search_port_detail_date'):
+            a = session.get('search_port_detail_date')
             cardport1 = cardport1.filter(CardPort1.date_time == session.get('search_port_detail_date'))
         else:
             cardport1 = cardport1.filter(CardPort1.date_time == date.today())
@@ -2203,6 +2403,7 @@ def save_card_detail(city, host_name, config):
     for item in card_detail_data:
         #存入数据库
         card_detail = CardDetail(
+            city = city,
             host_name = host_name,
             host_ip = item[1],
             slot = item[2],
