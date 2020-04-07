@@ -324,6 +324,28 @@ class NetFlow(db.Model):
     def __repr__(self):
         return '<NetFlow %r>' % self.site_name
 
+
+
+class SpecialLine(db.Model):
+    '''专线统计表'''
+
+    __tablename__ = 'special_line'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    city = db.Column(db.String(64)) #地市
+    host_name = db.Column(db.String(64)) #设备名
+    ies_id = db.Column(db.String(64)) #ies 编号
+    ies_describe = db.Column(db.String(64)) #ies 描述
+    gi_name = db.Column(db.String(64)) #group-interface 端口名称
+    gi_describe = db.Column(db.String(64)) #group-interface 端口描述
+    ip = db.Column(db.String(64)) #ip 地址
+    mac = db.Column(db.String(64)) #mac 地址
+    egress_id = db.Column(db.String(64)) #qos sap-egress编号
+    rate = db.Column(db.String(64)) #带宽值 rate值/1000
+    date_time = db.Column(db.Date, default = date.today())
+
+    def __repr__(self):
+        return '<SpecialLine %r>' % self.ip
+
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)

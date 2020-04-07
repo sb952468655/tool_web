@@ -22,9 +22,11 @@ def create_app(config_name):
 
     from .main import main as main_blueprint
     from .auth import auth as auth_blueprint
+    from .special_line import special_line as special_line_blueprint
 
     app.register_blueprint(auth_blueprint, url_prefix='/auth')
     app.register_blueprint(main_blueprint)
+    app.register_blueprint(special_line_blueprint)
 
     return app
 
