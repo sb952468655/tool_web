@@ -31,17 +31,21 @@ def mobile_warn1(res):
         result = re_obj.findall(res_fan_info.group())
         if result:
             for item in result:
-                msg += item[0] + '\n'
-                if item[2] == 'full speed':
-                    err += '风扇%s全转速，建议清洗滤尘网。\n' % item[1]
-                elif 'speed' not in item[2]:
-                    if int(item[2][:-2]) >= 50:
+                try:
+                    if item[2] == 'full speed':
+                        err += '风扇%s全转速，建议清洗滤尘网。\n' % item[1]
+                    elif 'speed' not in item[2]:
+                        if int(item[2][:-2]) >= 50:
+                            err += '风扇%s转速大于50。\n' % item[1]
+                    elif int(item[3][-4:-2]) >= 50:
+                        msg += 'Fan tray number: %s\nSpeed: %s\n' % (item[1], item[2])
                         err += '风扇%s转速大于50。\n' % item[1]
-                elif int(item[3][-4:-2]) >= 50:
-                    msg += 'Fan tray number: %s\nSpeed: %s\n' % (item[1], item[2])
-                    err += '风扇%s转速大于50。\n' % item[1]
-                elif item[4] != 'up':
-                    err += '风扇%s状态不正常。\n' % item[1]
+                    elif item[4] != 'up':
+                        err += '风扇%s状态不正常。\n' % item[1]
+                except Exception:
+                    pass
+                msg += item[0] + '\n'
+                
         else:
             logging.error('没有找到风扇信息')
     else:
