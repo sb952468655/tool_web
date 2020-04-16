@@ -100,9 +100,12 @@ def get_statistic_data(config):
         if res_stable_leases and user_num_4015 and res_stable_leases.group(4) != '0' and user_num_4015 != '0':
             a = res_stable_leases.group(4)
             lyl_4015 = str(round(int(user_num_4015)/int(res_stable_leases.group(4)),2) * 100) + ' %'
-        statistic_data.append(
-            [item[0], item[1], res_ip, port_type, res_utilization[i][0], res_utilization[i][1], user_num, utilization, user_num_4015, lyl_4015]
-        )
+        try:
+            statistic_data.append(
+                [item[0], item[1], res_ip, port_type, res_utilization[i][0], res_utilization[i][1], user_num, utilization, user_num_4015, lyl_4015]
+            )
+        except Exception:
+            pass
 
     return statistic_data
 
