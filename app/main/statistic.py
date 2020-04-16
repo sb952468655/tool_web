@@ -40,7 +40,7 @@ def get_statistic_data(config):
             index = res_subscriber_management_statistics.index(item[1])
         except ValueError:
             pass
-        if index != -1:
+        if index != -1 and index < len(res_ppp):
             user_num = res_ppp[index]
 
         #地址池总数
