@@ -337,6 +337,7 @@ class SpecialLine(db.Model):
     ies_describe = db.Column(db.String(64)) #ies 描述
     gi_name = db.Column(db.String(64)) #group-interface 端口名称
     gi_describe = db.Column(db.String(64)) #group-interface 端口描述
+    sap_name = db.Column(db.String(64)) # sap名称
     ip = db.Column(db.String(64)) #ip 地址
     mac = db.Column(db.String(64)) #mac 地址
     egress_id = db.Column(db.String(64)) #qos sap-egress编号

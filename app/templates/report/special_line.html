@@ -1,0 +1,62 @@
+{% extends "report_port.html" %}
+
+{% block title %} 专线统计表 {% endblock %}
+{% block page_header %} 专线统计表 {% endblock %}
+
+{% block report_content %}
+<form class="form-inline" method="post" action="{{ url_for('special_line.index') }}">
+    <div class="form-group">
+        <label>设备名称</label>
+        <select class="form-control" name = "host_name">
+            {% if current_user.username == 'nokia' %}
+                {% if host_name == 'all' %}
+                <option selected value ="all">全部</option>
+                {% else %}
+                <option value ="all">全部</option>
+                {% endif %}
+            {% endif %}
+            {% for i in host_list %}
+                {% if i == host_name %}
+                <option selected>{{ i }}</option>
+                {% else %}
+                <option>{{ i }}</option>
+                {% endif %}
+            {% endfor %}
+        </select>
+    </div>
+    <button type="submit" class="btn btn-default">查看</button>
+    <a class="btn btn-default" href="{{ url_for('main.download_excel', host_name = host_name, table_name = 'special_line') }}" role="button">生成表格</a>
+</form><br>
+    <table class="table table-striped table-condensed">
+        <thead>
+            <tr>
+                <th>IES编号</th>
+                <th>IES描述</th>
+                <th>interface端口名称</th>
+                <th>interface端口描述</th>
+                <th>sap信息</th>
+                <th>IP地址</th>
+                <th>MAC地址</th>
+                <th>qos sap-egress编号</th>
+                <th>带宽值</th>
+                <th>日期</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in special_line_data %}
+                <tr>
+                    <th>{{ item.ies_id }}</th>
+                    <th>{{ item.ies_describe }}</th>
+                    <th>{{ item.gi_name }}</th>
+                    <th>{{ item.gi_describe }}</th>
+                    <th>{{ item.sap_name }}</th>
+                    <th>{{ item.ip }}</th>
+                    <th>{{ item.mac }}</th>
+                    <th>{{ item.egress_id }}</th>
+                    <th>{{ item.rate }}</th>
+                    <th>{{ item.date_time }}</th>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

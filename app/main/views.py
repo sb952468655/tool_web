@@ -21,6 +21,7 @@ from .. import db
 from ..models import *
 from .report import *
 from .common import get_log, get_host, get_today_log_name, get_city_list, get_host_logs, get_log_from_date, make_excel
+from ..special_line.views import save_special_line
 from .forms import CaseUploadForm, ModelForm, ModelListCreateForm, ModelSelectForm
 sys.path.append('../')
 
@@ -2204,27 +2205,29 @@ def save_db():
             yesterday_log = get_log(i, j, 1)
             if today_log:
                 #端口明细
-                save_port_detail(i, j, today_log)
+                # save_port_detail(i, j, today_log)
                 #端口统计
-                save_port_statistic(i, j, today_log)
+                # save_port_statistic(i, j, today_log)
                 #card明细
-                save_card_detail(i, j, today_log)
+                # save_card_detail(i, j, today_log)
                 #card统计
-                save_card_statistic(i, j, today_log)
+                # save_card_statistic(i, j, today_log)
                 #mda明细
-                save_mda_detail(i, j, today_log)
+                # save_mda_detail(i, j, today_log)
                 # mda统计
-                save_mda_statistic(i, j, today_log)
+                # save_mda_statistic(i, j, today_log)
                 #业务负载统计-按端口统计
-                save_load_statistic(i, j, today_log)
+                # save_load_statistic(i, j, today_log)
                 #业务负载统计-按设备统计
-                save_load_statistic_host(i, j, today_log)
+                # save_load_statistic_host(i, j, today_log)
                 #地址采集
-                save_address_collect(i, j, today_log)
+                # save_address_collect(i, j, today_log)
                 #组巡
-                save_zuxun(i, j, today_log)
+                # save_zuxun(i, j, today_log)
                 #重要网络流量
-                save_netflow(i, j, today_log)
+                # save_netflow(i, j, today_log)
+                #专线统计
+                save_special_line(i, j, today_log)
 
             if today_log and yesterday_log:
                 save_xunjian(i, j, today_log, yesterday_log)
