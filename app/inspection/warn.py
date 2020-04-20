@@ -681,6 +681,8 @@ def mobile_warn25(res, res_old):
     p_per_threshold_mda_discard_statistics = r'(?s)Per Threshold MDA Discard Statistics\n={79}.*?\n='
     p_ethernet_like_medium_statistics = r'(?s)Ethernet-like Medium Statistics\n={79}.*?\n='
     ddm = r'                              Value High Alarm  High Warn   Low Warn  Low Alarm'
+    p_traffic_statistics = r'(?s)Traffic Statistics\n={79}.*?\n={79}'
+    p_utilization = r'Utilization \(300 seconds\) {24,26}(\d{1,3}\.\d{2})% {16,18}(\d{1,3}\.\d{2})%'
 
     #找到所有 Ethernet Interface
     start = 0
@@ -732,62 +734,71 @@ def mobile_warn25(res, res_old):
                 logging.error('没有找到光功率信息')
                 continue
 
-        #检查 Ethernet-like Medium Statistics
-        res_ethernet_like_medium_statistics = re.search(p_ethernet_like_medium_statistics, i[0])
-        res_ethernet_like_medium_statistics_old = re.search(p_ethernet_like_medium_statistics, i[1])
-        if res_ethernet_interface and res_ethernet_interface_old:
-            p_ethernet_like = r' :([ 0-9]{20})'
-            res_ethernet_like = re.findall(p_ethernet_like, res_ethernet_like_medium_statistics.group())
-            res_ethernet_like_old = re.findall(p_ethernet_like, res_ethernet_like_medium_statistics_old.group())
-            for j in zip(res_ethernet_like, res_ethernet_like_old):
-                if int(j[0].strip()) - int(j[1].strip()) > 0:
-                    err += 'port {} Ethernet-like Medium Statistics 状态异常\n'.format(res_interface.group(1))
-                    msg += 'port {}\n{}\n'.format(res_interface.group(1), res_ethernet_like_medium_statistics.group())
-                    break
-        else:
-            logging.error('没有找到Ethernet-like Medium Statistics')
-        
-        #检查 Per Threshold MDA Discard Statistics
-        res_per_threshold_mda_discard_statistics = re.search(p_per_threshold_mda_discard_statistics, i[0])
-        res_per_threshold_mda_discard_statistics_old = re.search(p_per_threshold_mda_discard_statistics, i[1])
-        if res_per_threshold_mda_discard_statistics and res_per_threshold_mda_discard_statistics_old:
-            p_per_threshold = r'Threshold \d{1,2} Dropped : {2,11}(\d{1,9}) {13,23}(\d{1,10}) '
+            #检查 Ethernet-like Medium Statistics
+            res_ethernet_like_medium_statistics = re.search(p_ethernet_like_medium_statistics, i[0])
+            res_ethernet_like_medium_statistics_old = re.search(p_ethernet_like_medium_statistics, i[1])
+            if res_ethernet_interface and res_ethernet_interface_old:
+                p_ethernet_like = r' :([ 0-9]{20})'
+                res_ethernet_like = re.findall(p_ethernet_like, res_ethernet_like_medium_statistics.group())
+                res_ethernet_like_old = re.findall(p_ethernet_like, res_ethernet_like_medium_statistics_old.group())
+                for j in zip(res_ethernet_like, res_ethernet_like_old):
+                    if int(j[0].strip()) - int(j[1].strip()) > 0:
+                        err += 'port {} Ethernet-like Medium Statistics 状态异常\n'.format(res_interface.group(1))
+                        msg += 'port {}\n{}\n'.format(res_interface.group(1), res_ethernet_like_medium_statistics.group())
+                        break
+            else:
+                logging.error('没有找到Ethernet-like Medium Statistics')
+            
+            #检查 Per Threshold MDA Discard Statistics
+            res_per_threshold_mda_discard_statistics = re.search(p_per_threshold_mda_discard_statistics, i[0])
+            res_per_threshold_mda_discard_statistics_old = re.search(p_per_threshold_mda_discard_statistics, i[1])
+            if res_per_threshold_mda_discard_statistics and res_per_threshold_mda_discard_statistics_old:
+                p_per_threshold = r'Threshold \d{1,2} Dropped : {2,11}(\d{1,9}) {13,23}(\d{1,10}) '
 
-            res_per_threshold = re.findall(p_per_threshold, res_per_threshold_mda_discard_statistics.group())
-            res_per_threshold_old = re.findall(p_per_threshold, res_per_threshold_mda_discard_statistics_old.group())
+                res_per_threshold = re.findall(p_per_threshold, res_per_threshold_mda_discard_statistics.group())
+                res_per_threshold_old = re.findall(p_per_threshold, res_per_threshold_mda_discard_statistics_old.group())
 
-            for j in zip(res_per_threshold, res_per_threshold_old):
-                if int(j[0][0].strip()) - int(j[1][0].strip()) > 0 or int(j[0][1].strip()) - int(j[1][1].strip()) > 0:
-                    err += 'port {} Per Threshold MDA Discard Statistics 状态异常\n'.format(res_interface.group(1))
-                    msg += 'port {}\n{}\n'.format(res_interface.group(1), res_per_threshold_mda_discard_statistics.group())
-                    break
-        else:
-            logging.error('没有找到Per Threshold MDA Discard Statistics')
+                for j in zip(res_per_threshold, res_per_threshold_old):
+                    if int(j[0][0].strip()) - int(j[1][0].strip()) > 0 or int(j[0][1].strip()) - int(j[1][1].strip()) > 0:
+                        err += 'port {} Per Threshold MDA Discard Statistics 状态异常\n'.format(res_interface.group(1))
+                        msg += 'port {}\n{}\n'.format(res_interface.group(1), res_per_threshold_mda_discard_statistics.group())
+                        break
+            else:
+                logging.error('没有找到Per Threshold MDA Discard Statistics')
 
-        #检查 Queue Statistics
-        res_queue_statistics = re.search(p_queue_statistics, i[0])
-        res_queue_statistics_old = re.search(p_queue_statistics, i[1])
-        if res_queue_statistics and res_queue_statistics_old:
-            p_profile_dropped = r'In Profile dropped    : {1,4}(\d{1,3}) {13,23}\d{1,10}'
-            p_prof_dropped = r'In/Inplus Prof dropped: {1,4}(\d{1,3}) {13,23}\d{1,10}'
+            #检查 Queue Statistics
+            res_queue_statistics = re.search(p_queue_statistics, i[0])
+            res_queue_statistics_old = re.search(p_queue_statistics, i[1])
+            if res_queue_statistics and res_queue_statistics_old:
+                p_profile_dropped = r'In Profile dropped    : {1,4}(\d{1,3}) {13,23}\d{1,10}'
+                p_prof_dropped = r'In/Inplus Prof dropped: {1,4}(\d{1,3}) {13,23}\d{1,10}'
 
-            res_profile_dropped = re.findall(p_profile_dropped, res_queue_statistics.group())
-            res_profile_dropped_old = re.findall(p_profile_dropped, res_queue_statistics_old.group())
+                res_profile_dropped = re.findall(p_profile_dropped, res_queue_statistics.group())
+                res_profile_dropped_old = re.findall(p_profile_dropped, res_queue_statistics_old.group())
 
-            res_prof_dropped = re.findall(p_prof_dropped, res_queue_statistics.group())
-            res_prof_dropped_old = re.findall(p_prof_dropped, res_queue_statistics_old.group())
+                res_prof_dropped = re.findall(p_prof_dropped, res_queue_statistics.group())
+                res_prof_dropped_old = re.findall(p_prof_dropped, res_queue_statistics_old.group())
 
-            for j in zip(res_profile_dropped, res_profile_dropped_old):
-                if int(j[0].strip()) - int(j[1].strip()) > 0:
-                    err += 'port {} In Profile dropped 状态异常\n'.format(res_interface.group(1))
-                    msg += 'port {}\n{}\n'.format(res_interface.group(1), res_queue_statistics.group())
-                    break
+                for j in zip(res_profile_dropped, res_profile_dropped_old):
+                    if int(j[0].strip()) - int(j[1].strip()) > 0:
+                        err += 'port {} In Profile dropped 状态异常\n'.format(res_interface.group(1))
+                        msg += 'port {}\n{}\n'.format(res_interface.group(1), res_queue_statistics.group())
+                        break
 
-            for j in zip(res_prof_dropped, res_prof_dropped_old):
-                if int(j[0].strip()) - int(j[1].strip()) > 0:
-                    err += 'port {} In/Inplus Prof dropped 状态异常\n'.format(res_interface.group(1))
-                    msg += 'port {}\n{}\n'.format(res_interface.group(1), res_queue_statistics.group())
-                    break
+                for j in zip(res_prof_dropped, res_prof_dropped_old):
+                    if int(j[0].strip()) - int(j[1].strip()) > 0:
+                        err += 'port {} In/Inplus Prof dropped 状态异常\n'.format(res_interface.group(1))
+                        msg += 'port {}\n{}\n'.format(res_interface.group(1), res_queue_statistics.group())
+                        break
+
+            #检查Traffic Statistics 端口流量占用率
+            res_traffic_statistics = re.search(p_traffic_statistics, i[0])
+            if res_traffic_statistics:
+                res_utilization = re.search(p_utilization, res_traffic_statistics.group())
+                if res_utilization:
+                    print(res_utilization.groups())
+                    if float(res_utilization.group(1)) > 60 or float(res_utilization.group(2)) > 60:
+                        err += 'port {} Input/Output”占用率超60%\n'.format(res_interface.group(1))
 
     if err == '':
         err = 'port状态正常'

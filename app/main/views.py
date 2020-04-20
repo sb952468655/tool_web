@@ -50,17 +50,6 @@ def report_port():
 
     from .report import get_report_data, get_device_name, get_port_ggl, get_ip
 
-    # if request.method == 'POST':
-    #     session['search_port_detail_port'] = ''
-    #     session['search_port_detail_date'] = ''
-    #     search_port_detail_port = request.form.get('port')
-    #     search_port_detail_date = request.form.get('date')
-
-    #     if search_port_detail_port:
-    #         session['search_port_detail_port'] = search_port_detail_port
-    #     if search_port_detail_date:
-    #         session['search_port_detail_date'] = datetime.strptime(search_port_detail_date,'%Y-%m-%d').date()
-
     if request.method == 'POST':
         host_name = request.form.get('host_name')
     else:
@@ -68,21 +57,6 @@ def report_port():
         if not host_name:
             host_name = host_list[0]
 
-    #搜索
-    # cardport1 = CardPort1.query
-    # if session.get('search_port_detail_port'):
-    #     cardport1 = cardport1.filter(CardPort1.port == session.get('search_port_detail_port'))
-    # if session.get('search_port_detail_date'):
-    #     cardport1 = cardport1.filter(CardPort1.date_time == session.get('search_port_detail_date'))
-    # else:
-    #     cardport1 = cardport1.filter(CardPort1.date_time == date.today())
-
-    # cardport1 = cardport1.filter(CardPort1.host_name == host_name)
-    # pageination = cardport1.paginate(
-    #     page, per_page = current_app.config['FLASKY_POSTS_PER_PAGE'],
-    #     error_out = False
-    # )
-    # card_data = pageination.items
     if host_name == 'all':
         pageination = CardPort1.query.filter_by(date_time = date.today()).paginate(
             page, per_page = current_app.config['FLASKY_POSTS_PER_PAGE'],
@@ -95,6 +69,7 @@ def report_port():
         )
     card_data = pageination.items
 
+    card_data = [(index, item) for index, item in enumerate(card_data) ]
     return render_template('report.html', 
         card_data = card_data, 
         host_list = host_list,
@@ -108,7 +83,7 @@ def host_list_data(host_name):
     '''设备清单统计'''
     city = session.get('city')
     host_list_data = get_host_list(city)
-
+    host_list_data = [(index, item) for index, item in enumerate(host_list_data) ]
     return render_template('host_list_data.html', host_name=host_name, host_list_data = host_list_data ,action='host_list_data')
 
 @main.route('/card_detail', methods=['GET', 'POST'])
@@ -133,6 +108,7 @@ def card_detail():
     else:
         card_detail_data = CardDetail.query.filter_by(host_name = host_name, date_time = date.today()).all()
 
+    card_detail_data = [(index, item) for index, item in enumerate(card_detail_data) ]
     return render_template('card_detail.html', host_name=host_name, host_list = host_list, card_detail_data = card_detail_data ,action='card_detail')
 
 @main.route('/card_statistic', methods=['GET', 'POST'])
@@ -157,6 +133,7 @@ def card_statistic():
     else:
         card_statistic_data = CardStatistic.query.filter_by(host_name = host_name, date_time = date.today()).all()
 
+    card_statistic_data = [(index, item) for index, item in enumerate(card_statistic_data) ]
     return render_template('card_statistic.html', host_name=host_name, host_list = host_list, card_statistic_data = card_statistic_data ,action='card_statistic')
 
 
@@ -179,10 +156,11 @@ def all_card_statistic():
         card_statistic_data = CardStatistic.query.filter_by(city = city, date_time = date.today()).all()
         mda_statistic_data = MdaStatistic.query.filter_by(city = city, date_time = date.today()).all()
     
+    data = [(index, item) for index, item in enumerate(card_statistic_data + mda_statistic_data) ]
     return render_template('all_card_statistic.html', 
     city = city, 
     city_list = g_city_to_name, 
-    card_statistic_data = card_statistic_data + mda_statistic_data, 
+    card_statistic_data = data, 
     action='all_card_statistic')
 
 
@@ -205,10 +183,11 @@ def all_card_detail():
         card_data = CardDetail.query.filter_by(city = city, date_time = date.today()).all()
         mda_data = MdaDetail.query.filter_by(city = city, date_time = date.today()).all()
     
+    data = [(index, item) for index, item in enumerate(mda_data + card_data) ]
     return render_template('all_card_detail.html', 
     city = city, 
     city_list = g_city_to_name, 
-    card_detail_data = card_data + mda_data, 
+    card_detail_data = data, 
     action='all_card_detail')
 
 
@@ -234,6 +213,7 @@ def mda_detail():
     else:
         mda_detail_data = MdaDetail.query.filter_by(host_name = host_name, date_time = date.today()).all()
 
+    mda_detail_data = [(index, item) for index, item in enumerate(mda_detail_data) ]
     return render_template('mda_detail.html', host_name=host_name, host_list = host_list, mda_detail_data = mda_detail_data ,action='mda_detail')
 
 @main.route('/mda_statistic', methods=['GET', 'POST'])
@@ -258,6 +238,7 @@ def mda_statistic():
     else:
         mda_statistic_data = MdaStatistic.query.filter_by(host_name = host_name, date_time = date.today()).all()
 
+    mda_statistic_data = [(index, item) for index, item in enumerate(mda_statistic_data) ]
     return render_template('mda_statistic.html', host_name=host_name, host_list = host_list, mda_statistic_data = mda_statistic_data, action='mda_statistic')
 
 @main.route('/port_statistic', methods=['GET', 'POST'])
@@ -282,6 +263,7 @@ def port_statistic():
     else:
         port_statistic_data = PortStatistic.query.filter_by(host_name = host_name, date_time = date.today()).all()
 
+    port_statistic_data = [(index, item) for index, item in enumerate(port_statistic_data) ]
     return render_template('port_statistic.html', host_name=host_name, host_list = host_list, port_statistic_data = port_statistic_data, action='port_statistic')
 
 
@@ -640,7 +622,7 @@ def download_excel(host_name, table_name):
                 i.pea_uplink_throughput_utilization
             ))
     elif table_name == 'load_statistic':
-        file_name = '业务负荷统计表（按端口）.xlsx'
+        file_name = '{} 业务负荷统计表（按端口）.xlsx'.format(host_name)
         labels = [
             '设备名', '设备IP', 'port', '端口带宽', '带宽in利用率'
             , '带宽out利用率', 'ies 3000用户数量', 'ies 3000地址池利用率'
@@ -663,7 +645,7 @@ def download_excel(host_name, table_name):
                 i.vprn_4015_utilization
             ))
     elif table_name == 'load_statistic_host':
-        file_name = '业务负荷统计表（按设备）.xlsx'
+        file_name = '{} 业务负荷统计表（按设备）.xlsx'.format(host_name)
         labels = [
             '设备名', '设备IP', 'ies 3000用户数量', 'ies 3000地址池利用率', 'vprn 4015用户数量'
             , 'vprn 4015地址池利用率'
@@ -832,7 +814,11 @@ def xj_report(city, host_name, type):
         doc.add_paragraph()
         
         font = p_info.runs[0].font
-        font.color.rgb = RGBColor(0, 0, 255)
+        if '正常' in line.err:
+            font.color.rgb = RGBColor(0, 0, 255)
+        else:
+            font.color.rgb = RGBColor(244, 208, 0)
+        # font.color.rgb = RGBColor(0, 0, 255)
 
         # font = p_warn.runs[0].font
         # font.color.rgb = RGBColor(255, 0, 255)
@@ -907,7 +893,7 @@ def xj_report_all_host():
             if '正常' in j.err:
                 font.color.rgb = RGBColor(0, 0, 255)
             else:
-                font.color.rgb = RGBColor(255, 0, 0)
+                font.color.rgb = RGBColor(244, 208, 0)
 
             font = p_warn.runs[0].font
             if 'port状态巡检' == j.check_item:
@@ -1040,7 +1026,7 @@ def address_collect():
             error_out = False
         )
     address_data = pageination.items
-
+    address_data = [(index, item) for index, item in enumerate(address_data) ]
 
     return render_template('address_collect.html', 
         address_data = address_data, 
@@ -1190,7 +1176,7 @@ def load_statistic():
     )
     statistic_data = pageination.items
 
-
+    statistic_data = [(index, item) for index, item in enumerate(statistic_data) ]
     return render_template('statistic.html',
         statistic_data = statistic_data,
         host_list = host_list,
@@ -1213,6 +1199,7 @@ def load_statistic_host():
 
     load_statistic_host_data = LoadStatisticHost.query.filter_by(city = city, date_time = date.today()).all()
 
+    load_statistic_host_data = [(index, item) for index, item in enumerate(load_statistic_host_data) ]
     return render_template('statistic_host.html',
         load_statistic_host_data = load_statistic_host_data, 
         action = 'load_statistic_host')
@@ -1228,6 +1215,7 @@ def install_base(host_name):
 
     install_base_data = InstallBase.query.filter_by(date_time = date.today()).all()
 
+    install_base_data = [(index, item) for index, item in enumerate(install_base_data) ]
     return render_template('report/install_base.html',
         data = install_base_data,
         action = 'install_base',

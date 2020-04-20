@@ -29,6 +29,7 @@ def index():
     else:
         special_line_data = SpecialLine.query.filter_by(host_name = host_name, date_time = date.today()).all()
 
+    special_line_data = [(index, item) for index, item in enumerate(special_line_data) ]
     return render_template('report/special_line.html', host_name=host_name, host_list = host_list, special_line_data = special_line_data ,action='special_line')
 
 def save_special_line(city, host_name, config):

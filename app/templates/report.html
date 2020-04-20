@@ -28,6 +28,7 @@
     <table class="table table-condensed" style="min-width:2000px;" >
         <thead>
             <tr>
+                <th>序号</th>
                 <th>设备名</th>
                 <th>设备IP</th>
                 <th>port</th>
@@ -50,12 +51,13 @@
             </tr>
         </thead>
         <tbody>
-            {% for item in card_data %}
+            {% for index, item in card_data %}
                 {% if item.is_abnormal == '否' or item.is_abnormal == '' %}
                 <tr>
                 {% else %}
                 <tr bgcolor="#FFFF00">
                 {% endif %}
+                    <th>{{ (pageination.page - 1) * pageination.per_page + index + 1 }}</th>
                     <th>{{ item.host_name.split('.')[0] }}</th>
                     <th>{{ item.host_ip }}</th>
                     <th>{{ item.port }}</th>

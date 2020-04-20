@@ -163,8 +163,9 @@ def get_card_detail(config):
     '''card 明细'''
 
     card_detial_data = []
+    is_abnormal = '否'
     p_card = r'(?s)(Card \w{1,2}\n.*?\n    Memory capacity)'
-    p_slot_type_state = r'(\w{1,2}) {8,9}([\S]{5,20}) {20,40}(up|down) {2,4}(up|down)'
+    p_slot_type_state = r'(\w{1,2}) {8,9}([\S]{4,20}) {20,40}(up|down) {2,4}(up|down)'
     # p_operational_state = r'Operational state             : (up|down)\n'
     p_serial_number = r'Serial number                 : (.*?)\n'
     p_time_of_last_boot = r'Time of last boot             : (.*?)\n'
@@ -212,6 +213,8 @@ def get_card_detail(config):
         else:
             continue
 
+        if admin_state != 'up' or operational_state != 'up':
+            is_abnormal = '是'
         card_detial_data.append((
             host_name,
             host_ip,
@@ -223,17 +226,19 @@ def get_card_detail(config):
             time_of_last_boot,
             temperature,
             temperature_threshold,
-            '否'
+            is_abnormal
         ))
 
-    return card_detial_data
+    sfm_data = get_sfm_detail(config)
+
+    return card_detial_data + sfm_data
 
 def get_card_statistic(config):
     '''card 统计'''
     card_statistic_data = []
 
     p_card_summary = r'(?s)(Card Summary\n={79}\n.*?\n=)'
-    p_card_type = r'\w{1,2} {8,9}([\S]{4,20}) '
+    p_card_type = r'\w{1,2} {8,9}([\S]{4,20}) {24，38}up    up'
 
 
     host_name = get_host_name(config)
@@ -290,10 +295,83 @@ def get_sfm(config):
     return sfm_data
 
 
+def get_sfm_detail(config):
+    '''sfm明细'''
+
+    sfm_detial_data = []
+    is_abnormal = '否'
+    p_fabric = r'(?s)(Fabric \d{1,2}\n={79}.*?\n={79})'
+
+    p_slot_type_state = r'(\w{1,2}) {8,9}([\S]{4,20}) {20,40}(up|down) {2,4}(up|down)'
+    p_serial_number = r'Serial number                 : (.*?)\n'
+    p_time_of_last_boot = r'Time of last boot             : (.*?)\n'
+    p_temperature = r'Temperature                   : (.*?)\n'
+    p_temperature_threshold = r'Temperature threshold         : (.*?)\n'
+
+    host_name = get_host_name(config)
+    host_ip = get_ip(config)
+
+    if not host_name or not host_ip:
+        return sfm_detial_data
+
+    res_sfm = re.findall(p_fabric, config)
+    for item in res_sfm:
+        res_slot_type_state = re.search(p_slot_type_state, item)
+        if res_slot_type_state:
+            slot = res_slot_type_state.group(1)
+            card_type = res_slot_type_state.group(2)
+            admin_state = res_slot_type_state.group(3)
+            operational_state = res_slot_type_state.group(4)
+        else:
+            continue
+
+        res_serial_number = re.search(p_serial_number, item)
+        if res_serial_number:
+            serial_number = res_serial_number.group(1)
+        else:
+            continue
+
+        res_time_of_last_boot = re.search(p_time_of_last_boot, item)
+        if res_time_of_last_boot:
+            time_of_last_boot = res_time_of_last_boot.group(1)
+        else:
+            continue
+
+        res_temperature_threshold = re.search(p_temperature_threshold, item)
+        if res_temperature_threshold:
+            temperature_threshold = res_temperature_threshold.group(1)
+        else:
+            continue
+
+        res_temperature = re.search(p_temperature, item)
+        if res_temperature:
+            temperature = res_temperature.group(1)
+        else:
+            continue
+        
+        if admin_state != 'up' or operational_state != 'up':
+            is_abnormal = '是'
+        sfm_detial_data.append((
+            host_name,
+            host_ip,
+            slot,
+            card_type,
+            admin_state,
+            operational_state,
+            serial_number,
+            time_of_last_boot,
+            temperature,
+            temperature_threshold,
+            is_abnormal
+        ))
+
+    return sfm_detial_data
+
 def get_mda_detail(config):
     '''mda 明细'''
 
     mda_detial_data = []
+    is_abnormal = '否'
     p_card = r'(?s)(MDA \d{1,2}/\d detail\n.*?\n    Firmware version)'
     p_slot_type_state = r'(\w{1,2}| ) {4,5}(\d) {5}([\S]{5,20}) {20,40}(up|down) {6,8}(up|down)'
     p_serial_number = r'Serial number                 : (.*?)\n'
@@ -343,6 +421,8 @@ def get_mda_detail(config):
         else:
             continue
 
+        if admin_state != 'up' or operational_state != 'up':
+            is_abnormal = '是'
         mda_detial_data.append((
             host_name,
             host_ip,
@@ -355,7 +435,7 @@ def get_mda_detail(config):
             time_of_last_boot,
             temperature,
             temperature_threshold,
-            '否'
+            is_abnormal
         ))
 
     return mda_detial_data

@@ -44,8 +44,6 @@ def get_ies_saps(config):
             res_ies_des = re.search(p_description, res_ies[1][0])
             res_interface = re.findall(PAT['interface'], res_ies[1][0])
             for j in res_interface:
-                if j[1] == 'sap lag-89:4019.0':
-                    print(j[1])
                 res_inter_des = re.search(p_inter_description, j[0])
                 if res_ies_des:
                     ies_des = res_ies_des.group(1)
