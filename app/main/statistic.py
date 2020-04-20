@@ -131,7 +131,7 @@ def get_statistic_host_data(city):
 
         if not host_name or not host_ip:
             continue
-
+        res_user_num = ''
         res_pool_pppoe = re.search(p_pool_pppoe, config)
         if res_pool_pppoe:
             res_user_num = re.search(p_user_num, res_pool_pppoe.group())
@@ -143,8 +143,6 @@ def get_statistic_host_data(city):
                 provisioned_addresses = res_provisioned_addresses.group(1)
 
         res_pool_vprn_cms = re.search(p_pool_vprn_cms, config)
-        if res_pool_vprn_cms:
-            text = res_pool_vprn_cms.group()
         if res_user_num:
             res_user_num2 = re.search(p_user_num, res_pool_vprn_cms.group())
             res_provisioned_addresses2 = re.search(p_provisioned_addresses, res_pool_vprn_cms.group())
