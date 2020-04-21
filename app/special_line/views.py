@@ -12,6 +12,7 @@ from ..main.common import get_host
 @special_line.route('/special_line', methods=['GET', 'POST'])
 @login_required
 def index():
+    search_date = date.today()
     city = session.get('city')
     if not city:
         return redirect(url_for('main.city_list'))
@@ -19,15 +20,18 @@ def index():
     
     if request.method == 'POST':
         host_name = request.form.get('host_name')
+        form_date = request.form.get('date')
+        if form_date:
+            search_date = datetime.strptime(form_date,'%Y-%m-%d').date()
     else:
         host_name = request.args.get('host_name')
         if not host_name:
             host_name = host_list[0]
 
     if host_name == 'all':
-        special_line_data = SpecialLine.query.filter_by(date_time = date.today()).all()
+        special_line_data = SpecialLine.query.filter_by(date_time = search_date).all()
     else:
-        special_line_data = SpecialLine.query.filter_by(host_name = host_name, date_time = date.today()).all()
+        special_line_data = SpecialLine.query.filter_by(host_name = host_name, date_time = search_date).all()
 
     special_line_data = [(index, item) for index, item in enumerate(special_line_data) ]
     return render_template('report/special_line.html', host_name=host_name, host_list = host_list, special_line_data = special_line_data ,action='special_line')

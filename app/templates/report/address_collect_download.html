@@ -1,0 +1,45 @@
+{% extends "report_port.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% import "_macros.html" as macros %}
+
+{% block title %} 地址采集 {% endblock %}
+{% block page_header %} 地址采集 {% endblock %}
+{% block report_content %}
+<div class="row">
+    <div class="col-md-6">
+        <form action="#" method="post">
+            <table class="table table-striped table-condensed" >
+                <tbody>
+                    {% for index, item in host_data %}
+                    <tr>
+                        <th>{{ index + 1 }}</th>
+                        <th>
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" name="{{ item }}"> {{ item }}
+                                </label>
+                            </div>
+                        </th>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% if host_data %}
+                <a id="selectAll" class="btn btn-default">全选</a>
+                <button type="submit" class="btn btn-default">下载</button>
+            {% endif %}
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+    $(function() {
+    $("#selectAll").click(function(){ 
+        $("input").attr("checked","true");
+    })
+    });
+</script>
+{% endblock %}

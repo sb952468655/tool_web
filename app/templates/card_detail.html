@@ -25,6 +25,14 @@
                 {% endfor %}
             </select>
         </div>
+        <div class="form-group">
+            <label>日期</label>
+            <div class="input-group date form_datetime" data-date-format="yyyy-mm-dd" data-link-field="dtp_input1">
+                <input class="form-control" type="text" id="port_statistic_date"  name="date" value="" readonly>
+                <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+                <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+            </div>
+        </div>
         <button type="submit" class="btn btn-default">查看</button>
         <a class="btn btn-default" href="{{ url_for('main.download_excel', host_name = host_name, table_name = 'card_detail') }}" role="button">生成表格</a>
     </form><br>

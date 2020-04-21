@@ -10,7 +10,11 @@
         <div class="panel-body">
             {% for item in xunjian_data %}
                 <h2 title="{{ check_to_describe.get(item.check_item) }}">{{ item.check_item }} <span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span></h2>
-                <pre class="pre-scrollable">{{ item.err }}</pre><br>
+                {% if '正常' in item.err%}
+                <pre class="pre-scrollable">{{ item.err}}</pre><br>
+                {% else %}
+                <pre class="pre-scrollable" style="background-color:#FFFF00">{{ item.err}}</pre><br>
+                {% endif %}
                 <pre class="pre-scrollable">{{ item.msg }}</pre><br><br>
             {% endfor %}
         </div>
