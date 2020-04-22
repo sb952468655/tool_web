@@ -1085,56 +1085,81 @@ def address_collect():
 @login_required
 def address_mk_excel():
     '''地址采集生成 excel 表格'''
+
+    if not os.path.exists(os.path.join('app', 'static', 'address_collect')):
+            os.makedirs(os.path.join('app', 'static', 'address_collect'))
+
+    backup_data = request.form.to_dict()
+    city = session.get('city')
+    if not city:
+        return redirect(url_for('main.city_list'))
+    host_num = len(get_host(city))
+    if host_num == len(backup_data):
+        file_name = '{}-{}.zip'.format(g_city_to_name.get(city), date.today().strftime('%Y%m%d'))
+    elif len(backup_data) == 1:
+        keys = list(backup_data.keys())
+        file_name = '{}-{}.zip'.format(keys[0], date.today().strftime('%Y%m%d'))
+    else:
+        file_name = str(time.time()) + '.zip'
+    zip_name = os.path.join('app', 'static', 'address_collect', file_name)
+    zip = zipfile.ZipFile(zip_name, 'w', zipfile.ZIP_DEFLATED )
     #获取选中的设备名称
-    excel = openpyxl.Workbook()
-    sheet = excel.active
-    sheet['A1'] = '设备名'
-    sheet['B1'] = '设备IP'
-    sheet['C1'] = 'IP类型'
-    sheet['D1'] = '网络功能类型'
-    sheet['E1'] = '是否已分配'
-    sheet['F1'] = 'IP'
-    sheet['G1'] = '网关'
-    sheet['H1'] = '掩码'
-    sheet['I1'] = '逻辑接口编号'
-    sheet['J1'] = 'sap-ID'
-    sheet['K1'] = '下一跳IP'
-    sheet['L1'] = 'IES/VPRN编号'
-    sheet['M1'] = 'VPN-RD'
-    sheet['N1'] = 'VPN-RT'
-    sheet['O1'] = '接口或用户描述'
+    for host_name, _ in request.form.to_dict().items():
+        save_path = os.path.join('app','static', 'address_collect', '{}-{}-地址采集.xlsx'.format(host_name, date.today().strftime('%Y%m%d')))
+        if not os.path.exists(save_path):
+            excel = openpyxl.Workbook()
+            sheet = excel.active
+            sheet['A1'] = '设备名'
+            sheet['B1'] = '设备IP'
+            sheet['C1'] = 'IP类型'
+            sheet['D1'] = '网络功能类型'
+            sheet['E1'] = '是否已分配'
+            sheet['F1'] = 'IP'
+            sheet['G1'] = '网关'
+            sheet['H1'] = '掩码'
+            sheet['I1'] = '逻辑接口编号'
+            sheet['J1'] = 'sap-ID'
+            sheet['K1'] = '下一跳IP'
+            sheet['L1'] = 'IES/VPRN编号'
+            sheet['M1'] = 'VPN-RD'
+            sheet['N1'] = 'VPN-RT'
+            sheet['O1'] = '接口或用户描述'
 
 
-    sheet.column_dimensions['A'].width = 40.0
-    sheet.column_dimensions['B'].width = 20.0
-    # sheet.column_dimensions['N'].width = 20.0
-    # sheet.column_dimensions['Q'].width = 15.0
-    # sheet.column_dimensions['R'].width = 15.0
-    cur_row = 2
+            sheet.column_dimensions['A'].width = 40.0
+            sheet.column_dimensions['B'].width = 20.0
+            # sheet.column_dimensions['N'].width = 20.0
+            # sheet.column_dimensions['Q'].width = 15.0
+            # sheet.column_dimensions['R'].width = 15.0
+            cur_row = 2
 
-    address_data = AddressCollect.query.filter_by(host_name = host_name, date_time = date.today()).all()
-    for item in address_data:
-        sheet['A'+ str(cur_row)] = item.host_name.split('.')[0]
-        sheet['B'+ str(cur_row)] = item.host_ip
-        sheet['C'+ str(cur_row)] = item.ip_type
-        sheet['D'+ str(cur_row)] = item.function_type
-        sheet['E'+ str(cur_row)] = item.is_use
-        sheet['F'+ str(cur_row)] = item.ip
-        sheet['G'+ str(cur_row)] = item.gateway
-        sheet['H'+ str(cur_row)] = item.mask
-        sheet['I'+ str(cur_row)] = item.interface_name
-        sheet['J'+ str(cur_row)] = item.sap_id
-        sheet['K'+ str(cur_row)] = item.next_hop
-        sheet['L'+ str(cur_row)] = item.ies_vprn_id
-        sheet['M'+ str(cur_row)] = item.vpn_rd
-        sheet['N'+ str(cur_row)] = item.vpn_rt
-        sheet['O'+ str(cur_row)] = item.description
+            address_data = AddressCollect.query.filter_by(host_name = host_name, date_time = date.today()).all()
+            for item in address_data:
+                sheet['A'+ str(cur_row)] = item.host_name.split('.')[0]
+                sheet['B'+ str(cur_row)] = item.host_ip
+                sheet['C'+ str(cur_row)] = item.ip_type
+                sheet['D'+ str(cur_row)] = item.function_type
+                sheet['E'+ str(cur_row)] = item.is_use
+                sheet['F'+ str(cur_row)] = item.ip
+                sheet['G'+ str(cur_row)] = item.gateway
+                sheet['H'+ str(cur_row)] = item.mask
+                sheet['I'+ str(cur_row)] = item.interface_name
+                sheet['J'+ str(cur_row)] = item.sap_id
+                sheet['K'+ str(cur_row)] = item.next_hop
+                sheet['L'+ str(cur_row)] = item.ies_vprn_id
+                sheet['M'+ str(cur_row)] = item.vpn_rd
+                sheet['N'+ str(cur_row)] = item.vpn_rt
+                sheet['O'+ str(cur_row)] = item.description
 
-        cur_row += 1
-    
-    excel.save(os.path.join('app','static', 'address.xlsx'))
+                cur_row += 1
+            
+            excel.save(save_path)
+        zip.write(save_path, '{} 地址采集.xlsx'.format(host_name))
 
-    return redirect(url_for('static', filename='address.xlsx'))
+    zip.close()
+    url = url_for('static', filename = 'address_collect/{}'.format(file_name))
+    url2 = unquote(url, encoding='utf-8')
+    return redirect(url2)
 
 
 @main.route('/config_backup')
