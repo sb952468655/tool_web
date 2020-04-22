@@ -179,9 +179,9 @@ def all_card_statistic():
     data_set = {}
     for _, i in data:
         if i.card_type not in data_set.keys():
-            data_set[i.card_type] = i.card_num
+            data_set[i.card_type] = int(i.card_num)
         else:
-            data_set[i.card_type] = data_set[i.card_type] + i.card_num
+            data_set[i.card_type] = data_set[i.card_type] + int(i.card_num)
 
     data = []
     for k, v in data_set.items():
