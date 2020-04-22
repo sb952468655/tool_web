@@ -1154,7 +1154,7 @@ def address_mk_excel():
                 cur_row += 1
             
             excel.save(save_path)
-        zip.write(save_path, '{} 地址采集.xlsx'.format(host_name))
+        zip.write(save_path, '{}-{}-地址采集.xlsx'.format(host_name, date.today().strftime('%Y%m%d')))
 
     zip.close()
     url = url_for('static', filename = 'address_collect/{}'.format(file_name))
@@ -2693,6 +2693,57 @@ def save_address_collect(city, host_name, config):
         db.session.add(address_collect)
     db.session.commit()
     db.session.close()
+
+
+    #新建excel
+    save_path = os.path.join('app','static', 'address_collect', '{}-{}-地址采集.xlsx'.format(host_name, date.today().strftime('%Y%m%d')))
+    excel = openpyxl.Workbook()
+    sheet = excel.active
+    sheet['A1'] = '设备名'
+    sheet['B1'] = '设备IP'
+    sheet['C1'] = 'IP类型'
+    sheet['D1'] = '网络功能类型'
+    sheet['E1'] = '是否已分配'
+    sheet['F1'] = 'IP'
+    sheet['G1'] = '网关'
+    sheet['H1'] = '掩码'
+    sheet['I1'] = '逻辑接口编号'
+    sheet['J1'] = 'sap-ID'
+    sheet['K1'] = '下一跳IP'
+    sheet['L1'] = 'IES/VPRN编号'
+    sheet['M1'] = 'VPN-RD'
+    sheet['N1'] = 'VPN-RT'
+    sheet['O1'] = '接口或用户描述'
+
+
+    sheet.column_dimensions['A'].width = 40.0
+    sheet.column_dimensions['B'].width = 20.0
+    # sheet.column_dimensions['N'].width = 20.0
+    # sheet.column_dimensions['Q'].width = 15.0
+    # sheet.column_dimensions['R'].width = 15.0
+    cur_row = 2
+
+    address_data = AddressCollect.query.filter_by(host_name = host_name, date_time = date.today()).all()
+    for item in address_data:
+        sheet['A'+ str(cur_row)] = item.host_name.split('.')[0]
+        sheet['B'+ str(cur_row)] = item.host_ip
+        sheet['C'+ str(cur_row)] = item.ip_type
+        sheet['D'+ str(cur_row)] = item.function_type
+        sheet['E'+ str(cur_row)] = item.is_use
+        sheet['F'+ str(cur_row)] = item.ip
+        sheet['G'+ str(cur_row)] = item.gateway
+        sheet['H'+ str(cur_row)] = item.mask
+        sheet['I'+ str(cur_row)] = item.interface_name
+        sheet['J'+ str(cur_row)] = item.sap_id
+        sheet['K'+ str(cur_row)] = item.next_hop
+        sheet['L'+ str(cur_row)] = item.ies_vprn_id
+        sheet['M'+ str(cur_row)] = item.vpn_rd
+        sheet['N'+ str(cur_row)] = item.vpn_rt
+        sheet['O'+ str(cur_row)] = item.description
+
+        cur_row += 1
+    
+    excel.save(save_path)
 
 def save_zuxun(city, host_name, config):
     '''保存组巡数据'''
