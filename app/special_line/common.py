@@ -23,7 +23,7 @@ p_gruop_inter_description = r'^                    description "(.*?)"'
 p_qos_id = r'qos (\d{1,6})'
 p_rate = r'rate (\d{1,10})'
 # p_arp_table = r'(?s)ARP Table \(Router: Base\)\n={79}.*?\n={79}'
-p_sap_arp = r'(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}) {1,9}(([A-Fa-f0-9]{2}:){5}[A-Fa-f0-9]{2}) \d{2}h\d{2}m\d{2}s (Dyn|Oth)\[I\] sap '
+p_sap_arp = r'(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}) {1,9}(([A-Fa-f0-9]{2}:){5}[A-Fa-f0-9]{2}) \d{2}h\d{2}m\d{2}s (Dyn|Oth|Man)\[I\] '
 p_vrrp = r'(?s) vrrp \d{1,3}\n.*?\n {16}exit'
 p_vrrp_instances = r'(?s)VRRP Instances.*?\n={79}.*?\n={79}'
 p_sap_state = r'(.{32}) \d{1,2} {3,5}(No|Yes)  (Up|Down) {1,3}([a-zA-Z]{2,6}) '
@@ -63,16 +63,17 @@ def get_ies_saps(config):
                         if res_vrrp_instances:
                             res_sap_state = re.findall(p_sap_state, res_vrrp_instances.group())
                             for k in res_sap_state:
-                                a = res_sap.groups()
                                 sap = res_sap.group(2).replace('"', '')
                                 if sap in k[0] and k[3] == 'Master':
-                                    p = p_sap_arp + sap
-                                    res_sap_arp = re.search(p, config)
-                                    if res_sap_arp:
-                                        ip = res_sap_arp.group(1)
-                                        mac = res_sap_arp.group(2)
-                                    if ip:
-                                        saps.append((i, ies_des, j[1], inter_des, sap , ip, mac, qos_id, band_width))
+                                    p = p_sap_arp + j[1]
+                                    res_sap_arp = re.findall(p, config)
+                                    for sap_arp in res_sap_arp:
+                                        print(sap_arp)
+                                        ip = sap_arp[0]
+                                        mac = sap_arp[1]
+
+                                        if ip:
+                                            saps.append((i, ies_des, j[1], inter_des, sap , ip, mac, qos_id, band_width))
                 else:
                     res_sap = re.findall(p_sap, j[0])
                     for sap in res_sap:
@@ -92,14 +93,78 @@ def get_ies_saps(config):
                                 res_rate.sort()
                                 band_width = res_rate[-1]/1000
 
-                        p = p_sap_arp + sap[1]
-                        res_sap_arp = re.search(p, config)
-                        if res_sap_arp:
-                            print(res_sap_arp.groups())
-                            ip = res_sap_arp.group(1)
-                            mac = res_sap_arp.group(2)
-                        if ip:
-                            saps.append((i, ies_des, j[1], inter_des, sap[1] , ip, mac, qos_id, band_width))
+                        p = p_sap_arp + j[1]
+                        res_sap_arp = re.findall(p, config)
+                        for sap_arp in res_sap_arp:
+                            print(sap_arp)
+                            ip = sap_arp[0]
+                            mac = sap_arp[1]
+
+                            if ip:
+                                saps.append((i, ies_des, j[1], inter_des, sap[1].replace('"', '') , ip, mac, qos_id, band_width))
+
+            #group-interface
+            res_group_interface = re.findall(PAT['group_interface'], res_ies[1][0])
+            for j in res_group_interface:
+                res_inter_des = re.search(p_gruop_inter_description, j[0])
+                if res_ies_des:
+                    vprn_des = res_ies_des.group(1)
+                else:
+                    vprn_des = ''
+                if res_inter_des:
+                    inter_des = res_inter_des.group(1)
+                else:
+                    inter_des = ''
+
+                #判断是否有vrrp
+                res_vrrp = re.search(p_vrrp, j[0])
+                if res_vrrp:
+                    #检查sap 在show router vrrp instance中的状态是否为Master ，如果是，获取sap用户信息
+                    res_sap = re.search(p_sap, j[0])
+                    if res_sap:
+                        res_vrrp_instances = re.search(p_vrrp_instances, config)
+                        if res_vrrp_instances:
+                            res_sap_state = re.findall(p_sap_state, res_vrrp_instances.group())
+                            for k in res_sap_state:
+                                sap = res_sap.group(2).replace('"', '')
+                                if sap in k[0] and k[3] == 'Master':
+                                    p = p_sap_arp + j[1]
+                                    res_sap_arp = re.findall(p, config)
+                                    for sap_arp in res_sap_arp:
+                                        print(sap_arp)
+                                        ip = sap_arp[0]
+                                        mac = sap_arp[1]
+
+                                        if ip:
+                                            saps.append((i, ies_des, j[1], inter_des, sap.replace('"', '') , ip, mac, qos_id, band_width))
+                else:
+                    res_sap = re.findall(p_sap_2, j[0])
+                    for sap in res_sap:
+                        band_width = ''
+                        qos_id = ''
+                        ip = ''
+                        mac = ''
+
+                        res_qos_id = re.search(p_qos_id, sap[0])
+                        if res_qos_id:
+                            qos_id = res_qos_id.group(1)
+                            p_sap_egress = r'sap-egress %s name ".*?" create.*?\n {8}exit' % res_qos_id.group(1)
+                            res_sap_egress = re.search(p_sap_egress, config)
+                            if res_sap_egress:
+                                res_rate = re.findall(p_rate, res_sap_egress.group())
+                                res_rate = [int(i) for i in res_rate]
+                                res_rate.sort()
+                                band_width = res_rate[-1]/1000
+
+                        p = p_sap_arp + j[1]
+                        res_sap_arp = re.findall(p, config)
+                        for sap_arp in res_sap_arp:
+                            print(sap_arp)
+                            ip = sap_arp[0]
+                            mac = sap_arp[1]
+
+                            if ip:
+                                saps.append((i, vprn_des, j[1], inter_des, sap[1].replace('"', '') , ip, mac, qos_id, band_width))
 
 
     return saps
@@ -113,19 +178,60 @@ def get_vprn_saps(config):
         res_vprn = re.findall(p_vprn, config)
         if len(res_vprn) == 2:
             res_vprn_des = re.search(p_description, res_vprn[1][0])
-            res_group_interface = re.findall(PAT['group_interface'], res_vprn[1][0])
-            for j in res_group_interface:
-                res_group_inter_des = re.search(p_gruop_inter_description, j[0])
+            res_interface = re.findall(PAT['interface'], res_vprn[1][0])
+            #interface
+            for j in res_interface:
+                res_inter_des = re.search(p_inter_description, j[0])
                 if res_vprn_des:
                     vprn_des = res_vprn_des.group(1)
                 else:
                     vprn_des = ''
-                if res_group_inter_des:
-                    group_inter_des = res_group_inter_des.group(1)
+                if res_inter_des:
+                    inter_des = res_inter_des.group(1)
                 else:
-                    group_inter_des = ''
+                    inter_des = ''
 
- 
+                res_sap = re.findall(p_sap, j[0])
+                for sap in res_sap:
+                    band_width = ''
+                    qos_id = ''
+                    ip = ''
+                    mac = ''
+
+                    res_qos_id = re.search(p_qos_id, sap[0])
+                    if res_qos_id:
+                        qos_id = res_qos_id.group(1)
+                        p_sap_egress = r'sap-egress %s name ".*?" create.*?\n {8}exit' % res_qos_id.group(1)
+                        res_sap_egress = re.search(p_sap_egress, config)
+                        if res_sap_egress:
+                            res_rate = re.findall(p_rate, res_sap_egress.group())
+                            res_rate = [int(i) for i in res_rate]
+                            res_rate.sort()
+                            band_width = res_rate[-1]/1000
+
+                    p = p_sap_arp + j[1]
+                    res_sap_arp = re.findall(p, config)
+                    for sap_arp in res_sap_arp:
+                        print(sap_arp)
+                        ip = sap_arp[0]
+                        mac = sap_arp[1]
+
+                        if ip:
+                            saps.append((i, vprn_des, j[1], inter_des, sap[1].replace('"', '') , ip, mac, qos_id, band_width))
+
+            #group-interface
+            res_group_interface = re.findall(PAT['group_interface'], res_vprn[1][0])
+            for j in res_group_interface:
+                res_inter_des = re.search(p_gruop_inter_description, j[0])
+                if res_vprn_des:
+                    vprn_des = res_vprn_des.group(1)
+                else:
+                    vprn_des = ''
+                if res_inter_des:
+                    inter_des = res_inter_des.group(1)
+                else:
+                    inter_des = ''
+
                 res_sap = re.findall(p_sap_2, j[0])
                 for sap in res_sap:
                     band_width = ''
@@ -144,13 +250,14 @@ def get_vprn_saps(config):
                             res_rate.sort()
                             band_width = res_rate[-1]/1000
 
-                    p = p_sap_arp + sap[1]
-                    res_sap_arp = re.search(p, config)
-                    if res_sap_arp:
-                        print(res_sap_arp.groups())
-                        ip = res_sap_arp.group(1)
-                        mac = res_sap_arp.group(2)
-                    if ip:
-                        saps.append((i, vprn_des, j[1], group_inter_des, sap[1] , ip, mac, qos_id, band_width))
+                    p = p_sap_arp + j[1]
+                    res_sap_arp = re.findall(p, config)
+                    for sap_arp in res_sap_arp:
+                        print(sap_arp)
+                        ip = sap_arp[0]
+                        mac = sap_arp[1]
+
+                        if ip:
+                            saps.append((i, vprn_des, j[1], inter_des, sap[1].replace('"', '') , ip, mac, qos_id, band_width))
 
     return saps
