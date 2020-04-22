@@ -17,7 +17,8 @@ g_city_to_name = {
     'yancheng': '盐城',
     'yangzhou': '扬州',
     'zhenjiang': '镇江',
-    'xuzhou': '徐州'
+    'xuzhou': '徐州',
+    'all': '全省'
 }
 
 g_check_to_describe = {

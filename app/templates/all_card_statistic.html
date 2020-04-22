@@ -1,8 +1,8 @@
 {% extends "report_port.html" %}
 {% import "bootstrap/wtf.html" as wtf %}
 
-{% block title %} 全省板卡统计明细 {% endblock %}
-{% block page_header %} 全省板卡统计明细 {% endblock %}
+{% block title %} 全省板卡统计汇总 {% endblock %}
+{% block page_header %} 全省板卡统计汇总 {% endblock %}
 
 {% block report_content %}
     <form class="form-inline" method="post" action="{{ url_for('main.all_card_statistic') }}">
@@ -38,9 +38,7 @@
         <thead>
             <tr>
                 <th>序号</th>
-                <th>设备名</th>
                 <th>地市名</th>
-                <th>设备IP</th>
                 <th>card类型</th>
                 <th>数量</th>
             </tr>
@@ -49,11 +47,9 @@
             {% for index, item in card_statistic_data %}
                 <tr>
                     <th>{{ index + 1 }}</th>
-                    <th>{{ item.host_name }}</th>
-                    <th>{{ city_list[item.city] }}</th>
-                    <th>{{ item.host_ip }}</th>
-                    <th>{{ item.card_type }}</th>
-                    <th>{{ item.card_num }}</th>
+                    <th>{{ city_list[city] }}</th>
+                    <th>{{ item[0] }}</th>
+                    <th>{{ item[1] }}</th>
                 </tr>
             {% endfor %}
         </tbody>

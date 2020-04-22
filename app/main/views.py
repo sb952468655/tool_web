@@ -176,6 +176,17 @@ def all_card_statistic():
         mda_statistic_data = MdaStatistic.query.filter_by(city = city, date_time = search_date).all()
     
     data = [(index, item) for index, item in enumerate(card_statistic_data + mda_statistic_data) ]
+    data_set = {}
+    for _, i in data:
+        if i.card_type not in data_set.keys():
+            data_set[i.card_type] = i.card_num
+        else:
+            data_set[i.card_type] = data_set[i.card_type] + i.card_num
+
+    data = []
+    for k, v in data_set.items():
+        data.append((k,v))
+    data = [(index, item) for index, item in enumerate(data) ]
     return render_template('all_card_statistic.html', 
     city = city, 
     city_list = g_city_to_name, 
@@ -206,7 +217,11 @@ def all_card_detail():
         card_data = CardDetail.query.filter_by(city = city, date_time = search_date).all()
         mda_data = MdaDetail.query.filter_by(city = city, date_time = search_date).all()
     
-    data = [(index, item) for index, item in enumerate(mda_data + card_data) ]
+    all_data = card_data + mda_data
+    def take_host_name(elem):
+        return elem.host_name
+    all_data.sort(key=take_host_name)
+    data = [(index, item) for index, item in enumerate(all_data) ]
     return render_template('all_card_detail.html', 
     city = city, 
     city_list = g_city_to_name, 

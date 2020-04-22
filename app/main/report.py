@@ -167,7 +167,7 @@ def get_card_detail(config):
     p_card = r'(?s)(Card \w{1,2}\n.*?\n    Memory capacity)'
     p_slot_type_state = r'(\w{1,2}) {8,9}([\S]{4,20}) {20,40}(up|down) {2,4}(up|down)'
     # p_operational_state = r'Operational state             : (up|down)\n'
-    p_serial_number = r'Serial number                 : (.*?)\n'
+    p_serial_number = r'Serial number                 : (.{11})\n'
     p_time_of_last_boot = r'Time of last boot             : (.*?)\n'
     p_temperature = r'Temperature                   : (.*?)\n'
     p_temperature_threshold = r'Temperature threshold         : (.*?)\n'
@@ -238,7 +238,7 @@ def get_card_statistic(config):
     card_statistic_data = []
 
     p_card_summary = r'(?s)(Card Summary\n={79}\n.*?\n=)'
-    p_card_type = r'\w{1,2} {8,9}([\S]{4,20}) {24，38}up    up'
+    p_card_type = r'\w{1,2} {8,9}([\S]{4,20}) *?up    up'
 
 
     host_name = get_host_name(config)
