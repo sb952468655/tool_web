@@ -69,10 +69,11 @@ def report_port():
         )
         if not pageination.items and request.method == 'GET':
             last = CardPort1.query.order_by(CardPort1.id.desc()).first()
-            pageination = CardPort1.query.filter_by(date_time = last.date_time).paginate(
-                page, per_page = current_app.config['FLASKY_POSTS_PER_PAGE'],
-                error_out = False
-            )
+            if last:
+                pageination = CardPort1.query.filter_by(date_time = last.date_time).paginate(
+                    page, per_page = current_app.config['FLASKY_POSTS_PER_PAGE'],
+                    error_out = False
+                )
     else:
         pageination = CardPort1.query.filter_by(host_name = host_name, date_time = search_date).paginate(
             page, per_page = current_app.config['FLASKY_POSTS_PER_PAGE'],
@@ -81,10 +82,11 @@ def report_port():
 
         if not pageination.items and request.method == 'GET':
             last = CardPort1.query.filter_by(host_name = host_name).order_by(CardPort1.id.desc()).first()
-            pageination = CardPort1.query.filter_by(date_time = last.date_time).paginate(
-                page, per_page = current_app.config['FLASKY_POSTS_PER_PAGE'],
-                error_out = False
-            )
+            if last:
+                pageination = CardPort1.query.filter_by(date_time = last.date_time).paginate(
+                    page, per_page = current_app.config['FLASKY_POSTS_PER_PAGE'],
+                    error_out = False
+                )
     card_data = pageination.items
 
     card_data = [(index, item) for index, item in enumerate(card_data) ]
@@ -131,12 +133,14 @@ def card_detail():
         card_detail_data = CardDetail.query.filter_by(date_time = search_date).all()
         if not card_detail_data and request.method == 'GET':
             last = CardDetail.query.order_by(CardDetail.id.desc()).first()
-            card_detail_data = CardDetail.query.filter_by(date_time = last.date_time).all()
+            if last:
+                card_detail_data = CardDetail.query.filter_by(date_time = last.date_time).all()
     else:
         card_detail_data = CardDetail.query.filter_by(host_name = host_name, date_time = search_date).all()
         if not card_detail_data and request.method == 'GET':
             last = CardDetail.query.filter_by(host_name = host_name).order_by(CardDetail.id.desc()).first()
-            card_detail_data = CardDetail.query.filter_by(host_name = host_name, date_time = last.date_time).all()
+            if last:
+                card_detail_data = CardDetail.query.filter_by(host_name = host_name, date_time = last.date_time).all()
 
     card_detail_data = [(index, item) for index, item in enumerate(card_detail_data) ]
     return render_template('card_detail.html', host_name=host_name, host_list = host_list, card_detail_data = card_detail_data ,action='card_detail')
@@ -166,12 +170,14 @@ def card_statistic():
         card_statistic_data = CardStatistic.query.filter_by(date_time = search_date).all()
         if not card_statistic_data:
             last = CardStatistic.query.order_by(CardStatistic.id.desc()).first()
-            card_statistic_data = CardStatistic.query.filter_by(date_time = last.date_time).all()
+            if last:
+                card_statistic_data = CardStatistic.query.filter_by(date_time = last.date_time).all()
     else:
         card_statistic_data = CardStatistic.query.filter_by(host_name = host_name, date_time = search_date).all()
         if not card_statistic_data and request.method == 'GET':
             last = CardStatistic.query.order_by(CardStatistic.id.desc()).first()
-            card_statistic_data = CardStatistic.query.filter_by(host_name = host_name, date_time = last.date_time).all()
+            if last:
+                card_statistic_data = CardStatistic.query.filter_by(host_name = host_name, date_time = last.date_time).all()
 
     card_statistic_data = [(index, item) for index, item in enumerate(card_statistic_data) ]
     return render_template('card_statistic.html', host_name=host_name, host_list = host_list, card_statistic_data = card_statistic_data ,action='card_statistic')
@@ -198,20 +204,24 @@ def all_card_statistic():
         mda_statistic_data = MdaStatistic.query.filter_by(date_time = search_date).all()
         if not card_statistic_data and request.method == 'GET':
             last = CardStatistic.query.order_by(CardStatistic.id.desc()).first()
-            card_statistic_data = CardStatistic.query.filter_by(date_time = last.date_time).all()
+            if last:
+                card_statistic_data = CardStatistic.query.filter_by(date_time = last.date_time).all()
 
         if not mda_statistic_data and request.method == 'GET':
             last = MdaStatistic.query.order_by(MdaStatistic.id.desc()).first()
-            mda_statistic_data = MdaStatistic.query.filter_by(date_time = last.date_time).all()
+            if last:
+                mda_statistic_data = MdaStatistic.query.filter_by(date_time = last.date_time).all()
     else:
         card_statistic_data = CardStatistic.query.filter_by(city = city, date_time = search_date).all()
         mda_statistic_data = MdaStatistic.query.filter_by(city = city, date_time = search_date).all()
         if not card_statistic_data and request.method == 'GET':
             last = CardStatistic.query.order_by(CardStatistic.id.desc()).first()
-            card_statistic_data = CardStatistic.query.filter_by(city = city, date_time = last.date_time).all()
+            if last:
+                card_statistic_data = CardStatistic.query.filter_by(city = city, date_time = last.date_time).all()
         if not mda_statistic_data and request.method == 'GET':
             last = MdaStatistic.query.order_by(MdaStatistic.id.desc()).first()
-            mda_statistic_data = MdaStatistic.query.filter_by(city = city, date_time = last.date_time).all()
+            if last:
+                mda_statistic_data = MdaStatistic.query.filter_by(city = city, date_time = last.date_time).all()
     
     data = [(index, item) for index, item in enumerate(card_statistic_data + mda_statistic_data) ]
     data_set = {}
@@ -253,20 +263,24 @@ def all_card_detail():
         mda_data = MdaDetail.query.filter_by(date_time = search_date).all()
         if not card_data and request.method == 'GET':
             last = CardDetail.query.order_by(CardDetail.id.desc()).first()
-            card_data = CardDetail.query.filter_by(date_time = last.date_time).all()
+            if last:
+                card_data = CardDetail.query.filter_by(date_time = last.date_time).all()
         if not mda_data and request.method == 'GET':
             last = MdaDetail.query.order_by(MdaDetail.id.desc()).first()
-            mda_data = MdaDetail.query.filter_by(date_time = last.date_time).all()
+            if last:
+                mda_data = MdaDetail.query.filter_by(date_time = last.date_time).all()
     else:
         card_data = CardDetail.query.filter_by(city = city, date_time = search_date).all()
         mda_data = MdaDetail.query.filter_by(city = city, date_time = search_date).all()
 
         if not card_data and request.method == 'GET':
             last = CardDetail.query.filter_by(city = city).order_by(CardDetail.id.desc()).first()
-            card_data = CardDetail.query.filter_by(city = city, date_time = last.date_time).all()
+            if last:
+                card_data = CardDetail.query.filter_by(city = city, date_time = last.date_time).all()
         if not mda_data and request.method == 'GET':
             last = MdaDetail.query.filter_by(city = city).order_by(MdaDetail.id.desc()).first()
-            mda_data = MdaDetail.query.filter_by(city = city, date_time = last.date_time).all()
+            if last:
+                mda_data = MdaDetail.query.filter_by(city = city, date_time = last.date_time).all()
     
     all_data = card_data + mda_data
     def take_host_name(elem):
@@ -305,12 +319,14 @@ def mda_detail():
         mda_detail_data = MdaDetail.query.filter_by(date_time = search_date).all()
         if not mda_detail_data and request.method == 'GET':
             last = MdaDetail.query.order_by(MdaDetail.id.desc()).first()
-            mda_detail_data = MdaDetail.query.filter_by(date_time = last.date_time).all()
+            if last:
+                mda_detail_data = MdaDetail.query.filter_by(date_time = last.date_time).all()
     else:
         mda_detail_data = MdaDetail.query.filter_by(host_name = host_name, date_time = search_date).all()
         if not mda_detail_data and request.method == 'GET':
             last = MdaDetail.query.filter_by(host_name = host_name).order_by(MdaDetail.id.desc()).first()
-            mda_detail_data = MdaDetail.query.filter_by(host_name = host_name, date_time = last.date_time).all()
+            if last:
+                mda_detail_data = MdaDetail.query.filter_by(host_name = host_name, date_time = last.date_time).all()
 
     mda_detail_data = [(index, item) for index, item in enumerate(mda_detail_data) ]
     return render_template('mda_detail.html', host_name=host_name, host_list = host_list, mda_detail_data = mda_detail_data ,action='mda_detail')
@@ -340,12 +356,14 @@ def mda_statistic():
         mda_statistic_data = MdaStatistic.query.filter_by(date_time = search_date).all()
         if not mda_statistic_data and request.method == 'GET':
             last = MdaStatistic.query.order_by(CardDetail.id.desc()).first()
-            mda_statistic_data = MdaStatistic.query.filter_by(date_time = last.date_time).all()
+            if last:
+                mda_statistic_data = MdaStatistic.query.filter_by(date_time = last.date_time).all()
     else:
         mda_statistic_data = MdaStatistic.query.filter_by(host_name = host_name, date_time = search_date).all()
         if not mda_statistic_data and request.method == 'GET':
             last = MdaStatistic.query.filter_by(host_name = host_name).order_by(MdaStatistic.id.desc()).first()
-            mda_statistic_data = MdaStatistic.query.filter_by(host_name = host_name, date_time = last.date_time).all()
+            if last:
+                mda_statistic_data = MdaStatistic.query.filter_by(host_name = host_name, date_time = last.date_time).all()
 
     mda_statistic_data = [(index, item) for index, item in enumerate(mda_statistic_data) ]
     return render_template('mda_statistic.html', host_name=host_name, host_list = host_list, mda_statistic_data = mda_statistic_data, action='mda_statistic')
@@ -375,12 +393,14 @@ def port_statistic():
         port_statistic_data = PortStatistic.query.filter_by(date_time = search_date).all()
         if not port_statistic_data and request.method == 'GET':
             last = PortStatistic.query.order_by(PortStatistic.id.desc()).first()
-            port_statistic_data = PortStatistic.query.filter_by(date_time = last.date_time).all()
+            if last:
+                port_statistic_data = PortStatistic.query.filter_by(date_time = last.date_time).all()
     else:
         port_statistic_data = PortStatistic.query.filter_by(host_name = host_name, date_time = search_date).all()
         if not port_statistic_data and request.method == 'GET':
             last = PortStatistic.query.filter_by(host_name = host_name).order_by(PortStatistic.id.desc()).first()
-            port_statistic_data = PortStatistic.query.filter_by(host_name = host_name, date_time = last.date_time).all()
+            if last:
+                port_statistic_data = PortStatistic.query.filter_by(host_name = host_name, date_time = last.date_time).all()
 
     port_statistic_data = [(index, item) for index, item in enumerate(port_statistic_data) ]
     return render_template('port_statistic.html', host_name=host_name, host_list = host_list, port_statistic_data = port_statistic_data, action='port_statistic')
@@ -1302,10 +1322,11 @@ def load_statistic():
     statistic_data = pageination.items
     if not statistic_data and request.method == 'GET':
         last = LoadStatistic.query.order_by(LoadStatistic.id.desc()).first()
-        pageination = LoadStatistic.query.filter_by(host_name = host_name, date_time = last.date_time).paginate(
-            page, per_page = current_app.config['FLASKY_POSTS_PER_PAGE'],
-            error_out = False
-        )
+        if last:
+            pageination = LoadStatistic.query.filter_by(host_name = host_name, date_time = last.date_time).paginate(
+                page, per_page = current_app.config['FLASKY_POSTS_PER_PAGE'],
+                error_out = False
+            )
 
     statistic_data = [(index, item) for index, item in enumerate(statistic_data) ]
     return render_template('statistic.html',
@@ -1332,7 +1353,8 @@ def load_statistic_host():
     load_statistic_host_data = LoadStatisticHost.query.filter_by(city = city, date_time = date.today()).all()
     if not load_statistic_host_data:
         last = LoadStatisticHost.query.filter_by(city = city).order_by(LoadStatisticHost.id.desc()).first()
-        load_statistic_host_data = LoadStatisticHost.query.filter_by(city = city, date_time = last.date_time).all()
+        if last:
+            load_statistic_host_data = LoadStatisticHost.query.filter_by(city = city, date_time = last.date_time).all()
 
     load_statistic_host_data = [(index, item) for index, item in enumerate(load_statistic_host_data) ]
     return render_template('statistic_host.html',
@@ -1351,7 +1373,8 @@ def install_base(host_name):
     install_base_data = InstallBase.query.filter_by(date_time = date.today()).all()
     if not install_base_data:
         last = InstallBase.query.order_by(InstallBase.id.desc()).first()
-        install_base_data = InstallBase.query.filter_by(date_time = last.date_time).all()
+        if last:
+            install_base_data = InstallBase.query.filter_by(date_time = last.date_time).all()
 
     install_base_data = [(index, item) for index, item in enumerate(install_base_data) ]
     return render_template('report/install_base.html',
@@ -1367,7 +1390,8 @@ def net_flow(host_name):
     net_flow_data = NetFlow.query.filter_by(date_time = date.today()).all()
     if not net_flow_data:
         last = NetFlow.query.order_by(NetFlow.id.desc()).first()
-        net_flow_data = NetFlow.query.filter_by(date_time = last.date_time).all()
+        if last:
+            net_flow_data = NetFlow.query.filter_by(date_time = last.date_time).all()
 
     return render_template('report/net_flow.html',
         data = net_flow_data,

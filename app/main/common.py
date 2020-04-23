@@ -39,14 +39,20 @@ def get_log(city, host, date = None):
     for i in logs:
         if date != None:
             if is_yesday_log(i):
-                log_str = open(os.path.join(g_log_path, city, host, i)).read()
+                try:
+                    log_str = open(os.path.join(g_log_path, city, host, i)).read()
+                except:
+                    break
                 if len(log_str) < 100:
                     log_str = ''
                 else:
                     break
         else:
             if is_today_log(i):
-                log_str = open(os.path.join(g_log_path, city, host, i)).read()
+                try:
+                    log_str = open(os.path.join(g_log_path, city, host, i)).read()
+                except:
+                    break
                 if len(log_str) < 100:
                     log_str = ''
                 else:
@@ -118,11 +124,13 @@ def is_today_log(log_name):
 
     p_log_datetime = r'(\d{4})(\d{2})(\d{2})-(\d{2})(\d{2})(\d{2})'
     res = re.search(p_log_datetime, log_name)
-    # print(res.groups())
-    real_date_time = datetime.datetime(int(res.group(1)), int(res.group(2)), int(res.group(3)), \
-        int(res.group(4)), int(res.group(5)), int(res.group(6))) + datetime.timedelta(hours=8) + datetime.timedelta(days=1)
+    if res:
+        real_date_time = datetime.datetime(int(res.group(1)), int(res.group(2)), int(res.group(3)), \
+            int(res.group(4)), int(res.group(5)), int(res.group(6))) + datetime.timedelta(hours=8) + datetime.timedelta(days=1)
 
-    today_time = datetime.datetime.now()
+        today_time = datetime.datetime.now()
+    else:
+        return False
 
     if today_time.strftime('%y/%m/%d') == real_date_time.strftime('%y/%m/%d'):
         return True
@@ -135,8 +143,11 @@ def is_yesday_log(log_name):
 
     p_log_datetime = r'(\d{4})(\d{2})(\d{2})-(\d{2})(\d{2})(\d{2})'
     res = re.search(p_log_datetime, log_name)
-    real_date_time = datetime.datetime(int(res.group(1)), int(res.group(2)), int(res.group(3)), \
-        int(res.group(4)), int(res.group(5)), int(res.group(6))) + datetime.timedelta(hours=8) + datetime.timedelta(days=2)
+    if res:
+        real_date_time = datetime.datetime(int(res.group(1)), int(res.group(2)), int(res.group(3)), \
+            int(res.group(4)), int(res.group(5)), int(res.group(6))) + datetime.timedelta(hours=8) + datetime.timedelta(days=2)
+    else:
+        return False
 
     today_time = datetime.datetime.now()
 
