@@ -33,12 +33,14 @@ def index():
         special_line_data = SpecialLine.query.filter_by(date_time = search_date).all()
         if not special_line_data and request.method == 'GET':
             last = SpecialLine.query.order_by(SpecialLine.id.desc()).first()
-            special_line_data = SpecialLine.query.filter_by(date_time = last.date_time).all()
+            if last:
+                special_line_data = SpecialLine.query.filter_by(date_time = last.date_time).all()
     else:
         special_line_data = SpecialLine.query.filter_by(host_name = host_name, date_time = search_date).all()
         if not special_line_data and request.method == 'GET':
             last = SpecialLine.query.filter_by(host_name = host_name).order_by(SpecialLine.id.desc()).first()
-            special_line_data = SpecialLine.query.filter_by(host_name = host_name, date_time = last.date_time).all()
+            if last:
+                special_line_data = SpecialLine.query.filter_by(host_name = host_name, date_time = last.date_time).all()
 
     special_line_data = [(index, item) for index, item in enumerate(special_line_data) ]
     return render_template('report/special_line.html', host_name=host_name, host_list = host_list, special_line_data = special_line_data ,action='special_line')
