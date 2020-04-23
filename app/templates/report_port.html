@@ -42,9 +42,9 @@
                 <li role="presentation" ><a href="{{ url_for('main.mda_statistic', host_name = host_name ) }}">mda统计</a></li>
             {% endif %}
             {% if action == 'address_collect' %}
-                <li role="presentation" class="active"><a href="{{ url_for('main.address_collect', host_name = host_name ) }}">地址采集</a></li>
+                <li role="presentation" class="active"><a href="{{ url_for('main.address_collect', host_name = host_name ) }}">专线地址采集</a></li>
             {% else %}
-                <li role="presentation" ><a href="{{ url_for('main.address_collect', host_name = host_name ) }}">地址采集</a></li>
+                <li role="presentation" ><a href="{{ url_for('main.address_collect', host_name = host_name ) }}">专线地址采集</a></li>
             {% endif %}
             {% if action == 'host_list_data' %}
                 <li role="presentation" class="active"><a href="{{ url_for('main.host_list_data', host_name = host_name ) }}">设备清单统计</a></li>
@@ -82,10 +82,12 @@
         </ul>
     </div>
     <div class="col-md-10">
+        {% block report_content2 %}
         <div style="overflow:scroll;max-height:400px">
             {% block report_content %}
             {% endblock %}
         </div>
+        {% endblock %}
         {% block pageination %}
         {% endblock %}
     </div>
