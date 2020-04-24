@@ -42,7 +42,9 @@ def get_log(city, host, date = None):
                 try:
                     log_str = open(os.path.join(g_log_path, city, host, i)).read()
                 except:
-                    break
+                    log_str = open(os.path.join(g_log_path, city, host, i), encoding='utf-8-sig').read()
+                finally:
+                    pass
                 if len(log_str) < 100:
                     log_str = ''
                 else:
@@ -52,7 +54,9 @@ def get_log(city, host, date = None):
                 try:
                     log_str = open(os.path.join(g_log_path, city, host, i)).read()
                 except:
-                    break
+                    log_str = open(os.path.join(g_log_path, city, host, i), encoding='utf-8-sig').read()
+                finally:
+                    pass
                 if len(log_str) < 100:
                     log_str = ''
                 else:
@@ -65,8 +69,13 @@ def get_log(city, host, date = None):
         save_path = os.path.join(os.getcwd() ,'app', 'static', 'logs', city, host)
         log_name = get_log_from_ftp(host, save_path)
         if log_name:
-            log_str = open(os.path.join(g_log_path, city, host, log_name)).read()
-
+            
+            try:
+                log_str = open(os.path.join(g_log_path, city, host, log_name)).read()
+            except:
+                log_str = open(oos.path.join(g_log_path, city, host, log_name), encoding='utf-8-sig').read()
+            finally:
+                pass
     return log_str
 
 def get_log_from_date(city, host, date):

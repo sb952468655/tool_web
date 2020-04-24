@@ -56,7 +56,7 @@ def save_special_line(city, host_name, config):
 
     special_line_data = get_saps(config)
     if special_line_data:
-        logging.info('host: {} {} begin save'.format(host_name, 'special_line_data'))
+        logging.info('special_line host: {} {} begin save'.format(host_name, 'special_line_data'))
 
     today = date.today()
     for item in special_line_data:

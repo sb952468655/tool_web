@@ -473,6 +473,10 @@ def xunjian(host_name):
         abort(404)
 
     xunjian_data = XunJian.query.filter_by(host_name = host_name, date_time = date.today()).all()
+    if not xunjian_data:
+        last = XunJian.query.order_by(XunJian.id.desc()).first()
+        if last:
+            xunjian_data = XunJian.query.filter_by(host_name = host_name, date_time = last.date_time).all()
     warn_data = [item for item in xunjian_data if item.err]
     
     return render_template('xunjian/xunjian.html', xunjian_data=warn_data, host_name = host_name, city = city, check_to_describe = g_check_to_describe)
@@ -483,11 +487,12 @@ def xunjian_output_all(host_name):
     '''设备巡检-全量输出'''
 
     city = session.get('city')
-    count = XunJian.query.filter_by(host_name = host_name, date_time = date.today()).count()
-    if count == 0:
-        abort(404)
-
     xunjian_data = XunJian.query.filter_by(host_name = host_name, date_time = date.today()).all()
+    if not xunjian_data:
+        last = XunJian.query.order_by(XunJian.id.desc()).first()
+        if last:
+            xunjian_data = XunJian.query.filter_by(host_name = host_name, date_time = last.date_time).all()
+
     warn_data = [item for item in xunjian_data if item.err]
     
     return render_template('xunjian/xunjian_output_all.html', xunjian_data=warn_data, host_name = host_name, city = city, check_to_describe = g_check_to_describe)
@@ -499,17 +504,15 @@ def xunjian_all_host():
 
     warn_data = []
     city = session.get('city')
-    
-    count = XunJian.query.filter_by(city = city, date_time = date.today()).count()
-    if count == 0:
-        abort(404)
 
     host_list = get_host(city)
     for i in host_list:
         xunjian_data = XunJian.query.filter_by(host_name = i, date_time = date.today()).all()
+        if not xunjian_data:
+            last = XunJian.query.order_by(XunJian.id.desc()).first()
+            if last:
+                xunjian_data = XunJian.query.filter_by(host_name = host_name, date_time = last.date_time).all()
         warn_data.append((i, [item for item in xunjian_data if item.err]))
-    
-    
 
     return render_template('xunjian/xunjian_all_host.html', xunjian_data=warn_data)
 
@@ -1275,7 +1278,7 @@ def backup_list():
         for name, _ in request.form.to_dict().items():
             log_str = get_log(city, name)
             log_config_str = log_str[:log_str.index('# Finished')]
-            back_up_log_path = os.path.join('app', 'static', 'backup', name + '.log')
+            back_up_log_path = os.path.join('app', 'static', 'backup', name + ' {}.log'.format(date.today().strftime('%Y%m%d')))
             with open(back_up_log_path, 'w') as f:
                 f.write(log_config_str)
             zip.write(back_up_log_path, name + '.log')
@@ -1511,11 +1514,11 @@ def zuxun(host_name):
     if not city:
         return redirect(url_for('main.city_list'))
 
-    count = ZuXun.query.filter_by(host_name = host_name, date_time = date.today()).count()
-    if count == 0:
-        abort(404)
-
     zuxun_data = ZuXun.query.filter_by(host_name = host_name, date_time = date.today()).all()
+    if not zuxun_data:
+        last = ZuXun.query.filter_by(host_name = host_name).order_by(ZuXun.id.desc()).first()
+        if last:
+            zuxun_data = ZuXun.query.filter_by(host_name = host_name, date_time = last.date_time).all()
 
 
     return render_template('zuxun/zuxun.html',
@@ -2381,7 +2384,6 @@ def save_db():
             if today_log and yesterday_log:
                 save_xunjian(i, j, today_log, yesterday_log)
                 #配置检查
-
             else:
                 if not today_log:
                     logging.info('host: {} not found today log'.format(j))
@@ -2865,7 +2867,7 @@ def save_netflow(city, host_name, config):
 
     res = get_netflow(config)
     if res:
-        logging.info('host: {} {} begin save'.format(host_name, 'netflow'))
+        logging.info('netflow host: {} {} begin save'.format(host_name, 'netflow'))
 
     today = date.today()
     netflow = NetFlow(

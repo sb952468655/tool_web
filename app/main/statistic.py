@@ -118,6 +118,10 @@ def get_statistic_host_data(city):
 
     p_user_num = r'Stable Leases {12}(\d{1,6}) {10,16}(\d{1,6}) '
     p_provisioned_addresses = r'Provisioned Addresses    (\d{1,6}) '
+    provisioned_addresses_4015 = ''
+    provisioned_addresses = ''
+    current_num_4015 = ''
+    peak_num_4015 = ''
 
     host_list = get_host(city)
     # filenames = []
@@ -143,7 +147,7 @@ def get_statistic_host_data(city):
                 provisioned_addresses = res_provisioned_addresses.group(1)
 
         res_pool_vprn_cms = re.search(p_pool_vprn_cms, config)
-        if res_user_num:
+        if res_user_num and res_pool_vprn_cms:
             res_user_num2 = re.search(p_user_num, res_pool_vprn_cms.group())
             res_provisioned_addresses2 = re.search(p_provisioned_addresses, res_pool_vprn_cms.group())
             if res_user_num2:
@@ -152,11 +156,17 @@ def get_statistic_host_data(city):
             if res_provisioned_addresses2:
                 provisioned_addresses_4015 = res_provisioned_addresses2.group(1)
 
-        ies_3000_lyl_current = str(round(int(current_num) * 100/int(provisioned_addresses),2)) + ' %'
-        ies_3000_lyl_peak = str(round(int(peak_num) * 100/int(provisioned_addresses),2)) + ' %'
+        ies_3000_lyl_current = ''
+        ies_3000_lyl_peak = ''
+        if provisioned_addresses and provisioned_addresses != '0':
+            ies_3000_lyl_current = str(round(int(current_num) * 100/int(provisioned_addresses),2)) + ' %'
+            ies_3000_lyl_peak = str(round(int(peak_num) * 100/int(provisioned_addresses),2)) + ' %'
 
-        vprn_4015_lyl_current = str(round(int(current_num_4015) * 100/int(provisioned_addresses_4015),2)) + ' %'
-        vprn_4015_lyl_peak = str(round(int(peak_num_4015) * 100/int(provisioned_addresses_4015),2)) + ' %'
+        vprn_4015_lyl_current = ''
+        vprn_4015_lyl_peak = ''
+        if provisioned_addresses_4015  and provisioned_addresses_4015 != '0':
+            vprn_4015_lyl_current = str(round(int(current_num_4015) * 100/int(provisioned_addresses_4015),2)) + ' %'
+            vprn_4015_lyl_peak = str(round(int(peak_num_4015) * 100/int(provisioned_addresses_4015),2)) + ' %'
 
 
         statistic_host_data.append((
