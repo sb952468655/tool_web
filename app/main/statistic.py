@@ -120,7 +120,9 @@ def get_statistic_host_data(city):
     p_provisioned_addresses = r'Provisioned Addresses    (\d{1,6}) '
     provisioned_addresses_4015 = ''
     provisioned_addresses = ''
+    current_num = ''
     current_num_4015 = ''
+    peak_num = ''
     peak_num_4015 = ''
 
     host_list = get_host(city)

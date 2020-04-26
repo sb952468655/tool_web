@@ -73,7 +73,7 @@ def get_log(city, host, date = None):
             try:
                 log_str = open(os.path.join(g_log_path, city, host, log_name)).read()
             except:
-                log_str = open(oos.path.join(g_log_path, city, host, log_name), encoding='utf-8-sig').read()
+                log_str = open(os.path.join(g_log_path, city, host, log_name), encoding='utf-8-sig').read()
             finally:
                 pass
     return log_str
