@@ -55,6 +55,7 @@ def save_special_line(city, host_name, config):
 
     if today_data_count:
         logging.info('special_line host: {} today is saved'.format(host_name))
+        db.session.close()
         return
 
     special_line_data = get_saps(config)

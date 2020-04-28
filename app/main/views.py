@@ -2461,18 +2461,18 @@ def save_db():
                 t_special_line = threading.Thread(target=save_special_line, args=(i, j, today_log))
                 t_special_line.start()
 
-                t_port_detail.join()
-                t_port_statistic.join()
-                t_card_detail.join()
-                t_card_statistic.join()
-                t_mda_detail.join()
-                t_mda_statistic.join()
-                t_load_statistic.join()
-                t_load_statistic_host.join()
-                t_address_collect.join()
-                t_zuxun.join()
-                t_netflow.join()
-                t_special_line.join()
+                # t_port_detail.join()
+                # t_port_statistic.join()
+                # t_card_detail.join()
+                # t_card_statistic.join()
+                # t_mda_detail.join()
+                # t_mda_statistic.join()
+                # t_load_statistic.join()
+                # t_load_statistic_host.join()
+                # t_address_collect.join()
+                # t_zuxun.join()
+                # t_netflow.join()
+                # t_special_line.join()
 
             if today_log and yesterday_log:
                 # save_xunjian(i, j, today_log, yesterday_log)
@@ -2493,6 +2493,7 @@ def save_db():
     t_install_base = threading.Thread(target=save_install_base)
     t_install_base.start()
 
+    db.session.remove()
     return '数据保存成功'
 
 
@@ -2505,6 +2506,7 @@ def save_xunjian(city, host_name, config_new, config_old):
 
     if today_data_count:
         logging.info('xunjian host: {} today is saved'.format(host_name))
+        db.session.close()
         return
 
     xunjian_data = mobile.xunjian(config_new, config_old)
@@ -2535,6 +2537,7 @@ def save_port_detail(city, host_name, config):
 
     if today_data_count:
         logging.info('port_detail host: {} today is saved'.format(host_name))
+        db.session.close()
         return
 
     ip = get_ip(config)
@@ -2621,6 +2624,7 @@ def save_port_statistic(city, host_name, config):
 
     if today_data_count:
         logging.info('port_statistic host: {} today is saved'.format(host_name))
+        db.session.close()
         return
 
     port_statistic_data = get_port_statistic(config)
@@ -2645,7 +2649,6 @@ def save_port_statistic(city, host_name, config):
         db.session.add(port_statistic)
     db.session.commit()
     db.session.close()
-
 def save_card_detail(city, host_name, config):
     '''card明细入库'''
 
@@ -2655,6 +2658,7 @@ def save_card_detail(city, host_name, config):
 
     if today_data_count:
         logging.info('card_detail host: {} today is saved'.format(host_name))
+        db.session.close()
         return
 
     card_detail_data = get_card_detail(config)
@@ -2693,6 +2697,7 @@ def save_card_statistic(city, host_name, config):
 
     if today_data_count:
         logging.info('card_statistic host: {} today is saved'.format(host_name))
+        db.session.close()
         return
 
     card_statistic_data = get_card_statistic(config)
@@ -2725,6 +2730,7 @@ def save_mda_detail(city, host_name, config):
 
     if today_data_count:
         logging.info('mda_detail host: {} today is saved'.format(host_name))
+        db.session.close()
         return
 
     mda_detail_data = get_mda_detail(config)
@@ -2764,6 +2770,7 @@ def save_mda_statistic(city, host_name, config):
 
     if today_data_count:
         logging.info('mda_statistic host: {} today is saved'.format(host_name))
+        db.session.close()
         return
 
     mda_statistic_data = get_mda_statistic(config)
@@ -2796,6 +2803,7 @@ def save_load_statistic(city, host_name, config):
 
     if today_data_count:
         logging.info('load_statistic host: {} today is saved'.format(host_name))
+        db.session.close()
         return
 
     res = get_statistic_data(config)
@@ -2834,6 +2842,7 @@ def save_load_statistic_host(city, host_name, config):
 
     if today_data_count:
         logging.info('load_statistic_host host: {} today is saved'.format(host_name))
+        db.session.close()
         return
 
     load_statistic_host_data = get_statistic_host_data(city)
@@ -2960,6 +2969,7 @@ def save_zuxun(city, host_name, config):
 
     if today_data_count:
         logging.info('zuxun host: {} today is saved'.format(host_name))
+        db.session.close()
         return
 
     res = zuxun_check(config)
@@ -2987,6 +2997,7 @@ def save_netflow(city, host_name, config):
 
     if today_data_count:
         logging.info('netflow host: {} today is saved'.format(host_name))
+        db.session.close()
         return
 
     res = get_netflow(config)
@@ -3021,6 +3032,7 @@ def save_install_base():
     today_data_count = InstallBase.query.filter_by(date_time = date.today()).count()
     if today_data_count:
         logging.info('install_base today is saved')
+        db.session.close()
         return
 
     data = dict()
