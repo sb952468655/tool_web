@@ -347,6 +347,20 @@ class SpecialLine(db.Model):
     def __repr__(self):
         return '<SpecialLine %r>' % self.ip
 
+
+class HostList(db.Model):
+    '''设备清单'''
+
+    __tablename__ = 'host_list'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    city = db.Column(db.String(64)) #地市
+    host_name = db.Column(db.String(64)) #设备名
+    host_ip = db.Column(db.String(64)) #设备ip
+    version = db.Column(db.String(64)) #版本
+    boot_time = db.Column(db.String(64)) #设备启动时间
+    config_save_time = db.Column(db.String(64)) #设备配置保存时间
+    date_time = db.Column(db.Date, default = date.today())
+
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)

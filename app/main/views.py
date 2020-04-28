@@ -105,14 +105,60 @@ def report_port():
         date = form_date,
         pageination = pageination)
 
-@main.route('/host_list_data/<host_name>')
-@login_required
-def host_list_data(host_name):
-    '''设备清单统计'''
-    city = session.get('city')
+
+def save_host_list(city):
+    '''设备清单入库'''
+
+    app = create_app('production')
+    app.app_context().push()
+    host_list_count = HostList.query.filter_by(city = city, date_time = date.today()).count()
+
+    if host_list_count:
+        logging.info('host_list city: {} today is saved'.format(city))
+        return
+
     host_list_data = get_host_list(city)
+
+    logging.info('host_list city: {} begin save'.format(city))
+    for item in host_list_data:
+        host_list = HostList(
+            city = city,
+            host_name = item[0],
+            host_ip = item[1],
+            version = item[2],
+            boot_time = item[3],
+            config_save_time = item[4],
+            date_time = date.today()
+        )
+
+        db.session.add(host_list)
+
+    db.session.commit()
+    db.session.close()
+
+@main.route('/host_list_data', methods=['GET', 'POST'])
+@login_required
+def host_list_data():
+    '''设备清单统计'''
+    search_date = date.today()
+    form_date = ''
+    city = session.get('city')
+    if not city:
+        return redirect(url_for('main.city_list'))
+
+    if request.method == 'POST':
+        form_date = request.form.get('date')
+        if form_date:
+            search_date = datetime.strptime(form_date,'%Y-%m-%d').date()
+
+
+    host_list_data = HostList.query.filter_by(city = city, date_time = search_date).all()
+    if not host_list_data and request.method == 'GET':
+        last = HostList.query.filter_by(city = city).order_by(HostList.id.desc()).first()
+        if last:
+            host_list_data = HostList.query.filter_by(city = city, date_time = last.date_time).all()
     host_list_data = [(index, item) for index, item in enumerate(host_list_data) ]
-    return render_template('host_list_data.html', host_name=host_name, host_list_data = host_list_data ,action='host_list_data')
+    return render_template('host_list_data.html', host_list_data = host_list_data ,action='host_list_data')
 
 @main.route('/card_detail', methods=['GET', 'POST'])
 @login_required
@@ -2438,9 +2484,10 @@ def save_db():
                     logging.info('host: {} not found today log'.format(j))
                 if not yesterday_log:
                     logging.info('host: {} not found yesterday log'.format(j))
-
-            
-
+        #设备清单
+        # save_host_list(i)
+        t_host_list = threading.Thread(target=save_host_list, args=(i,))
+        t_host_list.start()
     #installbase统计
     # save_install_base()
     t_install_base = threading.Thread(target=save_install_base)
