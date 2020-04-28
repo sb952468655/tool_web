@@ -24,6 +24,7 @@
         <thead>
             <tr>
                 <th>序号</th>
+                <th>日期</th>
                 <th>设备名</th>
                 <th>设备IP</th>
                 <th>port</th>
@@ -40,6 +41,7 @@
             {% for index, item in statistic_data %}
                 <tr>
                     <th>{{ (pageination.page - 1) * pageination.per_page + index + 1 }}</th>
+                    <th>{{ item.date_time }}</th>
                     <th>{{ item.host_name.split('.')[0] }}</th>
                     <th>{{ item.host_ip }}</th>
                     <th>{{ item.port }}</th>

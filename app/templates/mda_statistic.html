@@ -40,6 +40,7 @@
         <thead>
             <tr>
                 <th>序号</th>
+                <th>日期</th>
                 <th>设备名</th>
                 <th>设备IP</th>
                 <th>MDA类型</th>
@@ -50,6 +51,7 @@
             {% for index, item in mda_statistic_data %}
                 <tr>
                     <th>{{ index + 1 }}</th>
+                    <th>{{ item.date_time }}</th>
                     <th>{{ item.host_name }}</th>
                     <th>{{ item.host_ip }}</th>
                     <th>{{ item.card_type }}</th>

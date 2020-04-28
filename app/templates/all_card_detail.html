@@ -38,6 +38,7 @@
         <thead>
             <tr>
                 <th>序号</th>
+                <th>日期</th>
                 <th>设备名</th>
                 <th>地市名</th>
                 <th>设备IP</th>
@@ -50,13 +51,13 @@
                 <th>Temperature</th>
                 <th>Temperature threshold</th>
                 <th>是否存在异常</th>
-                <th>日期</th>
             </tr>
         </thead>
         <tbody>
             {% for index, item in card_detail_data %}
                 <tr>
                     <th>{{ index + 1 }}</th>
+                    <th>{{ item.date_time.strftime("%Y/%m/%d") }}</th>
                     <th>{{ item.host_name }}</th>
                     <th>{{ city_list[item.city] }}</th>
                     <th>{{ item.host_ip }}</th>
@@ -72,7 +73,6 @@
                     <th>{{ item.temperature }}</th>
                     <th>{{ item.temperature_threshold }}</th>
                     <th>{{ item.is_abnormal }}</th>
-                    <th>{{ item.date_time.strftime("%Y/%m/%d") }}</th>
                 </tr>
             {% endfor %}
         </tbody>

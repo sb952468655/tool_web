@@ -41,6 +41,7 @@
         <thead>
             <tr>
                 <th>序号</th>
+                <th>日期</th>
                 <th>设备名</th>
                 <th>设备IP</th>
                 <th>IP类型</th>
@@ -62,6 +63,7 @@
             {% for index, item in address_data %}
                 <tr>
                     <th>{{ (pageination.page - 1) * pageination.per_page + index + 1 }}</th>
+                    <th>{{ item.data_time }}</th>
                     <th>{{ item.host_name }}</th>
                     <th>{{ item.host_ip }}</th>
                     <th>{{ item.ip_type }}</th>

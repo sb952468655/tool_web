@@ -37,6 +37,7 @@
         <thead>
             <tr>
                 <th>序号</th>
+                <th>日期</th>
                 <th>设备名</th>
                 <th>设备IP</th>
                 <th>port</th>
@@ -56,7 +57,6 @@
                 <th>收光门限</th>
                 <th>发光门限</th>
                 <th>是否存在异常</th>
-                <th>日期</th>
             </tr>
         </thead>
         <tbody>
@@ -67,6 +67,7 @@
                 <tr bgcolor="#FFFF00">
                 {% endif %}
                     <th>{{ (pageination.page - 1) * pageination.per_page + index + 1 }}</th>
+                    <th>{{ item.date_time }}</th>
                     <th>{{ item.host_name.split('.')[0] }}</th>
                     <th>{{ item.host_ip }}</th>
                     <th>{{ item.port }}</th>
@@ -102,7 +103,6 @@
                     <th>{{ item.output_warn }}</th>
                     <th>{{ item.optical_warn }}</th>
                     <th>{{ item.is_abnormal }}</th>
-                    <th>{{ item.date_time }}</th>
                 </tr>
             {% endfor %}
         </tbody>

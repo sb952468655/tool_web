@@ -8,6 +8,7 @@
         <thead>
             <tr>
                 <th>序号</th>
+                <th>日期</th>
                 <th>设备名</th>
                 <th>设备IP</th>
                 <th>ies 3000用户数量</th>
@@ -20,6 +21,7 @@
             {% for index, item in load_statistic_host_data %}
                 <tr>
                     <th>{{ index + 1 }}</th>
+                    <th>{{ item.date_time }}</th>
                     <th>{{ item.host_name }}</th>
                     <th>{{ item.host_ip }}</th>
                     <th>{{ item.ies_3000_num }}</th>
