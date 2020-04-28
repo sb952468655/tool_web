@@ -38,7 +38,7 @@ class TestingConfig(Config):
 
 class ProductionConfig(Config):
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
-        'sqlite:///' + os.path.join(basedir, 'data.sqlite')
+        'mysql+pymysql://root:nokia2020@localhost/tool_web'
     SEND_FILE_MAX_AGE_DEFAULT = timedelta(seconds = 1)
 
 config = {

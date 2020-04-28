@@ -5,7 +5,8 @@
 
 {% block page_content %}
 <div class="page-header">
-    <h1>{% block page_header %} 地市 {% endblock %}</h1>
+    <h1>诺基亚贝尔7750运维协助系统</h1>
+    <h2>{% block page_header %} 选择地市 {% endblock %}</h2>
 </div>
 <div class="row">
     <div class="col-md-10">
@@ -18,7 +19,7 @@
             <tbody>
                 {% for item in city_data %}
                     <tr>
-                        <th><a href="{{ url_for('main.host_list', city = item[0], action = session.get('action')) }}">{{ item[1] }}</a></th>
+                        <th><a href="{{ url_for('main.report_port', city = item[0]) }}">{{ item[1] }}</a></th>
                     </tr>
                 {% endfor %}
             </tbody>

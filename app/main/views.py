@@ -1,8 +1,9 @@
-import os, sys, zipfile, time, logging, re, time
+import os, sys, zipfile, time, logging, re, time, threading
+from ..import create_app
 from urllib.request import quote, unquote
 from sqlite3 import OperationalError
 from datetime import date, datetime
-from flask import render_template, session, redirect, url_for, current_app, request, abort, g, Response, flash
+from flask import render_template, session, redirect, url_for, current_app, request, abort, g, Response, flash, app
 from flask_login import login_required, current_user
 import openpyxl
 from openpyxl.styles import Alignment, PatternFill
@@ -33,7 +34,7 @@ def index():
         return redirect(url_for('main.city_list'))
     else:
         session['city'] = current_user.username
-        return redirect(url_for('main.host_list', action = 'report_port'))
+        return redirect(url_for('main.report_port'))
 
 
 @main.route('/report_port', methods=['GET', 'POST'])
@@ -43,13 +44,19 @@ def report_port():
 
     card_data = []
     page = request.args.get('page', 1, type=int)
-    city = session.get('city')
+    city = request.args.get('city')
+    if not city:
+        city = session.get('city')
+    if not city:
+        return redirect(url_for('main.city_list'))
+    else:
+        session['city'] = city
+        session['city_name'] = g_city_to_name.get(city)
+
     host_list = get_host(city)
     search_date = date.today()
     form_date = ''
-    if not city:
-        return redirect(url_for('main.city_list'))
-
+    
     from .report import get_report_data, get_device_name, get_port_ggl, get_ip
 
     if request.method == 'POST':
@@ -83,7 +90,7 @@ def report_port():
         if not pageination.items and request.method == 'GET':
             last = CardPort1.query.filter_by(host_name = host_name).order_by(CardPort1.id.desc()).first()
             if last:
-                pageination = CardPort1.query.filter_by(date_time = last.date_time).paginate(
+                pageination = CardPort1.query.filter_by(host_name = host_name, date_time = last.date_time).paginate(
                     page, per_page = current_app.config['FLASKY_POSTS_PER_PAGE'],
                     error_out = False
                 )
@@ -529,6 +536,7 @@ def auto_config():
 def generate_excel(host_name):
     '''端口明细生成表格'''
 
+    today_str = date.today().strftime('%Y%m%d')
     excel = openpyxl.Workbook()
     sheet = excel.active
     sheet['A1'] = '设备名'
@@ -604,9 +612,10 @@ def generate_excel(host_name):
 
         cur_row += 1
     
-    excel.save(os.path.join('app','static', 'port.xlsx'))
+    file_name = '端口明细-{}-{}.xlsx'.format(host_name, today_str)
+    excel.save(os.path.join('app','static', file_name))
 
-    return redirect(url_for('static', filename='port.xlsx'))
+    return redirect(url_for('static', filename=file_name))
 
 @main.route('/download_excel/<host_name>/<table_name>')
 @login_required
@@ -616,9 +625,10 @@ def download_excel(host_name, table_name):
     data = []
     labels = []
     file_name = ''
+    today_str = date.today().strftime('%Y%m%d')
 
     if table_name == 'port_statistic':
-        file_name = 'port_statistic.xlsx'
+        file_name = '端口统计-{}-{}.xlsx'.format(host_name, today_str)
         labels = [
             '设备名', '设备IP', '端口类型', '数量', '已使用', '剩余'
         ]
@@ -635,7 +645,7 @@ def download_excel(host_name, table_name):
             ))
 
     elif table_name == 'card_detail':
-        file_name = 'card_detail.xlsx'
+        file_name = 'card明细-{}-{}.xlsx'.format(host_name, today_str)
         labels = [
             '设备名', '设备IP', 'Slot', 'Equipped Type', 'Admin State'
             , 'Operational State', 'Serial number', 'Time of last boot'
@@ -658,7 +668,7 @@ def download_excel(host_name, table_name):
                 i.is_abnormal
             ))
     elif table_name == 'card_statistic':
-        file_name = 'card_statistic.xlsx'
+        file_name = 'card统计-{}-{}.xlsx'.format(host_name, today_str)
         labels = [
             '设备名', '设备IP', 'card类型', '数量'
         ]
@@ -672,7 +682,7 @@ def download_excel(host_name, table_name):
                 i.card_num
             ))
     elif table_name == 'mda_detail':
-        file_name = 'mda_detail.xlsx'
+        file_name = 'mda明细-{}-{}.xlsx'.format(host_name, today_str)
         labels = [
             '设备名', '设备IP', 'Slot', 'Mda', 'Equipped Type', 'Admin State'
             , 'Operational State', 'Serial number', 'Time of last boot'
@@ -696,7 +706,7 @@ def download_excel(host_name, table_name):
                 i.is_abnormal
             ))
     elif table_name == 'mda_statistic':
-        file_name = 'mda_statistic.xlsx'
+        file_name = 'mda统计-{}-{}.xlsx'.format(host_name, today_str)
         labels = [
             '设备名', '设备IP', 'MDA类型', '数量'
         ]
@@ -710,7 +720,7 @@ def download_excel(host_name, table_name):
                 i.card_num
             ))
     elif table_name == 'host_list':
-        file_name = 'host_list.xlsx'
+        file_name = '设备列表-{}.xlsx'.format(today_str)
         city = session.get('city')
         host_list_data = get_host_list(city)
 
@@ -764,7 +774,7 @@ def download_excel(host_name, table_name):
                 i.pea_uplink_throughput_utilization
             ))
     elif table_name == 'load_statistic':
-        file_name = '{} 业务负荷统计表（按端口）.xlsx'.format(host_name)
+        file_name = '业务负荷统计表（按端口）-{}-{}.xlsx'.format(host_name, today_str)
         labels = [
             '设备名', '设备IP', 'port', '端口带宽', '带宽in利用率'
             , '带宽out利用率', 'ies 3000用户数量', 'ies 3000地址池利用率'
@@ -787,7 +797,7 @@ def download_excel(host_name, table_name):
                 i.vprn_4015_utilization
             ))
     elif table_name == 'load_statistic_host':
-        file_name = '{} 业务负荷统计表（按设备）.xlsx'.format(host_name)
+        file_name = '业务负荷统计表（按设备）-{}.xlsx'.format(today_str)
         labels = [
             '设备名', '设备IP', 'ies 3000用户数量', 'ies 3000地址池利用率', 'vprn 4015用户数量'
             , 'vprn 4015地址池利用率'
@@ -805,7 +815,7 @@ def download_excel(host_name, table_name):
                 i.vprn_4015_pool_utilization
             ))
     elif table_name == 'all_card_statistic':
-        file_name = '全省板卡统计汇总.xlsx'
+        file_name = '全省板卡统计汇总-{}.xlsx'.format(today_str)
         labels = [
             '地市', '设备名', '设备IP', '板卡类型', '板卡数量'
         ]
@@ -828,7 +838,7 @@ def download_excel(host_name, table_name):
                 i.card_num
             ))
     elif table_name == 'all_card_detail':
-        file_name = '全省板卡统计明细.xlsx'
+        file_name = '全省板卡统计明细-{}.xlsx'.format(today_str)
         labels = [
             '地市', '设备名', '设备IP', 'slot', '板卡类型', 'admin状态', 'operational状态', 'serial number', 'time of last boot', 'temperature', 'temperature threshold'
         ]
@@ -1278,10 +1288,10 @@ def backup_list():
         for name, _ in request.form.to_dict().items():
             log_str = get_log(city, name)
             log_config_str = log_str[:log_str.index('# Finished')]
-            back_up_log_path = os.path.join('app', 'static', 'backup', name + ' {}.log'.format(date.today().strftime('%Y%m%d')))
+            back_up_log_path = os.path.join('app', 'static', 'backup', 'config备份-{}-{}.log'.format(name, date.today().strftime('%Y%m%d')))
             with open(back_up_log_path, 'w') as f:
                 f.write(log_config_str)
-            zip.write(back_up_log_path, name + '.log')
+            zip.write(back_up_log_path, 'config备份-{}-{}.log'.format(name, date.today().strftime('%Y%m%d')))
 
         zip.close()
 
@@ -2357,32 +2367,58 @@ def save_db():
             yesterday_log = get_log(i, j, 1)
             if today_log:
                 #端口明细
-                save_port_detail(i, j, today_log)
+                # save_port_detail(i, j, today_log)
+                t_port_detail = threading.Thread(target=save_port_detail, args=(i, j, today_log))
+                t_port_detail.start()
                 #端口统计
-                save_port_statistic(i, j, today_log)
+                # save_port_statistic(i, j, today_log)
+                t_port_statistic = threading.Thread(target=save_port_statistic, args=(i, j, today_log))
+                t_port_statistic.start()
                 #card明细
-                save_card_detail(i, j, today_log)
+                # save_card_detail(i, j, today_log)
+                t_card_detail = threading.Thread(target=save_card_detail, args=(i, j, today_log))
+                t_card_detail.start()
                 #card统计
-                save_card_statistic(i, j, today_log)
+                # save_card_statistic(i, j, today_log)
+                t_card_statistic = threading.Thread(target=save_card_statistic, args=(i, j, today_log))
+                t_card_statistic.start()
                 #mda明细
-                save_mda_detail(i, j, today_log)
+                # save_mda_detail(i, j, today_log)
+                t_mda_detail = threading.Thread(target=save_mda_detail, args=(i, j, today_log))
+                t_mda_detail.start()
                 # mda统计
-                save_mda_statistic(i, j, today_log)
+                # save_mda_statistic(i, j, today_log)
+                t_mda_statistic = threading.Thread(target=save_mda_statistic, args=(i, j, today_log))
+                t_mda_statistic.start()
                 #业务负载统计-按端口统计
-                save_load_statistic(i, j, today_log)
+                # save_load_statistic(i, j, today_log)
+                t_load_statistic = threading.Thread(target=save_load_statistic, args=(i, j, today_log))
+                t_load_statistic.start()
                 #业务负载统计-按设备统计
-                save_load_statistic_host(i, j, today_log)
+                # save_load_statistic_host(i, j, today_log)
+                t_load_statistic_host = threading.Thread(target=save_load_statistic_host, args=(i, j, today_log))
+                t_load_statistic_host.start()
                 #地址采集
-                save_address_collect(i, j, today_log)
+                # save_address_collect(i, j, today_log)
+                t_address_collect = threading.Thread(target=save_address_collect, args=(i, j, today_log))
+                t_address_collect.start()
                 #组巡
-                save_zuxun(i, j, today_log)
+                # save_zuxun(i, j, today_log)
+                t_zuxun = threading.Thread(target=save_zuxun, args=(i, j, today_log))
+                t_zuxun.start()
                 #重要网络流量
-                save_netflow(i, j, today_log)
+                # save_netflow(i, j, today_log)
+                t_netflow = threading.Thread(target=save_netflow, args=(i, j, today_log))
+                t_netflow.start()
                 #专线统计
-                save_special_line(i, j, today_log)
+                # save_special_line(i, j, today_log)
+                t_special_line = threading.Thread(target=save_special_line, args=(i, j, today_log))
+                t_special_line.start()
 
             if today_log and yesterday_log:
-                save_xunjian(i, j, today_log, yesterday_log)
+                # save_xunjian(i, j, today_log, yesterday_log)
+                t_xunjian = threading.Thread(target=save_xunjian, args=(i, j, today_log, yesterday_log))
+                t_xunjian.start()
                 #配置检查
             else:
                 if not today_log:
@@ -2391,7 +2427,9 @@ def save_db():
                     logging.info('host: {} not found yesterday log'.format(j))
 
     #installbase统计
-    save_install_base()
+    # save_install_base()
+    t_install_base = threading.Thread(target=save_install_base)
+    t_install_base.start()
 
     return '数据保存成功'
 
@@ -2399,6 +2437,8 @@ def save_db():
 def save_xunjian(city, host_name, config_new, config_old):
     '''巡检数据入库'''
 
+    app = create_app('production')
+    app.app_context().push()
     today_data_count = XunJian.query.filter_by(host_name = host_name, date_time = date.today()).count()
 
     if today_data_count:
@@ -2427,6 +2467,8 @@ def save_xunjian(city, host_name, config_new, config_old):
 def save_port_detail(city, host_name, config):
     '''端口明细入库'''
 
+    app = create_app('production')
+    app.app_context().push()
     today_data_count = CardPort1.query.filter_by(host_name = host_name, date_time = date.today()).count()
 
     if today_data_count:
@@ -2511,6 +2553,8 @@ def save_port_detail(city, host_name, config):
 def save_port_statistic(city, host_name, config):
     '''端口统计入库'''
 
+    app = create_app('production')
+    app.app_context().push()
     today_data_count = PortStatistic.query.filter_by(host_name = host_name, date_time = date.today()).count()
 
     if today_data_count:
@@ -2543,6 +2587,8 @@ def save_port_statistic(city, host_name, config):
 def save_card_detail(city, host_name, config):
     '''card明细入库'''
 
+    app = create_app('production')
+    app.app_context().push()
     today_data_count = CardDetail.query.filter_by(host_name = host_name, date_time = date.today()).count()
 
     if today_data_count:
@@ -2579,6 +2625,8 @@ def save_card_detail(city, host_name, config):
 def save_card_statistic(city, host_name, config):
     '''card统计入库'''
 
+    app = create_app('production')
+    app.app_context().push()
     today_data_count = CardStatistic.query.filter_by(host_name = host_name, date_time = date.today()).count()
 
     if today_data_count:
@@ -2609,6 +2657,8 @@ def save_card_statistic(city, host_name, config):
 def save_mda_detail(city, host_name, config):
     '''mda明细入库'''
 
+    app = create_app('production')
+    app.app_context().push()
     today_data_count = MdaDetail.query.filter_by(host_name = host_name, date_time = date.today()).count()
 
     if today_data_count:
@@ -2646,6 +2696,8 @@ def save_mda_detail(city, host_name, config):
 def save_mda_statistic(city, host_name, config):
     '''mda统计入库'''
 
+    app = create_app('production')
+    app.app_context().push()
     today_data_count = MdaStatistic.query.filter_by(host_name = host_name, date_time = date.today()).count()
 
     if today_data_count:
@@ -2676,6 +2728,8 @@ def save_mda_statistic(city, host_name, config):
 def save_load_statistic(city, host_name, config):
     '''业务负荷统计表-按端口统计入库'''
 
+    app = create_app('production')
+    app.app_context().push()
     today_data_count = LoadStatistic.query.filter_by(host_name = host_name, date_time = date.today()).count()
 
     if today_data_count:
@@ -2712,6 +2766,8 @@ def save_load_statistic(city, host_name, config):
 def save_load_statistic_host(city, host_name, config):
     '''业务负荷统计表-按设备统计入库'''
 
+    app = create_app('production')
+    app.app_context().push()
     today_data_count = LoadStatisticHost.query.filter_by(host_name = host_name, date_time = date.today()).count()
 
     if today_data_count:
@@ -2744,42 +2800,45 @@ def save_load_statistic_host(city, host_name, config):
 def save_address_collect(city, host_name, config):
     '''地址采集数据入库'''
 
+    app = create_app('production')
+    app.app_context().push()
     today_data_count = AddressCollect.query.filter_by(host_name = host_name, date_time = date.today()).count()
 
     if today_data_count:
         logging.info('address_collect host: {} today is saved'.format(host_name))
         return
 
-    res = get_address_data(config)
-    if res:
+    address_data = get_address_data(config)
+    if address_data:
         logging.info('host: {} {} begin save'.format(host_name, 'address_collect_data'))
 
     today = date.today()
-    for item in res:
-        #存入数据库
-        address_collect = AddressCollect(
-            host_name = host_name,
-            host_ip = item[0],
-            ip_type = item[1],
-            function_type = item[2],
-            is_use = item[3],
-            ip = item[4].strNormal(0),
-            gateway = item[5],
-            mask = item[6],
-            interface_name = item[7],
-            sap_id = item[8],
-            next_hop = item[9],
-            ies_vprn_id = item[10],
-            vpn_rd = item[11],
-            vpn_rt = item[12],
-            description = item[13],
-            date_time = today
-        )
+    # for item in res:
+    #     #存入数据库
+    #     address_collect = AddressCollect(
+    #         host_name = host_name,
+    #         host_ip = item[0],
+    #         ip_type = item[1],
+    #         function_type = item[2],
+    #         is_use = item[3],
+    #         ip = item[4].strNormal(0),
+    #         gateway = item[5],
+    #         mask = item[6],
+    #         interface_name = item[7],
+    #         sap_id = item[8],
+    #         next_hop = item[9],
+    #         ies_vprn_id = item[10],
+    #         vpn_rd = item[11],
+    #         vpn_rt = item[12],
+    #         description = item[13],
+    #         date_time = today
+    #     )
 
-        db.session.add(address_collect)
-    db.session.commit()
-    db.session.close()
+    #     db.session.add(address_collect)
+    # db.session.commit()
+    # db.session.close()
 
+    ILLEGAL_CHARACTERS_RE = re.compile(r'[\000-\010]|[\013-\014]|[\016-\037]')
 
     #新建excel
     save_path = os.path.join('app','static', 'address_collect', '{}-{}-地址采集.xlsx'.format(host_name, date.today().strftime('%Y%m%d')))
@@ -2809,23 +2868,24 @@ def save_address_collect(city, host_name, config):
     # sheet.column_dimensions['R'].width = 15.0
     cur_row = 2
 
-    address_data = AddressCollect.query.filter_by(host_name = host_name, date_time = date.today()).all()
+    # address_data = AddressCollect.query.filter_by(host_name = host_name, date_time = date.today()).all()
     for item in address_data:
-        sheet['A'+ str(cur_row)] = item.host_name.split('.')[0]
-        sheet['B'+ str(cur_row)] = item.host_ip
-        sheet['C'+ str(cur_row)] = item.ip_type
-        sheet['D'+ str(cur_row)] = item.function_type
-        sheet['E'+ str(cur_row)] = item.is_use
-        sheet['F'+ str(cur_row)] = item.ip
-        sheet['G'+ str(cur_row)] = item.gateway
-        sheet['H'+ str(cur_row)] = item.mask
-        sheet['I'+ str(cur_row)] = item.interface_name
-        sheet['J'+ str(cur_row)] = item.sap_id
-        sheet['K'+ str(cur_row)] = item.next_hop
-        sheet['L'+ str(cur_row)] = item.ies_vprn_id
-        sheet['M'+ str(cur_row)] = item.vpn_rd
-        sheet['N'+ str(cur_row)] = item.vpn_rt
-        sheet['O'+ str(cur_row)] = item.description
+        des = ILLEGAL_CHARACTERS_RE.sub(r'', item[13])
+        sheet['A'+ str(cur_row)] = host_name
+        sheet['B'+ str(cur_row)] = item[0]
+        sheet['C'+ str(cur_row)] = item[1]
+        sheet['D'+ str(cur_row)] = item[2]
+        sheet['E'+ str(cur_row)] = item[3]
+        sheet['F'+ str(cur_row)] = item[4].strNormal(0)
+        sheet['G'+ str(cur_row)] = item[5]
+        sheet['H'+ str(cur_row)] = item[6]
+        sheet['I'+ str(cur_row)] = item[7]
+        sheet['J'+ str(cur_row)] = item[8]
+        sheet['K'+ str(cur_row)] = item[9]
+        sheet['L'+ str(cur_row)] = item[10]
+        sheet['M'+ str(cur_row)] = item[11]
+        sheet['N'+ str(cur_row)] = item[12]
+        sheet['O'+ str(cur_row)] = des
 
         cur_row += 1
     
@@ -2834,6 +2894,8 @@ def save_address_collect(city, host_name, config):
 def save_zuxun(city, host_name, config):
     '''保存组巡数据'''
 
+    app = create_app('production')
+    app.app_context().push()
     today_data_count = ZuXun.query.filter_by(host_name = host_name, date_time = date.today()).count()
 
     if today_data_count:
@@ -2859,6 +2921,8 @@ def save_zuxun(city, host_name, config):
 def save_netflow(city, host_name, config):
     '''保存重要网络流量数据'''
 
+    app = create_app('production')
+    app.app_context().push()
     today_data_count = NetFlow.query.filter_by(site_name = host_name, date_time = date.today()).count()
 
     if today_data_count:
@@ -2891,11 +2955,13 @@ def save_netflow(city, host_name, config):
 def save_install_base():
     '''保存installbase数据'''
 
-    # today_data_count = InstallBase.query.filter_by(date_time = date.today()).count()
+    app = create_app('production')
+    app.app_context().push()
 
-    # if today_data_count:
-    #     logging.info('installbase today is saved')
-    #     return
+    today_data_count = InstallBase.query.filter_by(date_time = date.today()).count()
+    if today_data_count:
+        logging.info('install_base today is saved')
+        return
 
     data = dict()
     city_list = get_city_list()

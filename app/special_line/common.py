@@ -68,7 +68,6 @@ def get_ies_saps(config):
                                     p = p_sap_arp + j[1]
                                     res_sap_arp = re.findall(p, config)
                                     for sap_arp in res_sap_arp:
-                                        print(sap_arp)
                                         ip = sap_arp[0]
                                         mac = sap_arp[1]
 
@@ -96,7 +95,6 @@ def get_ies_saps(config):
                         p = p_sap_arp + j[1]
                         res_sap_arp = re.findall(p, config)
                         for sap_arp in res_sap_arp:
-                            print(sap_arp)
                             ip = sap_arp[0]
                             mac = sap_arp[1]
 
@@ -131,7 +129,6 @@ def get_ies_saps(config):
                                     p = p_sap_arp + j[1]
                                     res_sap_arp = re.findall(p, config)
                                     for sap_arp in res_sap_arp:
-                                        print(sap_arp)
                                         ip = sap_arp[0]
                                         mac = sap_arp[1]
 
@@ -159,7 +156,6 @@ def get_ies_saps(config):
                         p = p_sap_arp + j[1]
                         res_sap_arp = re.findall(p, config)
                         for sap_arp in res_sap_arp:
-                            print(sap_arp)
                             ip = sap_arp[0]
                             mac = sap_arp[1]
 
@@ -212,7 +208,6 @@ def get_vprn_saps(config):
                     p = p_sap_arp + j[1]
                     res_sap_arp = re.findall(p, config)
                     for sap_arp in res_sap_arp:
-                        print(sap_arp)
                         ip = sap_arp[0]
                         mac = sap_arp[1]
 
@@ -253,7 +248,6 @@ def get_vprn_saps(config):
                     p = p_sap_arp + j[1]
                     res_sap_arp = re.findall(p, config)
                     for sap_arp in res_sap_arp:
-                        print(sap_arp)
                         ip = sap_arp[0]
                         mac = sap_arp[1]
 

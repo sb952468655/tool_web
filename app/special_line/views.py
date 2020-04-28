@@ -1,4 +1,5 @@
 import os, logging
+from ..import create_app
 from flask import render_template, session, redirect, url_for, current_app, request, abort, g, Response, flash
 from flask_login import login_required, current_user
 import datetime
@@ -48,6 +49,8 @@ def index():
 def save_special_line(city, host_name, config):
     '''专线统计入库'''
 
+    app = create_app('production')
+    app.app_context().push()
     today_data_count = SpecialLine.query.filter_by(host_name = host_name, date_time = date.today()).count()
 
     if today_data_count:

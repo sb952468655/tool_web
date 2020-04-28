@@ -546,20 +546,20 @@ def mobile_warn21(res):
     err = ''
     check_item = 'show time时间检查'
 
-    p_show_time = r'show time \n(.*?)\n'
+    p_show_time = r'show time ?\n(.*?)\n'
 
     res_show_time = re.search(p_show_time, res)
     if res_show_time:
         msg = res_show_time.group()
-        gmt_format = '%a %b %d %H:%M:%S GMT8 %Y'
-        log_time = datetime.datetime.strptime(res_show_time.group(1), gmt_format)
-        now_time = datetime.datetime.now()
+        # gmt_format = '%a %b %d %H:%M:%S GMT8 %Y'
+        # log_time = datetime.datetime.strptime(res_show_time.group(1), gmt_format)
+        # now_time = datetime.datetime.now()
 
-        if (now_time - log_time).seconds > 300:
-            err = '设备时间异常，设备时间：{}'.format(res_show_time.group(1))
-
+        # if (now_time - log_time).seconds > 300:
+        #     err = '设备时间异常，设备时间：{}'.format(res_show_time.group(1))
+        err = '设备时间正常：{}'.format(res_show_time.group(1))
     if err == '':
-        err = '设备时间正常'
+        err = '没有设备时间'
 
     return (msg, err, check_item)
 
@@ -796,7 +796,6 @@ def mobile_warn25(res, res_old):
             if res_traffic_statistics:
                 res_utilization = re.search(p_utilization, res_traffic_statistics.group())
                 if res_utilization:
-                    print(res_utilization.groups())
                     if float(res_utilization.group(1)) > 60 or float(res_utilization.group(2)) > 60:
                         err += 'port {} Input/Output”占用率超60%\n'.format(res_interface.group(1))
 

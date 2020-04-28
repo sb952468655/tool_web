@@ -73,12 +73,12 @@
                     <th>{{ item.port_dk }}</th>
                     <th>{{ item.admin_state }}</th>
                     {% if item.admin_state == 'Up' and item.link_state == 'No' %}
-                    <th bgcolor="#FF0000">{{ item.link_state }}</th>
+                    <th bgcolor="#FFFF00">{{ item.link_state }}</th>
                     {% else %}
                     <th>{{ item.link_state }}</th>
                     {% endif %}
                     {% if item.admin_state == 'Up' and item.port_state != 'Up' %}
-                    <th bgcolor="#FF0000">{{ item.port_state }}</th>
+                    <th bgcolor="#FFFF00">{{ item.port_state }}</th>
                     {% else %}
                     <th>{{ item.port_state }}</th>
                     {% endif %}
@@ -92,12 +92,12 @@
                     {% if item.admin_state != 'Up' or item.link_state != 'Yes' or item.port_state != 'Up' or item.output_power == '' or (item.output_power|float >= item.output_warn.split('|')[1]|float and item.output_power|float <= item.output_warn.split('|')[0]|float) %}
                         <th>{{ item.output_power }}</th>
                     {% else %}
-                        <th bgcolor="#FF0000">{{ item.output_power }}</th>
+                        <th bgcolor="#FFFF00">{{ item.output_power }}</th>
                     {% endif %}
                     {% if item.admin_state != 'Up' or item.link_state != 'Yes' or item.port_state != 'Up' or item.optical_power == '' or (item.optical_power|float >= item.optical_warn.split('|')[1]|float and item.optical_power|float <= item.optical_warn.split('|')[0]|float) %}
                         <th>{{ item.optical_power }}</th>
                     {% else %}
-                        <th bgcolor="#FF0000">{{ item.optical_power }}</th>
+                        <th bgcolor="#FFFF00">{{ item.optical_power }}</th>
                     {% endif %}
                     <th>{{ item.output_warn }}</th>
                     <th>{{ item.optical_warn }}</th>
