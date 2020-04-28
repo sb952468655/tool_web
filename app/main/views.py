@@ -2802,9 +2802,8 @@ def save_address_collect(city, host_name, config):
 
     app = create_app('production')
     app.app_context().push()
-    today_data_count = AddressCollect.query.filter_by(host_name = host_name, date_time = date.today()).count()
-
-    if today_data_count:
+    save_path = os.path.join('app','static', 'address_collect', '{}-{}-地址采集.xlsx'.format(host_name, date.today().strftime('%Y%m%d')))
+    if os.path.exists(save_path):
         logging.info('address_collect host: {} today is saved'.format(host_name))
         return
 
@@ -2812,7 +2811,6 @@ def save_address_collect(city, host_name, config):
     if address_data:
         logging.info('host: {} {} begin save'.format(host_name, 'address_collect_data'))
 
-    today = date.today()
     # for item in res:
     #     #存入数据库
     #     address_collect = AddressCollect(
