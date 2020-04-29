@@ -54,6 +54,8 @@ def report_port():
         session['city_name'] = g_city_to_name.get(city)
 
     host_list = get_host(city)
+    if not host_list:
+        return '没有发现设备'
     search_date = date.today()
     form_date = ''
     
@@ -2476,7 +2478,7 @@ def save_db():
                 # t_address_collect.join()
                 # t_zuxun.join()
                 # t_netflow.join()
-                # t_special_line.join()
+                t_special_line.join()
 
             if today_log and yesterday_log:
                 # save_xunjian(i, j, today_log, yesterday_log)
