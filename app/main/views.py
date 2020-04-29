@@ -111,8 +111,8 @@ def report_port():
 def save_host_list(city):
     '''设备清单入库'''
 
-    app = create_app('production')
-    app.app_context().push()
+    # app = create_app('production')
+    # app.app_context().push()
     host_list_count = HostList.query.filter_by(city = city, date_time = date.today()).count()
 
     if host_list_count:
@@ -2419,53 +2419,53 @@ def save_db():
             yesterday_log = get_log(i, j, 1)
             if today_log:
                 #端口明细
-                # save_port_detail(i, j, today_log)
-                t_port_detail = threading.Thread(target=save_port_detail, args=(i, j, today_log))
-                t_port_detail.start()
+                save_port_detail(i, j, today_log)
+                # t_port_detail = threading.Thread(target=save_port_detail, args=(i, j, today_log))
+                # t_port_detail.start()
                 #端口统计
-                # save_port_statistic(i, j, today_log)
-                t_port_statistic = threading.Thread(target=save_port_statistic, args=(i, j, today_log))
-                t_port_statistic.start()
+                save_port_statistic(i, j, today_log)
+                # t_port_statistic = threading.Thread(target=save_port_statistic, args=(i, j, today_log))
+                # t_port_statistic.start()
                 #card明细
-                # save_card_detail(i, j, today_log)
-                t_card_detail = threading.Thread(target=save_card_detail, args=(i, j, today_log))
-                t_card_detail.start()
+                save_card_detail(i, j, today_log)
+                # t_card_detail = threading.Thread(target=save_card_detail, args=(i, j, today_log))
+                # t_card_detail.start()
                 #card统计
-                # save_card_statistic(i, j, today_log)
-                t_card_statistic = threading.Thread(target=save_card_statistic, args=(i, j, today_log))
-                t_card_statistic.start()
+                save_card_statistic(i, j, today_log)
+                # t_card_statistic = threading.Thread(target=save_card_statistic, args=(i, j, today_log))
+                # t_card_statistic.start()
                 #mda明细
-                # save_mda_detail(i, j, today_log)
-                t_mda_detail = threading.Thread(target=save_mda_detail, args=(i, j, today_log))
-                t_mda_detail.start()
+                save_mda_detail(i, j, today_log)
+                # t_mda_detail = threading.Thread(target=save_mda_detail, args=(i, j, today_log))
+                # t_mda_detail.start()
                 # mda统计
-                # save_mda_statistic(i, j, today_log)
-                t_mda_statistic = threading.Thread(target=save_mda_statistic, args=(i, j, today_log))
-                t_mda_statistic.start()
+                save_mda_statistic(i, j, today_log)
+                # t_mda_statistic = threading.Thread(target=save_mda_statistic, args=(i, j, today_log))
+                # t_mda_statistic.start()
                 #业务负载统计-按端口统计
-                # save_load_statistic(i, j, today_log)
-                t_load_statistic = threading.Thread(target=save_load_statistic, args=(i, j, today_log))
-                t_load_statistic.start()
+                save_load_statistic(i, j, today_log)
+                # t_load_statistic = threading.Thread(target=save_load_statistic, args=(i, j, today_log))
+                # t_load_statistic.start()
                 #业务负载统计-按设备统计
-                # save_load_statistic_host(i, j, today_log)
-                t_load_statistic_host = threading.Thread(target=save_load_statistic_host, args=(i, j, today_log))
-                t_load_statistic_host.start()
+                save_load_statistic_host(i, j, today_log)
+                # t_load_statistic_host = threading.Thread(target=save_load_statistic_host, args=(i, j, today_log))
+                # t_load_statistic_host.start()
                 #地址采集
-                # save_address_collect(i, j, today_log)
-                t_address_collect = threading.Thread(target=save_address_collect, args=(i, j, today_log))
-                t_address_collect.start()
+                save_address_collect(i, j, today_log)
+                # t_address_collect = threading.Thread(target=save_address_collect, args=(i, j, today_log))
+                # t_address_collect.start()
                 #组巡
-                # save_zuxun(i, j, today_log)
-                t_zuxun = threading.Thread(target=save_zuxun, args=(i, j, today_log))
-                t_zuxun.start()
+                save_zuxun(i, j, today_log)
+                # t_zuxun = threading.Thread(target=save_zuxun, args=(i, j, today_log))
+                # t_zuxun.start()
                 #重要网络流量
-                # save_netflow(i, j, today_log)
-                t_netflow = threading.Thread(target=save_netflow, args=(i, j, today_log))
-                t_netflow.start()
+                save_netflow(i, j, today_log)
+                # t_netflow = threading.Thread(target=save_netflow, args=(i, j, today_log))
+                # t_netflow.start()
                 #专线统计
-                # save_special_line(i, j, today_log)
-                t_special_line = threading.Thread(target=save_special_line, args=(i, j, today_log))
-                t_special_line.start()
+                save_special_line(i, j, today_log)
+                # t_special_line = threading.Thread(target=save_special_line, args=(i, j, today_log))
+                # t_special_line.start()
 
                 # t_port_detail.join()
                 # t_port_statistic.join()
@@ -2478,12 +2478,12 @@ def save_db():
                 # t_address_collect.join()
                 # t_zuxun.join()
                 # t_netflow.join()
-                t_special_line.join()
+                # t_special_line.join()
 
             if today_log and yesterday_log:
-                # save_xunjian(i, j, today_log, yesterday_log)
-                t_xunjian = threading.Thread(target=save_xunjian, args=(i, j, today_log, yesterday_log))
-                t_xunjian.start()
+                save_xunjian(i, j, today_log, yesterday_log)
+                # t_xunjian = threading.Thread(target=save_xunjian, args=(i, j, today_log, yesterday_log))
+                # t_xunjian.start()
                 #配置检查
             else:
                 if not today_log:
@@ -2491,28 +2491,28 @@ def save_db():
                 if not yesterday_log:
                     logging.info('host: {} not found yesterday log'.format(j))
         #设备清单
-        # save_host_list(i)
-        t_host_list = threading.Thread(target=save_host_list, args=(i,))
-        t_host_list.start()
+        save_host_list(i)
+        # t_host_list = threading.Thread(target=save_host_list, args=(i,))
+        # t_host_list.start()
     #installbase统计
-    # save_install_base()
-    t_install_base = threading.Thread(target=save_install_base)
-    t_install_base.start()
+    save_install_base()
+    # t_install_base = threading.Thread(target=save_install_base)
+    # t_install_base.start()
 
-    db.session.remove()
+    # db.session.remove()
     return '数据保存成功'
 
 
 def save_xunjian(city, host_name, config_new, config_old):
     '''巡检数据入库'''
 
-    app = create_app('production')
-    app.app_context().push()
+    # app = create_app('production')
+    # app.app_context().push()
     today_data_count = XunJian.query.filter_by(host_name = host_name, date_time = date.today()).count()
 
     if today_data_count:
         logging.info('xunjian host: {} today is saved'.format(host_name))
-        db.session.close()
+        # db.session.close()
         return
 
     xunjian_data = mobile.xunjian(config_new, config_old)
@@ -2537,13 +2537,13 @@ def save_xunjian(city, host_name, config_new, config_old):
 def save_port_detail(city, host_name, config):
     '''端口明细入库'''
 
-    app = create_app('production')
-    app.app_context().push()
+    # app = create_app('production')
+    # app.app_context().push()
     today_data_count = CardPort1.query.filter_by(host_name = host_name, date_time = date.today()).count()
 
     if today_data_count:
         logging.info('port_detail host: {} today is saved'.format(host_name))
-        db.session.close()
+        # db.session.close()
         return
 
     ip = get_ip(config)
@@ -2624,13 +2624,13 @@ def save_port_detail(city, host_name, config):
 def save_port_statistic(city, host_name, config):
     '''端口统计入库'''
 
-    app = create_app('production')
-    app.app_context().push()
+    # app = create_app('production')
+    # app.app_context().push()
     today_data_count = PortStatistic.query.filter_by(host_name = host_name, date_time = date.today()).count()
 
     if today_data_count:
         logging.info('port_statistic host: {} today is saved'.format(host_name))
-        db.session.close()
+        # db.session.close()
         return
 
     port_statistic_data = get_port_statistic(config)
@@ -2658,13 +2658,13 @@ def save_port_statistic(city, host_name, config):
 def save_card_detail(city, host_name, config):
     '''card明细入库'''
 
-    app = create_app('production')
-    app.app_context().push()
+    # app = create_app('production')
+    # app.app_context().push()
     today_data_count = CardDetail.query.filter_by(host_name = host_name, date_time = date.today()).count()
 
     if today_data_count:
         logging.info('card_detail host: {} today is saved'.format(host_name))
-        db.session.close()
+        # db.session.close()
         return
 
     card_detail_data = get_card_detail(config)
@@ -2697,13 +2697,13 @@ def save_card_detail(city, host_name, config):
 def save_card_statistic(city, host_name, config):
     '''card统计入库'''
 
-    app = create_app('production')
-    app.app_context().push()
+    # app = create_app('production')
+    # app.app_context().push()
     today_data_count = CardStatistic.query.filter_by(host_name = host_name, date_time = date.today()).count()
 
     if today_data_count:
         logging.info('card_statistic host: {} today is saved'.format(host_name))
-        db.session.close()
+        # db.session.close()
         return
 
     card_statistic_data = get_card_statistic(config)
@@ -2730,13 +2730,13 @@ def save_card_statistic(city, host_name, config):
 def save_mda_detail(city, host_name, config):
     '''mda明细入库'''
 
-    app = create_app('production')
-    app.app_context().push()
+    # app = create_app('production')
+    # app.app_context().push()
     today_data_count = MdaDetail.query.filter_by(host_name = host_name, date_time = date.today()).count()
 
     if today_data_count:
         logging.info('mda_detail host: {} today is saved'.format(host_name))
-        db.session.close()
+        # db.session.close()
         return
 
     mda_detail_data = get_mda_detail(config)
@@ -2770,13 +2770,13 @@ def save_mda_detail(city, host_name, config):
 def save_mda_statistic(city, host_name, config):
     '''mda统计入库'''
 
-    app = create_app('production')
-    app.app_context().push()
+    # app = create_app('production')
+    # app.app_context().push()
     today_data_count = MdaStatistic.query.filter_by(host_name = host_name, date_time = date.today()).count()
 
     if today_data_count:
         logging.info('mda_statistic host: {} today is saved'.format(host_name))
-        db.session.close()
+        # db.session.close()
         return
 
     mda_statistic_data = get_mda_statistic(config)
@@ -2803,13 +2803,13 @@ def save_mda_statistic(city, host_name, config):
 def save_load_statistic(city, host_name, config):
     '''业务负荷统计表-按端口统计入库'''
 
-    app = create_app('production')
-    app.app_context().push()
+    # app = create_app('production')
+    # app.app_context().push()
     today_data_count = LoadStatistic.query.filter_by(host_name = host_name, date_time = date.today()).count()
 
     if today_data_count:
         logging.info('load_statistic host: {} today is saved'.format(host_name))
-        db.session.close()
+        # db.session.close()
         return
 
     res = get_statistic_data(config)
@@ -2842,13 +2842,13 @@ def save_load_statistic(city, host_name, config):
 def save_load_statistic_host(city, host_name, config):
     '''业务负荷统计表-按设备统计入库'''
 
-    app = create_app('production')
-    app.app_context().push()
+    # app = create_app('production')
+    # app.app_context().push()
     today_data_count = LoadStatisticHost.query.filter_by(host_name = host_name, date_time = date.today()).count()
 
     if today_data_count:
         logging.info('load_statistic_host host: {} today is saved'.format(host_name))
-        db.session.close()
+        # db.session.close()
         return
 
     load_statistic_host_data = get_statistic_host_data(city)
@@ -2877,8 +2877,8 @@ def save_load_statistic_host(city, host_name, config):
 def save_address_collect(city, host_name, config):
     '''地址采集数据入库'''
 
-    app = create_app('production')
-    app.app_context().push()
+    # app = create_app('production')
+    # app.app_context().push()
     save_path = os.path.join('app','static', 'address_collect', '{}-{}-地址采集.xlsx'.format(host_name, date.today().strftime('%Y%m%d')))
     if os.path.exists(save_path):
         logging.info('address_collect host: {} today is saved'.format(host_name))
@@ -2969,13 +2969,13 @@ def save_address_collect(city, host_name, config):
 def save_zuxun(city, host_name, config):
     '''保存组巡数据'''
 
-    app = create_app('production')
-    app.app_context().push()
+    # app = create_app('production')
+    # app.app_context().push()
     today_data_count = ZuXun.query.filter_by(host_name = host_name, date_time = date.today()).count()
 
     if today_data_count:
         logging.info('zuxun host: {} today is saved'.format(host_name))
-        db.session.close()
+        # db.session.close()
         return
 
     res = zuxun_check(config)
@@ -2997,13 +2997,13 @@ def save_zuxun(city, host_name, config):
 def save_netflow(city, host_name, config):
     '''保存重要网络流量数据'''
 
-    app = create_app('production')
-    app.app_context().push()
+    # app = create_app('production')
+    # app.app_context().push()
     today_data_count = NetFlow.query.filter_by(site_name = host_name, date_time = date.today()).count()
 
     if today_data_count:
         logging.info('netflow host: {} today is saved'.format(host_name))
-        db.session.close()
+        # db.session.close()
         return
 
     res = get_netflow(config)
@@ -3032,13 +3032,13 @@ def save_netflow(city, host_name, config):
 def save_install_base():
     '''保存installbase数据'''
 
-    app = create_app('production')
-    app.app_context().push()
+    # app = create_app('production')
+    # app.app_context().push()
 
     today_data_count = InstallBase.query.filter_by(date_time = date.today()).count()
     if today_data_count:
         logging.info('install_base today is saved')
-        db.session.close()
+        # db.session.close()
         return
 
     data = dict()

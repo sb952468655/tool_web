@@ -49,13 +49,13 @@ def index():
 def save_special_line(city, host_name, config):
     '''专线统计入库'''
 
-    app = create_app('production')
-    app.app_context().push()
+    # app = create_app('production')
+    # app.app_context().push()
     today_data_count = SpecialLine.query.filter_by(host_name = host_name, date_time = date.today()).count()
 
     if today_data_count:
         logging.info('special_line host: {} today is saved'.format(host_name))
-        db.session.close()
+        # db.session.close()
         return
 
     special_line_data = get_saps(config)
