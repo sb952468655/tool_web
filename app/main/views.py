@@ -819,20 +819,22 @@ def download_excel(host_name, table_name):
             , '100G Port Utilization', 'Peak Uplink Throughput Utilization'
         ]
 
-        net_flow_data = NetFlow.query.filter_by(date_time = date.today()).all()
-        for i in net_flow_data:
-            data.append((
-                i.carrier,
-                i.province,
-                i.city,
-                i.network,
-                i.site_name,
-                i.port_num_10g,
-                i.port_utilization_10g,
-                i.port_num_100g,
-                i.port_utilization_100g,
-                i.pea_uplink_throughput_utilization
-            ))
+        last = NetFlow.query.order_by(NetFlow.id.desc()).first()
+        if last:
+            net_flow_data = NetFlow.query.filter_by(date_time = last.date_time).all()
+            for i in net_flow_data:
+                data.append((
+                    i.carrier,
+                    i.province,
+                    i.city,
+                    i.network,
+                    i.site_name,
+                    i.port_num_10g,
+                    i.port_utilization_10g,
+                    i.port_num_100g,
+                    i.port_utilization_100g,
+                    i.pea_uplink_throughput_utilization
+                ))
     elif table_name == 'load_statistic':
         file_name = '业务负荷统计表（按端口）-{}-{}.xlsx'.format(host_name, today_str)
         labels = [
@@ -1434,14 +1436,10 @@ def load_statistic_host():
         load_statistic_host_data = load_statistic_host_data, 
         action = 'load_statistic_host')
 
-@main.route('/install_base/<host_name>')
+@main.route('/install_base')
 @login_required
-def install_base(host_name):
+def install_base():
     '''installbase统计表'''
-
-    count = InstallBase.query.filter_by(date_time = date.today()).count()
-    if count == 0:
-        abort(404)
 
     install_base_data = InstallBase.query.filter_by(date_time = date.today()).all()
     if not install_base_data:
@@ -1452,12 +1450,11 @@ def install_base(host_name):
     install_base_data = [(index, item) for index, item in enumerate(install_base_data) ]
     return render_template('report/install_base.html',
         data = install_base_data,
-        action = 'install_base',
-        host_name = host_name)
+        action = 'install_base')
 
-@main.route('/net_flow/<host_name>')
+@main.route('/net_flow')
 @login_required
-def net_flow(host_name):
+def net_flow():
     '''重要网络流量统计'''
 
     net_flow_data = NetFlow.query.filter_by(date_time = date.today()).all()
@@ -1468,8 +1465,7 @@ def net_flow(host_name):
 
     return render_template('report/net_flow.html',
         data = net_flow_data,
-        action = 'net_flow',
-        host_name = host_name)
+        action = 'net_flow')
 
 @main.route('/case_lib', methods= ['GET', 'POST'])
 @login_required
