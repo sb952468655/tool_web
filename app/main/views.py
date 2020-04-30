@@ -772,18 +772,26 @@ def download_excel(host_name, table_name):
                 i.card_num
             ))
     elif table_name == 'host_list':
-        file_name = '设备列表-{}.xlsx'.format(today_str)
+        file_name = '设备清单统计-{}.xlsx'.format(today_str)
         city = session.get('city')
-        host_list_data = get_host_list(city)
 
         labels = [
             '设备名', '设备IP', '版本', '设备启动时间', '设备配置保存时间'
         ]
 
-        for i in host_list_data:
-            data.append((
-                i[0], i[1], i[2], i[3], i[4]
-            ))
+        last = HostList.query.filter_by(city=city).order_by(HostList.id.desc()).first()
+        if last:
+            host_list_data = HostList.query.filter_by(city=city, date_time = last.date_time).all()
+
+            for i in host_list_data:
+                data.append((
+                    i.host_name,
+                    i.host_ip,
+                    i.version,
+                    i.boot_time,
+                    i.config_save_time
+                ))
+
     elif table_name == 'install_base':
         file_name = 'Install+base+统计表-{}-江苏.xlsx'.format(date.today().strftime('%Y%m%d'))
         labels = [
@@ -1229,12 +1237,12 @@ def address_mk_excel():
         return redirect(url_for('main.city_list'))
     host_num = len(get_host(city))
     if host_num == len(backup_data):
-        file_name = '{}-{}.zip'.format(g_city_to_name.get(city), date.today().strftime('%Y%m%d'))
+        file_name = '地址采集-{}-{}.zip'.format(g_city_to_name.get(city), date.today().strftime('%Y%m%d'))
     elif len(backup_data) == 1:
         keys = list(backup_data.keys())
-        file_name = '{}-{}.zip'.format(keys[0], date.today().strftime('%Y%m%d'))
+        file_name = '地址采集-{}-{}.zip'.format(keys[0], date.today().strftime('%Y%m%d'))
     else:
-        file_name = str(time.time()) + '.zip'
+        file_name = '地址采集-' + str(time.time()) + '.zip'
     zip_name = os.path.join('app', 'static', 'address_collect', file_name)
     zip = zipfile.ZipFile(zip_name, 'w', zipfile.ZIP_DEFLATED )
     #获取选中的设备名称
@@ -1328,12 +1336,12 @@ def backup_list():
         host_num = len(get_host(city))
         backup_data = request.form.to_dict()
         if host_num == len(backup_data):
-            file_name = '{}-{}.zip'.format(g_city_to_name.get(city), date.today().strftime('%Y%m%d'))
+            file_name = 'config备份-{}-{}.zip'.format(g_city_to_name.get(city), date.today().strftime('%Y%m%d'))
         elif len(backup_data) == 1:
             keys = list(backup_data.keys())
-            file_name = '{}-{}.zip'.format(keys[0], date.today().strftime('%Y%m%d'))
+            file_name = 'config备份-{}-{}.zip'.format(keys[0], date.today().strftime('%Y%m%d'))
         else:
-            file_name = str(time.time()) + '.zip'
+            file_name = 'config备份-' + str(time.time()) + '.zip'
         zip_name = os.path.join('app', 'static', 'backup', file_name)
         zip = zipfile.ZipFile(zip_name, 'w', zipfile.ZIP_DEFLATED )
         
@@ -2414,6 +2422,10 @@ def save_db():
     citys = get_city_list()
     for i in citys:
         hosts = get_host(i)
+        city_count = CardPort1.query.filter_by(city = i, date_time = date.today()).count()
+        if city_count > 0:
+            logging.info('city {} today is saved'.format(i))
+            continue
         for j in hosts:
             today_log = get_log(i, j)
             yesterday_log = get_log(i, j, 1)
@@ -2618,7 +2630,10 @@ def save_port_detail(city, host_name, config):
 
         db.session.add(card_port)
 
-    db.session.commit()
+    try:
+        db.session.commit()
+    except:
+        db.session.rollback()
     db.session.close()
 
 def save_port_statistic(city, host_name, config):
@@ -2653,7 +2668,10 @@ def save_port_statistic(city, host_name, config):
         )
 
         db.session.add(port_statistic)
-    db.session.commit()
+    try:
+        db.session.commit()
+    except:
+        db.session.rollback()
     db.session.close()
 def save_card_detail(city, host_name, config):
     '''card明细入库'''

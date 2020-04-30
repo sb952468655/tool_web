@@ -62,7 +62,8 @@ def get_log(city, host, date = None):
                 else:
                     break
     
-    if not log_str and not date:
+    #只从备份服务器下载常州设备的log
+    if not log_str and not date and 'JSCZ' in host:
         logging.error('host: {} today log not found'.format(host))
         logging.error('begin download log from ftp server')
 
