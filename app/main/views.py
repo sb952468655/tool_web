@@ -76,7 +76,7 @@ def report_port():
             page, per_page = current_app.config['FLASKY_POSTS_PER_PAGE'],
             error_out = False
         )
-        if not pageination.items and request.method == 'GET':
+        if not pageination.items:
             last = CardPort1.query.order_by(CardPort1.id.desc()).first()
             if last:
                 pageination = CardPort1.query.filter_by(date_time = last.date_time).paginate(
@@ -89,7 +89,7 @@ def report_port():
             error_out = False
         )
 
-        if not pageination.items and request.method == 'GET':
+        if not pageination.items:
             last = CardPort1.query.filter_by(host_name = host_name).order_by(CardPort1.id.desc()).first()
             if last:
                 pageination = CardPort1.query.filter_by(host_name = host_name, date_time = last.date_time).paginate(
@@ -155,7 +155,7 @@ def host_list_data():
 
 
     host_list_data = HostList.query.filter_by(city = city, date_time = search_date).all()
-    if not host_list_data and request.method == 'GET':
+    if not host_list_data:
         last = HostList.query.filter_by(city = city).order_by(HostList.id.desc()).first()
         if last:
             host_list_data = HostList.query.filter_by(city = city, date_time = last.date_time).all()
@@ -186,13 +186,13 @@ def card_detail():
 
     if host_name == 'all':
         card_detail_data = CardDetail.query.filter_by(date_time = search_date).all()
-        if not card_detail_data and request.method == 'GET':
+        if not card_detail_data:
             last = CardDetail.query.order_by(CardDetail.id.desc()).first()
             if last:
                 card_detail_data = CardDetail.query.filter_by(date_time = last.date_time).all()
     else:
         card_detail_data = CardDetail.query.filter_by(host_name = host_name, date_time = search_date).all()
-        if not card_detail_data and request.method == 'GET':
+        if not card_detail_data:
             last = CardDetail.query.filter_by(host_name = host_name).order_by(CardDetail.id.desc()).first()
             if last:
                 card_detail_data = CardDetail.query.filter_by(host_name = host_name, date_time = last.date_time).all()
@@ -229,7 +229,7 @@ def card_statistic():
                 card_statistic_data = CardStatistic.query.filter_by(date_time = last.date_time).all()
     else:
         card_statistic_data = CardStatistic.query.filter_by(host_name = host_name, date_time = search_date).all()
-        if not card_statistic_data and request.method == 'GET':
+        if not card_statistic_data:
             last = CardStatistic.query.order_by(CardStatistic.id.desc()).first()
             if last:
                 card_statistic_data = CardStatistic.query.filter_by(host_name = host_name, date_time = last.date_time).all()
@@ -257,23 +257,23 @@ def all_card_statistic():
     if city == 'all':
         card_statistic_data = CardStatistic.query.filter_by(date_time = search_date).all()
         mda_statistic_data = MdaStatistic.query.filter_by(date_time = search_date).all()
-        if not card_statistic_data and request.method == 'GET':
+        if not card_statistic_data:
             last = CardStatistic.query.order_by(CardStatistic.id.desc()).first()
             if last:
                 card_statistic_data = CardStatistic.query.filter_by(date_time = last.date_time).all()
 
-        if not mda_statistic_data and request.method == 'GET':
+        if not mda_statistic_data:
             last = MdaStatistic.query.order_by(MdaStatistic.id.desc()).first()
             if last:
                 mda_statistic_data = MdaStatistic.query.filter_by(date_time = last.date_time).all()
     else:
         card_statistic_data = CardStatistic.query.filter_by(city = city, date_time = search_date).all()
         mda_statistic_data = MdaStatistic.query.filter_by(city = city, date_time = search_date).all()
-        if not card_statistic_data and request.method == 'GET':
+        if not card_statistic_data:
             last = CardStatistic.query.order_by(CardStatistic.id.desc()).first()
             if last:
                 card_statistic_data = CardStatistic.query.filter_by(city = city, date_time = last.date_time).all()
-        if not mda_statistic_data and request.method == 'GET':
+        if not mda_statistic_data:
             last = MdaStatistic.query.order_by(MdaStatistic.id.desc()).first()
             if last:
                 mda_statistic_data = MdaStatistic.query.filter_by(city = city, date_time = last.date_time).all()
@@ -320,11 +320,11 @@ def all_card_detail():
     if city == 'all':
         card_data = CardDetail.query.filter_by(date_time = search_date).all()
         mda_data = MdaDetail.query.filter_by(date_time = search_date).all()
-        if not card_data and request.method == 'GET':
+        if not card_data:
             last = CardDetail.query.order_by(CardDetail.id.desc()).first()
             if last:
                 card_data = CardDetail.query.filter_by(date_time = last.date_time).all()
-        if not mda_data and request.method == 'GET':
+        if not mda_data:
             last = MdaDetail.query.order_by(MdaDetail.id.desc()).first()
             if last:
                 mda_data = MdaDetail.query.filter_by(date_time = last.date_time).all()
@@ -332,11 +332,11 @@ def all_card_detail():
         card_data = CardDetail.query.filter_by(city = city, date_time = search_date).all()
         mda_data = MdaDetail.query.filter_by(city = city, date_time = search_date).all()
 
-        if not card_data and request.method == 'GET':
+        if not card_data:
             last = CardDetail.query.filter_by(city = city).order_by(CardDetail.id.desc()).first()
             if last:
                 card_data = CardDetail.query.filter_by(city = city, date_time = last.date_time).all()
-        if not mda_data and request.method == 'GET':
+        if not mda_data:
             last = MdaDetail.query.filter_by(city = city).order_by(MdaDetail.id.desc()).first()
             if last:
                 mda_data = MdaDetail.query.filter_by(city = city, date_time = last.date_time).all()
@@ -376,13 +376,13 @@ def mda_detail():
 
     if host_name == 'all':
         mda_detail_data = MdaDetail.query.filter_by(date_time = search_date).all()
-        if not mda_detail_data and request.method == 'GET':
+        if not mda_detail_data:
             last = MdaDetail.query.order_by(MdaDetail.id.desc()).first()
             if last:
                 mda_detail_data = MdaDetail.query.filter_by(date_time = last.date_time).all()
     else:
         mda_detail_data = MdaDetail.query.filter_by(host_name = host_name, date_time = search_date).all()
-        if not mda_detail_data and request.method == 'GET':
+        if not mda_detail_data:
             last = MdaDetail.query.filter_by(host_name = host_name).order_by(MdaDetail.id.desc()).first()
             if last:
                 mda_detail_data = MdaDetail.query.filter_by(host_name = host_name, date_time = last.date_time).all()
@@ -413,13 +413,13 @@ def mda_statistic():
 
     if host_name == 'all':
         mda_statistic_data = MdaStatistic.query.filter_by(date_time = search_date).all()
-        if not mda_statistic_data and request.method == 'GET':
+        if not mda_statistic_data:
             last = MdaStatistic.query.order_by(CardDetail.id.desc()).first()
             if last:
                 mda_statistic_data = MdaStatistic.query.filter_by(date_time = last.date_time).all()
     else:
         mda_statistic_data = MdaStatistic.query.filter_by(host_name = host_name, date_time = search_date).all()
-        if not mda_statistic_data and request.method == 'GET':
+        if not mda_statistic_data:
             last = MdaStatistic.query.filter_by(host_name = host_name).order_by(MdaStatistic.id.desc()).first()
             if last:
                 mda_statistic_data = MdaStatistic.query.filter_by(host_name = host_name, date_time = last.date_time).all()
@@ -450,13 +450,13 @@ def port_statistic():
 
     if host_name == 'all':
         port_statistic_data = PortStatistic.query.filter_by(date_time = search_date).all()
-        if not port_statistic_data and request.method == 'GET':
+        if not port_statistic_data:
             last = PortStatistic.query.order_by(PortStatistic.id.desc()).first()
             if last:
                 port_statistic_data = PortStatistic.query.filter_by(date_time = last.date_time).all()
     else:
         port_statistic_data = PortStatistic.query.filter_by(host_name = host_name, date_time = search_date).all()
-        if not port_statistic_data and request.method == 'GET':
+        if not port_statistic_data:
             last = PortStatistic.query.filter_by(host_name = host_name).order_by(PortStatistic.id.desc()).first()
             if last:
                 port_statistic_data = PortStatistic.query.filter_by(host_name = host_name, date_time = last.date_time).all()
@@ -1395,7 +1395,7 @@ def load_statistic():
         error_out = False
     )
     statistic_data = pageination.items
-    if not statistic_data and request.method == 'GET':
+    if not statistic_data:
         last = LoadStatistic.query.order_by(LoadStatistic.id.desc()).first()
         if last:
             pageination = LoadStatistic.query.filter_by(host_name = host_name, date_time = last.date_time).paginate(
@@ -3061,15 +3061,17 @@ def save_install_base():
         for host in get_host(city):
             today_log = get_log(city, host)
             # host_name = get_host_name(today_log)
-            host_type, host_model, version, note = get_install_base(today_log)
-            key = host_type + ' ' + host_model + ' ' + version + ' ' + note
-            if not key.strip():
-                logging.info('{} get installbase err'.format(host))
-                continue
-            if key in data:
-                data[key] += 1
-            else:
-                data[key] = 1
+            if today_log:
+                host_type, host_model, version, note = get_install_base(today_log)
+                key = host_type + ' ' + host_model + ' ' + version + ' ' + note
+                if not key.strip():
+                    logging.info('{} get installbase err'.format(host))
+                    continue
+                if key in data:
+                    data[key] += 1
+                else:
+                    data[key] = 1
+            
 
     logging.info('installbase begin save')
     today = date.today()

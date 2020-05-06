@@ -32,13 +32,13 @@ def index():
 
     if host_name == 'all':
         special_line_data = SpecialLine.query.filter_by(date_time = search_date).all()
-        if not special_line_data and request.method == 'GET':
+        if not special_line_data:
             last = SpecialLine.query.order_by(SpecialLine.id.desc()).first()
             if last:
                 special_line_data = SpecialLine.query.filter_by(date_time = last.date_time).all()
     else:
         special_line_data = SpecialLine.query.filter_by(host_name = host_name, date_time = search_date).all()
-        if not special_line_data and request.method == 'GET':
+        if not special_line_data:
             last = SpecialLine.query.filter_by(host_name = host_name).order_by(SpecialLine.id.desc()).first()
             if last:
                 special_line_data = SpecialLine.query.filter_by(host_name = host_name, date_time = last.date_time).all()
