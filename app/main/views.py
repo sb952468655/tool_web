@@ -270,11 +270,11 @@ def all_card_statistic():
         card_statistic_data = CardStatistic.query.filter_by(city = city, date_time = search_date).all()
         mda_statistic_data = MdaStatistic.query.filter_by(city = city, date_time = search_date).all()
         if not card_statistic_data:
-            last = CardStatistic.query.order_by(CardStatistic.id.desc()).first()
+            last = CardStatistic.query.filter_by(city = city).order_by(CardStatistic.id.desc()).first()
             if last:
                 card_statistic_data = CardStatistic.query.filter_by(city = city, date_time = last.date_time).all()
         if not mda_statistic_data:
-            last = MdaStatistic.query.order_by(MdaStatistic.id.desc()).first()
+            last = MdaStatistic.query.filter_by(city = city).order_by(MdaStatistic.id.desc()).first()
             if last:
                 mda_statistic_data = MdaStatistic.query.filter_by(city = city, date_time = last.date_time).all()
     
