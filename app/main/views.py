@@ -2418,10 +2418,10 @@ def save_db():
     citys = get_city_list()
     for i in citys:
         hosts = get_host(i)
-        city_count = CardPort1.query.filter_by(city = i, date_time = date.today()).count()
-        if city_count > 0:
-            logging.info('city {} today is saved'.format(i))
-            continue
+        # city_count = CardPort1.query.filter_by(city = i, date_time = date.today()).count()
+        # if city_count > 0:
+        #     logging.info('city {} today is saved'.format(i))
+        #     continue
         for j in hosts:
             today_log = get_log(i, j)
             yesterday_log = get_log(i, j, 1)
