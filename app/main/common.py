@@ -79,6 +79,21 @@ def get_log(city, host, date = None):
                 pass
     return log_str
 
+def get_log_first(city, host):
+    '''根据设备名获取目录中的第一个log'''
+
+    logs = get_host_logs(city, host)
+    log_str = ''
+    if logs:
+        try:
+            log_str = open(os.path.join(g_log_path, city, host, logs[0])).read()
+        except:
+            log_str = open(os.path.join(g_log_path, city, host, logs[0]), encoding='utf-8-sig').read()
+        finally:
+            pass
+
+    return log_str
+
 def get_log_from_date(city, host, date):
     '''根据设备名和日期获取log'''
 

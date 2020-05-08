@@ -21,7 +21,7 @@ from .statistic import get_statistic_data, get_statistic_host_data
 from .. import db
 from ..models import *
 from .report import *
-from .common import get_log, get_host, get_today_log_name, get_city_list, get_host_logs, get_log_from_date, make_excel
+from .common import get_log, get_log_first, get_host, get_today_log_name, get_city_list, get_host_logs, get_log_from_date, make_excel
 from ..special_line.views import save_special_line
 from .forms import CaseUploadForm, ModelForm, ModelListCreateForm, ModelSelectForm
 sys.path.append('../')
@@ -3062,7 +3062,7 @@ def save_install_base():
     city_list = get_city_list()
     for city in city_list:
         for host in get_host(city):
-            today_log = get_log(city, host)
+            today_log = get_log_first(city, host)
             # host_name = get_host_name(today_log)
             if today_log:
                 host_type, host_model, version, note = get_install_base(today_log)
