@@ -2415,8 +2415,11 @@ def xunjian_search(xunjian_name):
 def save_db():
     '''把所有数据入库'''
 
+    save_city = request.args.get('city')
     citys = get_city_list()
     for i in citys:
+        if save_city and i != save_city:
+            continue
         hosts = get_host(i)
         # city_count = CardPort1.query.filter_by(city = i, date_time = date.today()).count()
         # if city_count > 0:
