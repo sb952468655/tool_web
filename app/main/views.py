@@ -3061,7 +3061,9 @@ def save_install_base():
     data = dict()
     city_list = get_city_list()
     for city in city_list:
+        logging.info('city: {}'.format(city))
         for host in get_host(city):
+            logging.info('host: '.format(host))
             today_log = get_log_first(city, host)
             # host_name = get_host_name(today_log)
             if today_log:
@@ -3074,7 +3076,8 @@ def save_install_base():
                     data[key] += 1
                 else:
                     data[key] = 1
-            
+            else:
+                logging.error('install_base host: {} log not found'.format(host))
 
     logging.info('installbase begin save')
     today = date.today()
