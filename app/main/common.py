@@ -84,14 +84,17 @@ def get_log_first(city, host):
 
     logs = get_host_logs(city, host)
     log_str = ''
-    if logs:
+    for log in logs:
         try:
-            log_str = open(os.path.join(g_log_path, city, host, logs[0])).read()
+            log_str = open(os.path.join(g_log_path, city, host, log)).read()
         except:
-            log_str = open(os.path.join(g_log_path, city, host, logs[0]), encoding='utf-8-sig').read()
+            log_str = open(os.path.join(g_log_path, city, host, log), encoding='utf-8-sig').read()
         finally:
             pass
-
+        
+        if len(log_str) > 100:
+            break
+        
     return log_str
 
 def get_log_from_date(city, host, date):

@@ -3061,9 +3061,9 @@ def save_install_base():
     data = dict()
     city_list = get_city_list()
     for city in city_list:
-        logging.info('city: {}'.format(city))
+        # logging.info('city: {}'.format(city))
         for host in get_host(city):
-            logging.info('host: '.format(host))
+            # logging.info('host: {}'.format(host))
             today_log = get_log_first(city, host)
             # host_name = get_host_name(today_log)
             if today_log:
