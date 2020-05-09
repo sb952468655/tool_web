@@ -1319,9 +1319,8 @@ def config_backup():
     # today = date.today()
     date_str = date.today().strftime('%Y%m%d')
     for item in host_list:
-        if get_log(city, item):
+        if get_log(city, item) or get_log_first(city, item):
             host_data.append((item, date_str))
-        
     host_data = [(index, host) for index, host in enumerate(host_data)]
     return render_template('back_up/config_backup_host_list.html', host_data=host_data)
 
@@ -1349,11 +1348,14 @@ def backup_list():
         
         for name, _ in request.form.to_dict().items():
             log_str = get_log(city, name)
-            log_config_str = log_str[:log_str.index('# Finished')]
-            back_up_log_path = os.path.join('app', 'static', 'backup', 'config备份-{}-{}.log'.format(name, date.today().strftime('%Y%m%d')))
-            with open(back_up_log_path, 'w') as f:
-                f.write(log_config_str)
-            zip.write(back_up_log_path, 'config备份-{}-{}.log'.format(name, date.today().strftime('%Y%m%d')))
+            if not log_str:
+                log_str = get_log_first(city, name)
+            if log_str:
+                log_config_str = log_str[:log_str.index('# Finished')]
+                back_up_log_path = os.path.join('app', 'static', 'backup', 'config备份-{}-{}.log'.format(name, date.today().strftime('%Y%m%d')))
+                with open(back_up_log_path, 'w') as f:
+                    f.write(log_config_str)
+                zip.write(back_up_log_path, 'config备份-{}-{}.log'.format(name, date.today().strftime('%Y%m%d')))
 
         zip.close()
 
