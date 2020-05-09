@@ -547,7 +547,7 @@ def xunjian_output_all(host_name):
     city = session.get('city')
     xunjian_data = XunJian.query.filter_by(host_name = host_name, date_time = date.today()).all()
     if not xunjian_data:
-        last = XunJian.query.order_by(XunJian.id.desc()).first()
+        last = XunJian.query.filter_by(host_name = host_name).order_by(XunJian.id.desc()).first()
         if last:
             xunjian_data = XunJian.query.filter_by(host_name = host_name, date_time = last.date_time).all()
 
@@ -567,9 +567,9 @@ def xunjian_all_host():
     for i in host_list:
         xunjian_data = XunJian.query.filter_by(host_name = i, date_time = date.today()).all()
         if not xunjian_data:
-            last = XunJian.query.order_by(XunJian.id.desc()).first()
+            last = XunJian.query.filter_by(host_name = host_name).order_by(XunJian.id.desc()).first()
             if last:
-                xunjian_data = XunJian.query.filter_by(host_name = host_name, date_time = last.date_time).all()
+                xunjian_data = XunJian.query.filter_by(host_name = i, date_time = last.date_time).all()
         warn_data.append((i, [item for item in xunjian_data if item.err]))
 
     return render_template('xunjian/xunjian_all_host.html', xunjian_data=warn_data)
