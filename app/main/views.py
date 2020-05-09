@@ -1381,12 +1381,10 @@ def load_statistic():
     if request.method == 'POST':
         host_name = request.form.get('host_name')
         form_date = request.form.get('date')
+    else:
+        host_name = host_list[0]
     if form_date:
         search_date = datetime.strptime(form_date,'%Y-%m-%d').date()
-    else:
-        host_name = request.args.get('host_name')
-        if not host_name:
-            host_name = host_list[0]
 
     pageination = LoadStatistic.query.filter_by(host_name = host_name, date_time = search_date).paginate(
         page, per_page = current_app.config['FLASKY_POSTS_PER_PAGE'],
