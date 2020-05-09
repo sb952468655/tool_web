@@ -1064,14 +1064,15 @@ def xj_report_all_host():
     warn_data = []
     city = session.get('city')
 
-    count = XunJian.query.filter_by(city = city, date_time = date.today()).count()
-    if count == 0:
-        abort(404)
-
     host_list = get_host(city)
     for i in host_list:
         xunjian_data = XunJian.query.filter_by(host_name = i, date_time = date.today()).all()
-        warn_data.append((i, [item for item in xunjian_data if item.err]))
+        if not xunjian_data:
+            last = XunJian.query.filter_by(host_name = i).order_by(XunJian.id.desc()).first()
+            if last:
+                xunjian_data = XunJian.query.filter_by(host_name = i, date_time = last.date_time).all()
+        if xunjian_data:
+            warn_data.append((i, [item for item in xunjian_data if item.err]))
 
 
     #生成报告
