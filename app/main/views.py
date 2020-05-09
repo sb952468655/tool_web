@@ -1376,10 +1376,6 @@ def load_statistic():
     if not city:
         return redirect(url_for('main.city_list'))
 
-    count = LoadStatistic.query.filter_by(city = city, date_time = date.today()).count()
-    if count == 0:
-        abort(404)
-
     if request.method == 'POST':
         host_name = request.form.get('host_name')
         form_date = request.form.get('date')
@@ -1396,12 +1392,13 @@ def load_statistic():
     )
     statistic_data = pageination.items
     if not statistic_data:
-        last = LoadStatistic.query.order_by(LoadStatistic.id.desc()).first()
+        last = LoadStatistic.query.filter_by(host_name = host_name).order_by(LoadStatistic.id.desc()).first()
         if last:
             pageination = LoadStatistic.query.filter_by(host_name = host_name, date_time = last.date_time).paginate(
                 page, per_page = current_app.config['FLASKY_POSTS_PER_PAGE'],
                 error_out = False
             )
+            statistic_data = pageination.items
 
     statistic_data = [(index, item) for index, item in enumerate(statistic_data) ]
     return render_template('statistic.html',
@@ -1421,9 +1418,6 @@ def load_statistic_host():
     '''按设备统计用户数量'''
 
     city = session.get('city')
-    count = LoadStatisticHost.query.filter_by(city = city, date_time = date.today()).count()
-    if count == 0:
-        abort(404)
 
     load_statistic_host_data = LoadStatisticHost.query.filter_by(city = city, date_time = date.today()).all()
     if not load_statistic_host_data:
