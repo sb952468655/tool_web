@@ -476,7 +476,10 @@ def check_config(host_name):
 
     config = get_log(city, host_name)
     if not config:
+        config = get_log_first(city, host_name)
+    if not config:
         abort(404)
+
     check_res = all_check.all_check(config)
 
     session['host_name'] = host_name
@@ -527,13 +530,9 @@ def xunjian(host_name):
     if not city:
         return redirect(url_for('main.city_list'))
 
-    count = XunJian.query.filter_by(host_name = host_name, date_time = date.today()).count()
-    if count == 0:
-        abort(404)
-
     xunjian_data = XunJian.query.filter_by(host_name = host_name, date_time = date.today()).all()
     if not xunjian_data:
-        last = XunJian.query.order_by(XunJian.id.desc()).first()
+        last = XunJian.query.filter_by(host_name = host_name).order_by(XunJian.id.desc()).first()
         if last:
             xunjian_data = XunJian.query.filter_by(host_name = host_name, date_time = last.date_time).all()
     warn_data = [item for item in xunjian_data if item.err]
