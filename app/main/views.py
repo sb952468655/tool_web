@@ -144,6 +144,7 @@ def host_list_data():
     '''设备清单统计'''
     search_date = date.today()
     form_date = ''
+    host_list_data = []
     city = session.get('city')
     if not city:
         return redirect(url_for('main.city_list'))
@@ -153,12 +154,19 @@ def host_list_data():
         if form_date:
             search_date = datetime.strptime(form_date,'%Y-%m-%d').date()
 
-
-    host_list_data = HostList.query.filter_by(city = city, date_time = search_date).all()
-    if not host_list_data:
-        last = HostList.query.filter_by(city = city).order_by(HostList.id.desc()).first()
-        if last:
-            host_list_data = HostList.query.filter_by(city = city, date_time = last.date_time).all()
+    host_list = get_host(city)
+    for i in host_list:
+        data = HostList.query.filter_by(host_name = i, date_time = search_date).first()
+        if data:
+            host_list_data.append(data)
+        else:
+            data = HostList.query.filter_by(host_name = i).order_by(HostList.id.desc()).first()
+            host_list_data.append(data)
+    # host_list_data = HostList.query.filter_by(city = city, date_time = search_date).all()
+    # if not host_list_data:
+    #     last = HostList.query.filter_by(city = city).order_by(HostList.id.desc()).first()
+    #     if last:
+    #         host_list_data = HostList.query.filter_by(city = city, date_time = last.date_time).all()
     host_list_data = [(index, item) for index, item in enumerate(host_list_data) ]
     return render_template('host_list_data.html', host_list_data = host_list_data ,action='host_list_data')
 
@@ -1418,12 +1426,18 @@ def load_statistic_host():
     '''按设备统计用户数量'''
 
     city = session.get('city')
+    load_statistic_host_data = []
 
-    load_statistic_host_data = LoadStatisticHost.query.filter_by(city = city, date_time = date.today()).all()
-    if not load_statistic_host_data:
-        last = LoadStatisticHost.query.filter_by(city = city).order_by(LoadStatisticHost.id.desc()).first()
-        if last:
-            load_statistic_host_data = LoadStatisticHost.query.filter_by(city = city, date_time = last.date_time).all()
+    host_list = get_host(city)
+    for i in host_list:
+        data = LoadStatisticHost.query.filter_by(host_name = i).order_by(LoadStatisticHost.id.desc()).first()
+        if data:
+            load_statistic_host_data.append(data)
+    # load_statistic_host_data = LoadStatisticHost.query.filter_by(city = city, date_time = date.today()).all()
+    # if not load_statistic_host_data:
+    #     last = LoadStatisticHost.query.filter_by(city = city).order_by(LoadStatisticHost.id.desc()).first()
+    #     if last:
+    #         load_statistic_host_data = LoadStatisticHost.query.filter_by(city = city, date_time = last.date_time).all()
 
     load_statistic_host_data = [(index, item) for index, item in enumerate(load_statistic_host_data) ]
     return render_template('statistic_host.html',
