@@ -6,7 +6,7 @@
     <a class="btn btn-default" href="{{ url_for('main.xj_log_export', host_name = host_name) }}" role="button" style="margin : 0px 0px 15px 0px;">导出</a>
 
     <div class="panel panel-default">
-        <div class="panel-heading"><h3>{{ host_name.split('.')[0] }}</h3></div>
+        <div class="panel-heading"><h3>设备名称：{{ host_name.split('.')[0] }}</h3></div>
         <div class="panel-body">
             <pre class="pre-scrollable">{{ log_str }}</pre>
         </div>
