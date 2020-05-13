@@ -238,7 +238,7 @@ def card_statistic():
     else:
         card_statistic_data = CardStatistic.query.filter_by(host_name = host_name, date_time = search_date).all()
         if not card_statistic_data:
-            last = CardStatistic.query.order_by(CardStatistic.id.desc()).first()
+            last = CardStatistic.query.filter_by(host_name = host_name).order_by(CardStatistic.id.desc()).first()
             if last:
                 card_statistic_data = CardStatistic.query.filter_by(host_name = host_name, date_time = last.date_time).all()
 
