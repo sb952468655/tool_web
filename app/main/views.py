@@ -311,7 +311,8 @@ def all_card_statistic():
         #     if last:
         #         mda_statistic_data = MdaStatistic.query.filter_by(city = city, date_time = last.date_time).all()
 
-
+        card_statistic_data = []
+        mda_statistic_data = []
         host_list = get_host(city)
         for j in host_list:
             data = CardStatistic.query.filter_by(host_name = j, date_time = search_date).all()
