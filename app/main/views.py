@@ -778,8 +778,20 @@ def download_excel(host_name, table_name):
         labels = [
             '设备名', '设备IP', 'card类型', '数量'
         ]
-
-        card_statistic_data = CardStatistic.query.filter_by(host_name = host_name, date_time = date.today()).all()
+        card_statistic_data = []
+        if host_name == 'all':
+            city = session.get('city')
+            host_list = get_host(city)
+            for j in host_list:
+                last = CardStatistic.query.filter_by(host_name = j).order_by(CardStatistic.id.desc()).first()
+                if last:
+                    temp_data = CardStatistic.query.filter_by(host_name = j, date_time = last.date_time).all()
+                    card_statistic_data += temp_data
+        else:
+            last = CardStatistic.query.filter_by(host_name = j).order_by(CardStatistic.id.desc()).first()
+            if last:
+                card_statistic_data = CardStatistic.query.filter_by(host_name = j, date_time = last.date_time).all()
+        # card_statistic_data = CardStatistic.query.filter_by(host_name = host_name, date_time = date.today()).all()
         for i in card_statistic_data:
             data.append((
                 i.host_name,
@@ -1195,12 +1207,14 @@ def xj_report_summary():
     '''所有设备巡检报告汇总'''
 
     city = session.get('city')
+    xunjian_data = []
+    host_list = get_host(city)
+    for j in host_list:
+        last = XunJian.query.filter_by(host_name = j).order_by(XunJian.id.desc()).first()
+        if last:
+            data = XunJian.query.filter_by(host_name = j, date_time = last.date_time).all()
+            xunjian_data += data
 
-    count = XunJian.query.filter_by(city = city, date_time = date.today()).count()
-    if count == 0:
-        abort(404)
-
-    xunjian_data = XunJian.query.filter_by(city = city, date_time = date.today()).all()
     file_name = '报告汇总.xlsx'
     labels = [
         '设备名', '检查项', '检查结果', '检查日期'
