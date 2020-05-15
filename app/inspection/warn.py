@@ -360,7 +360,7 @@ def mobile_warn14(res):
     '''设备admin账号巡检'''
 
     err = ''
-    msg = 'no user "admin"'
+    msg = ''
     check_item = '设备admin账号巡检'
     if 'no user "admin"' not in res:
         err = '设备存在admin账号'

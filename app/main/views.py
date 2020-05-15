@@ -1206,14 +1206,22 @@ def xj_report_all_host():
 def xj_report_summary():
     '''所有设备巡检报告汇总'''
 
+    is_all = request.args.get('city')
     city = session.get('city')
     xunjian_data = []
-    host_list = get_host(city)
-    for j in host_list:
-        last = XunJian.query.filter_by(host_name = j).order_by(XunJian.id.desc()).first()
-        if last:
-            data = XunJian.query.filter_by(host_name = j, date_time = last.date_time).all()
-            xunjian_data += data
+    city_list = []
+    if is_all == 'all':
+        city_list = get_city_list()
+    else:
+        city_list = city_list.append(city)
+
+    for i in city_list:
+        host_list = get_host(i)
+        for j in host_list:
+            last = XunJian.query.filter_by(host_name = j).order_by(XunJian.id.desc()).first()
+            if last:
+                data = XunJian.query.filter_by(host_name = j, date_time = last.date_time).all()
+                xunjian_data += data
 
     file_name = '报告汇总.xlsx'
     labels = [
@@ -1239,9 +1247,6 @@ def xj_report_summary():
         return redirect(url_for('static', filename=file_name))
     else:
         abort(404)
-
-
-
 
 @main.route('/city_list')
 @login_required
@@ -1393,16 +1398,16 @@ def config_backup():
     host_data = [(index, host) for index, host in enumerate(host_data)]
     return render_template('back_up/config_backup_host_list.html', host_data=host_data)
 
-@main.route('/backup_list', methods=['POST'])
+@main.route('/backup_list', methods=['GET', 'POST'])
 @login_required
 def backup_list():
     '''获取需要备份的config列表'''
 
     city = session.get('city')
+    select_host = []
+    if not os.path.exists(os.path.join('app', 'static', 'backup')):
+        os.makedirs(os.path.join('app', 'static', 'backup'))
     if request.method=='POST':
-        if not os.path.exists(os.path.join('app', 'static', 'backup')):
-            os.makedirs(os.path.join('app', 'static', 'backup'))
-
         host_num = len(get_host(city))
         backup_data = request.form.to_dict()
         if host_num == len(backup_data):
@@ -1412,25 +1417,34 @@ def backup_list():
             file_name = 'config备份-{}-{}.zip'.format(keys[0], date.today().strftime('%Y%m%d'))
         else:
             file_name = 'config备份-' + str(time.time()) + '.zip'
-        zip_name = os.path.join('app', 'static', 'backup', file_name)
-        zip = zipfile.ZipFile(zip_name, 'w', zipfile.ZIP_DEFLATED )
-        
-        for name, _ in request.form.to_dict().items():
-            log_str = get_log(city, name)
-            if not log_str:
-                log_str = get_log_first(city, name)
-            if log_str:
-                log_config_str = log_str[:log_str.index('# Finished')]
-                back_up_log_path = os.path.join('app', 'static', 'backup', 'config备份-{}-{}.log'.format(name, date.today().strftime('%Y%m%d')))
-                with open(back_up_log_path, 'w') as f:
-                    f.write(log_config_str)
-                zip.write(back_up_log_path, 'config备份-{}-{}.log'.format(name, date.today().strftime('%Y%m%d')))
+        select_host = [ (city, name) for name, _ in request.form.to_dict().items()]
+    else:
+        file_name = '全省config备份-{}.zip'.format(date.today().strftime('%Y%m%d'))
 
-        zip.close()
+        city_list = get_city_list()
+        for i in city_list:
+            host = get_host(i)
+            for j in host:
+                select_host.append((i, j))
 
-        url = url_for('static', filename = 'backup/{}'.format(file_name))
-        url2 = unquote(url, encoding='utf-8')
-        return redirect(url2)
+    zip_name = os.path.join('app', 'static', 'backup', file_name)
+    zip = zipfile.ZipFile(zip_name, 'w', zipfile.ZIP_DEFLATED )
+    for city, name in select_host:
+        log_str = get_log(city, name)
+        if not log_str:
+            log_str = get_log_first(city, name)
+        if log_str:
+            log_config_str = log_str[:log_str.index('# Finished')]
+            back_up_log_path = os.path.join('app', 'static', 'backup', 'config备份-{}-{}.log'.format(name, date.today().strftime('%Y%m%d')))
+            with open(back_up_log_path, 'w') as f:
+                f.write(log_config_str)
+            zip.write(back_up_log_path, 'config备份-{}-{}.log'.format(name, date.today().strftime('%Y%m%d')))
+
+    zip.close()
+
+    url = url_for('static', filename = 'backup/{}'.format(file_name))
+    url2 = unquote(url, encoding='utf-8')
+    return redirect(url2)
 
 
 
