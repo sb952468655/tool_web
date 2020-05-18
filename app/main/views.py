@@ -1212,8 +1212,10 @@ def xj_report_summary():
     city_list = []
     if is_all == 'all':
         city_list = get_city_list()
+        file_name = '全省巡检报告汇总-{}.xlsx'.format(date.today().strftime('%Y-%m-%d'))
     else:
-        city_list = city_list.append(city)
+        city_list.append(city)
+        file_name = '巡检报告汇总-{}-{}.xlsx'.format(g_city_to_name[city], date.today().strftime('%Y-%m-%d'))
 
     for i in city_list:
         host_list = get_host(i)
@@ -1223,7 +1225,7 @@ def xj_report_summary():
                 data = XunJian.query.filter_by(host_name = j, date_time = last.date_time).all()
                 xunjian_data += data
 
-    file_name = '报告汇总.xlsx'
+    # file_name = '报告汇总.xlsx'
     labels = [
         '设备名', '检查项', '检查结果', '检查日期'
     ]
