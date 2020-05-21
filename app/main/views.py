@@ -1005,21 +1005,63 @@ def download_excel(host_name, table_name):
                 i.vprn_4015_pool_utilization
             ))
     elif table_name == 'all_card_statistic':
-        file_name = '全省板卡统计汇总-{}.xlsx'.format(today_str)
+        city = request.args.get('city')
+        if not city:
+            city = session.get('city')
+        if city == 'all':
+            file_name = '全省板卡统计汇总-{}.xlsx'.format(today_str)
+        else:
+            file_name = '{}板卡统计汇总-{}.xlsx'.format(g_city_to_name[city] ,today_str)
         labels = [
             '地市', '设备名', '设备IP', '板卡类型', '板卡数量'
         ]
 
-        city = request.args.get('city')
 
         if city == 'all':
-            card_data = CardStatistic.query.filter_by(date_time = date.today()).all()
-            mda_data = MdaStatistic.query.filter_by(date_time = date.today()).all()
-        else:
-            card_data = CardStatistic.query.filter_by(city = city, date_time = date.today()).all()
-            mda_data = MdaStatistic.query.filter_by(city = city, date_time = date.today()).all()
+            card_statistic_data = []
+            mda_statistic_data = []
+            city_list = get_city_list()
+            for i in city_list:
+                host_list = get_host(i)
+                for j in host_list:
+                    last = CardStatistic.query.filter_by(host_name = j).order_by(CardStatistic.id.desc()).first()
+                    if last:
+                        temp = CardStatistic.query.filter_by(host_name = j, date_time = last.date_time).all()
+                        card_statistic_data += temp
 
-        for i in card_data:
+                    last = MdaStatistic.query.filter_by(host_name = j).order_by(MdaStatistic.id.desc()).first()
+                    if last:
+                        temp = MdaStatistic.query.filter_by(host_name = j, date_time = last.date_time).all()
+                        mda_statistic_data += temp
+        else:
+            # card_statistic_data = CardStatistic.query.filter_by(city = city, date_time = date.today()).all()
+            # mda_statistic_data = MdaStatistic.query.filter_by(city = city, date_time = date.today()).all()
+
+            card_statistic_data = []
+            mda_statistic_data = []
+            host_list = get_host(city)
+            for j in host_list:
+                
+                last = CardStatistic.query.filter_by(host_name = j).order_by(CardStatistic.id.desc()).first()
+                if last:
+                    temp = CardStatistic.query.filter_by(host_name = j, date_time = last.date_time).all()
+                    card_statistic_data += temp
+
+                last = MdaStatistic.query.filter_by(host_name = j).order_by(MdaStatistic.id.desc()).first()
+                if last:
+                    temp = MdaStatistic.query.filter_by(host_name = j, date_time = last.date_time).all()
+                    mda_statistic_data += temp
+
+        for i in card_statistic_data:
+            data.append((
+                g_city_to_name[i.city],
+                i.host_name,
+                i.host_ip,
+                i.card_type,
+                i.card_num
+            ))
+
+        for i in mda_statistic_data:
             data.append((
                 g_city_to_name[i.city],
                 i.host_name,
@@ -1028,7 +1070,14 @@ def download_excel(host_name, table_name):
                 i.card_num
             ))
     elif table_name == 'all_card_detail':
-        file_name = '全省板卡统计明细-{}.xlsx'.format(today_str)
+
+        city = request.args.get('city')
+        if not city:
+            city = session.get('city')
+        if city == 'all':
+            file_name = '全省板卡统计明细-{}.xlsx'.format(today_str)
+        else:
+            file_name = '{}板卡统计明细-{}.xlsx'.format(g_city_to_name[city] ,today_str)
         labels = [
             '地市', '设备名', '设备IP', 'slot', '板卡类型', 'admin状态', 'operational状态', 'serial number', 'time of last boot', 'temperature', 'temperature threshold'
         ]
@@ -1036,11 +1085,35 @@ def download_excel(host_name, table_name):
         city = request.args.get('city')
 
         if city == 'all':
-            card_data = CardDetail.query.filter_by(date_time = date.today()).all()
-            mda_data = MdaDetail.query.filter_by(date_time = date.today()).all()
+            card_data = []
+            mda_data = []
+            city_list = get_city_list()
+            for i in city_list:
+                host_list = get_host(i)
+                for j in host_list:
+                    last = CardDetail.query.filter_by(host_name = j).order_by(CardDetail.id.desc()).first()
+                    if last:
+                        temp = CardDetail.query.filter_by(host_name = j, date_time = last.date_time).all()
+                        card_data += temp
+
+                    last = MdaDetail.query.filter_by(host_name = j).order_by(MdaDetail.id.desc()).first()
+                    if last:
+                        temp = MdaDetail.query.filter_by(host_name = j, date_time = last.date_time).all()
+                        mda_data += temp
         else:
-            card_data = CardDetail.query.filter_by(city = city, date_time = date.today()).all()
-            mda_data = MdaDetail.query.filter_by(city = city, date_time = date.today()).all()
+            card_data = []
+            mda_data = []
+            host_list = get_host(city)
+            for j in host_list:
+                last = CardDetail.query.filter_by(host_name = j).order_by(CardDetail.id.desc()).first()
+                if last:
+                    temp = CardDetail.query.filter_by(host_name = j, date_time = last.date_time).all()
+                    card_data += temp
+
+                last = MdaDetail.query.filter_by(host_name = j).order_by(MdaDetail.id.desc()).first()
+                if last:
+                    temp = MdaDetail.query.filter_by(host_name = j, date_time = last.date_time).all()
+                    mda_data += temp
 
         for i in card_data:
             data.append((
