@@ -442,6 +442,12 @@ def all_card_detail():
                     data = MdaDetail.query.filter_by(host_name = j, date_time = last.date_time).all()
                     mda_data += data
     
+    for index, item in enumerate(mda_data):
+        if item.slot == ' ':
+            mda_data[index].slot = mda_data[index-1].slot.split('/')[0] + '/' + item.mda
+        else:
+            mda_data[index].slot = mda_data[index].slot.split('/')[0] + '/' + item.mda
+
     all_data = card_data + mda_data
     def take_host_name(elem):
         return elem.host_name

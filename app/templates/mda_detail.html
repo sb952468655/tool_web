@@ -62,7 +62,13 @@
                     <th>{{ item.date_time }}</th>
                     <th>{{ item.host_name }}</th>
                     <th>{{ item.host_ip }}</th>
-                    <th>{{ item.slot }}</th>
+                    <th>
+                        {% if item.slot.strip() == '' %}
+                        {{ mda_detail_data[index-1][1].slot }}
+                        {% else %}
+                        {{ item.slot }}
+                        {% endif %}
+                    </th>
                     <th>{{ item.mda }}</th>
                     <th>{{ item.equipped_type }}</th>
                     <th>{{ item.admin_state }}</th>
