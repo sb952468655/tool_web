@@ -1013,7 +1013,7 @@ def download_excel(host_name, table_name):
         else:
             file_name = '{}板卡统计汇总-{}.xlsx'.format(g_city_to_name[city] ,today_str)
         labels = [
-            '地市', '设备名', '设备IP', '板卡类型', '板卡数量'
+            '地市', '板卡类型', '板卡数量'
         ]
 
 
@@ -1052,22 +1052,25 @@ def download_excel(host_name, table_name):
                     temp = MdaStatistic.query.filter_by(host_name = j, date_time = last.date_time).all()
                     mda_statistic_data += temp
 
-        for i in card_statistic_data:
-            data.append((
-                g_city_to_name[i.city],
-                i.host_name,
-                i.host_ip,
-                i.card_type,
-                i.card_num
-            ))
 
-        for i in mda_statistic_data:
+        temp = [(index, item) for index, item in enumerate(card_statistic_data + mda_statistic_data) ]
+        data_set = {}
+        for _, i in temp:
+            if i.card_type not in data_set.keys():
+                data_set[i.card_type] = int(i.card_num)
+            else:
+                data_set[i.card_type] = data_set[i.card_type] + int(i.card_num)
+
+        res = []
+
+        for k, v in data_set.items():
+            res.append((k,v))
+
+        for i in res:
             data.append((
-                g_city_to_name[i.city],
-                i.host_name,
-                i.host_ip,
-                i.card_type,
-                i.card_num
+                g_city_to_name[city],
+                i[0],
+                i[1]
             ))
     elif table_name == 'all_card_detail':
 
