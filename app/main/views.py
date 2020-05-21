@@ -373,28 +373,74 @@ def all_card_detail():
             city = 'all'
 
     if city == 'all':
-        card_data = CardDetail.query.filter_by(date_time = search_date).all()
-        mda_data = MdaDetail.query.filter_by(date_time = search_date).all()
-        if not card_data:
-            last = CardDetail.query.order_by(CardDetail.id.desc()).first()
-            if last:
-                card_data = CardDetail.query.filter_by(date_time = last.date_time).all()
-        if not mda_data:
-            last = MdaDetail.query.order_by(MdaDetail.id.desc()).first()
-            if last:
-                mda_data = MdaDetail.query.filter_by(date_time = last.date_time).all()
-    else:
-        card_data = CardDetail.query.filter_by(city = city, date_time = search_date).all()
-        mda_data = MdaDetail.query.filter_by(city = city, date_time = search_date).all()
+        # card_data = CardDetail.query.filter_by(date_time = search_date).all()
+        # mda_data = MdaDetail.query.filter_by(date_time = search_date).all()
+        # if not card_data:
+        #     last = CardDetail.query.order_by(CardDetail.id.desc()).first()
+        #     if last:
+        #         card_data = CardDetail.query.filter_by(date_time = last.date_time).all()
+        # if not mda_data:
+        #     last = MdaDetail.query.order_by(MdaDetail.id.desc()).first()
+        #     if last:
+        #         mda_data = MdaDetail.query.filter_by(date_time = last.date_time).all()
 
-        if not card_data:
-            last = CardDetail.query.filter_by(city = city).order_by(CardDetail.id.desc()).first()
-            if last:
-                card_data = CardDetail.query.filter_by(city = city, date_time = last.date_time).all()
-        if not mda_data:
-            last = MdaDetail.query.filter_by(city = city).order_by(MdaDetail.id.desc()).first()
-            if last:
-                mda_data = MdaDetail.query.filter_by(city = city, date_time = last.date_time).all()
+        card_data = []
+        mda_data = []
+        city_list = get_city_list()
+        for i in city_list:
+            host_list = get_host(i)
+            for j in host_list:
+                data = CardDetail.query.filter_by(host_name = j, date_time = search_date).all()
+                if data:
+                    card_data += data
+                else:
+                    last = CardDetail.query.filter_by(host_name = j).order_by(CardDetail.id.desc()).first()
+                    if last:
+                        data = CardDetail.query.filter_by(host_name = j, date_time = last.date_time).all()
+                        card_data += data
+
+                data = MdaDetail.query.filter_by(host_name = j, date_time = search_date).all()
+                if data:
+                    mda_data += data
+                else:
+                    last = MdaDetail.query.filter_by(host_name = j).order_by(MdaDetail.id.desc()).first()
+                    if last:
+                        data = MdaDetail.query.filter_by(host_name = j, date_time = last.date_time).all()
+                        mda_data += data
+    else:
+        # card_data = CardDetail.query.filter_by(city = city, date_time = search_date).all()
+        # mda_data = MdaDetail.query.filter_by(city = city, date_time = search_date).all()
+
+        # if not card_data:
+        #     last = CardDetail.query.filter_by(city = city).order_by(CardDetail.id.desc()).first()
+        #     if last:
+        #         card_data = CardDetail.query.filter_by(city = city, date_time = last.date_time).all()
+        # if not mda_data:
+        #     last = MdaDetail.query.filter_by(city = city).order_by(MdaDetail.id.desc()).first()
+        #     if last:
+        #         mda_data = MdaDetail.query.filter_by(city = city, date_time = last.date_time).all()
+
+        card_data = []
+        mda_data = []
+        host_list = get_host(city)
+        for j in host_list:
+            data = CardDetail.query.filter_by(host_name = j, date_time = search_date).all()
+            if data:
+                card_data += data
+            else:
+                last = CardDetail.query.filter_by(host_name = j).order_by(CardDetail.id.desc()).first()
+                if last:
+                    data = CardDetail.query.filter_by(host_name = j, date_time = last.date_time).all()
+                    card_data += data
+
+            data = MdaDetail.query.filter_by(host_name = j, date_time = search_date).all()
+            if data:
+                mda_data += data
+            else:
+                last = MdaDetail.query.filter_by(host_name = j).order_by(MdaDetail.id.desc()).first()
+                if last:
+                    data = MdaDetail.query.filter_by(host_name = j, date_time = last.date_time).all()
+                    mda_data += data
     
     all_data = card_data + mda_data
     def take_host_name(elem):
