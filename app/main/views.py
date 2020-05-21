@@ -254,13 +254,18 @@ def all_card_statistic():
     search_date = date.today()
     if request.method == 'POST':
         city = request.form.get('city')
+        if not city:
+            city = session.get('city')
         form_date = request.form.get('date')
         if form_date:
             search_date = datetime.strptime(form_date,'%Y-%m-%d').date()
     else:
         city = request.args.get('city')
         if not city:
-            city = 'all'
+            if current_user.username == 'nokia':
+                city = 'all'
+            else:
+                city = session.get('city')
 
     if city == 'all':
         # card_statistic_data = CardStatistic.query.filter_by(date_time = search_date).all()
@@ -364,13 +369,18 @@ def all_card_detail():
     search_date = date.today()
     if request.method == 'POST':
         city = request.form.get('city')
+        if not city:
+            city = session.get('city')
         form_date = request.form.get('date')
         if form_date:
             search_date = datetime.strptime(form_date,'%Y-%m-%d').date()
     else:
         city = request.args.get('city')
         if not city:
-            city = 'all'
+            if current_user.username == 'nokia':
+                city = 'all'
+            else:
+                city = session.get('city')
 
     if city == 'all':
         # card_data = CardDetail.query.filter_by(date_time = search_date).all()

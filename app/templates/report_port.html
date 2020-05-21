@@ -77,6 +77,22 @@
                 {% else %}
                     <li role="presentation" ><a href="{{ url_for('main.all_card_statistic') }}">全省板卡统计汇总</a></li>
                 {% endif %}
+            {% else %}
+            {% if action == 'install_base' %}
+                <li role="presentation" class="active"><a href="{{ url_for('main.install_base', city = '1') }}">installbase统计</a></li>
+            {% else %}
+                <li role="presentation" ><a href="{{ url_for('main.install_base', city = '1') }}">installbase统计</a></li>
+            {% endif %}
+            {% if action == 'all_card_detail' %}
+                <li role="presentation" class="active"><a href="{{ url_for('main.all_card_detail') }}">板卡统计明细</a></li>
+            {% else %}
+                <li role="presentation" ><a href="{{ url_for('main.all_card_detail') }}">板卡统计明细</a></li>
+            {% endif %}
+            {% if action == 'all_card_statistic' %}
+                <li role="presentation" class="active"><a href="{{ url_for('main.all_card_statistic') }}">板卡统计汇总</a></li>
+            {% else %}
+                <li role="presentation" ><a href="{{ url_for('main.all_card_statistic') }}">板卡统计汇总</a></li>
+            {% endif %}
             {% endif %}
 
         </ul>

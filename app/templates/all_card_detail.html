@@ -6,6 +6,7 @@
 
 {% block report_content %}
     <form class="form-inline" method="post" action="{{ url_for('main.all_card_detail') }}">
+        {% if current_user.username == 'nokia' %}
         <div class="form-group">
             <label>地市选择</label>
             <select class="form-control" name = "city">
@@ -23,6 +24,7 @@
                 {% endfor %}
             </select>
         </div>
+        {% endif %}
         <div class="form-group">
             <label>日期</label>
             <div class="input-group date form_datetime" data-date-format="yyyy-mm-dd" data-link-field="dtp_input1">
