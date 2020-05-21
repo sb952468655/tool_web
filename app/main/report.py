@@ -1,5 +1,6 @@
 import re, os
 from .common import get_host, get_log
+from .config_7750 import *
 def get_report_data(config):
     '''从配置获取报表数据'''
     res_port = get_port(config)
@@ -445,7 +446,7 @@ def get_mda_statistic(config):
     mda_statistic_data = []
 
     p_card_summary = r'(?s)(MDA Summary\n={79}\n.*?\n=)'
-    p_card_type = r'\w{1,2} {4,5}\d {5}([\S]{5,20}) '
+    p_card_type = r'(\w{1,2}| {1,2}) {4,5}\d {5}([\S]{5,20}) '
 
     host_name = get_host_name(config)
     host_ip = get_ip(config)
@@ -456,6 +457,7 @@ def get_mda_statistic(config):
     res_card_summary = re.search(p_card_summary, config)
     if res_card_summary:
         res_card_type = re.findall(p_card_type, res_card_summary.group())
+        res_card_type = [i[1] for i in res_card_type]
         card_type_unique = list(set(res_card_type))
         for item in card_type_unique:
             mda_statistic_data.append((
@@ -541,7 +543,23 @@ def get_netflow(config):
 
     return (ge_10_num, str(port_utilization_10g)+'%', ge_100_num, str(port_utilization_100g)+'%', str(max_utilization)+'%')
 
+def get_service_statistic(config):
+    '''获取业务类型统计数据'''
 
+    port_lag = {}
+    p_lag_configuration = r'echo "LAG Configuration"\n#-{50}.*?\n#-{50}'
+    p_lag = generate_pat(5, 'lag', 4)
+    p_port = r'port (\d{1,2}/\d{1,2}/\d{1,2})'
+    res_lag_configuration = re.search(p_lag_configuration, config)
+    if res_lag_configuration:
+        res_lag = re.findall(p_lag, res_lag_configuration.group())
+        for i in res_lag:
+            res_port = re.findall(p_port, i[0])
+            port_lag[i[1]] = res_port
+
+    config_7750 = Config_7750(config)
+    service = config_7750.get_child()
+    
 def get_host_name(config):
     '''获取设备名称'''
 
