@@ -478,7 +478,7 @@ def get_install_base(config):
     note = ''
 
     p_system_type = r'System Type            : (7\d50) ([A-Z]{2,4})-(\d{2})'
-    p_system_version = r'System Version         : C-((\d{1,2})\.\d\.R\d)'
+    p_system_version = r'System Version         : C-((\d{1,2})\.\d\.R\d-?\d?)'
 
     res_system_type = re.search(p_system_type, config)
     res_system_version = re.search(p_system_version, config)

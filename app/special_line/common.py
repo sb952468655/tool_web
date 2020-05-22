@@ -72,7 +72,7 @@ def get_ies_saps(config):
                                         mac = sap_arp[1]
 
                                         if ip:
-                                            saps.append((i, ies_des, j[1], inter_des, sap , ip, mac, qos_id, band_width))
+                                            saps.append(('ies' ,i, ies_des, j[1], inter_des, sap , ip, mac, qos_id, band_width))
                 else:
                     res_sap = re.findall(p_sap, j[0])
                     for sap in res_sap:
@@ -99,7 +99,7 @@ def get_ies_saps(config):
                             mac = sap_arp[1]
 
                             if ip:
-                                saps.append((i, ies_des, j[1], inter_des, sap[1].replace('"', '') , ip, mac, qos_id, band_width))
+                                saps.append(('ies' ,i, ies_des, j[1], inter_des, sap[1].replace('"', '') , ip, mac, qos_id, band_width))
 
             #group-interface
             res_group_interface = re.findall(PAT['group_interface'], res_ies[1][0])
@@ -133,7 +133,7 @@ def get_ies_saps(config):
                                         mac = sap_arp[1]
 
                                         if ip:
-                                            saps.append((i, ies_des, j[1], inter_des, sap.replace('"', '') , ip, mac, qos_id, band_width))
+                                            saps.append(('ies' ,i, ies_des, j[1], inter_des, sap.replace('"', '') , ip, mac, qos_id, band_width))
                 else:
                     res_sap = re.findall(p_sap_2, j[0])
                     for sap in res_sap:
@@ -160,7 +160,7 @@ def get_ies_saps(config):
                             mac = sap_arp[1]
 
                             if ip:
-                                saps.append((i, vprn_des, j[1], inter_des, sap[1].replace('"', '') , ip, mac, qos_id, band_width))
+                                saps.append(('ies', i, vprn_des, j[1], inter_des, sap[1].replace('"', ''), ip, mac, qos_id, band_width))
 
 
     return saps
@@ -212,7 +212,7 @@ def get_vprn_saps(config):
                         mac = sap_arp[1]
 
                         if ip:
-                            saps.append((i, vprn_des, j[1], inter_des, sap[1].replace('"', '') , ip, mac, qos_id, band_width))
+                            saps.append(('vprn' ,i, vprn_des, j[1], inter_des, sap[1].replace('"', '') , ip, mac, qos_id, band_width))
 
             #group-interface
             res_group_interface = re.findall(PAT['group_interface'], res_vprn[1][0])
@@ -252,6 +252,6 @@ def get_vprn_saps(config):
                         mac = sap_arp[1]
 
                         if ip:
-                            saps.append((i, vprn_des, j[1], inter_des, sap[1].replace('"', '') , ip, mac, qos_id, band_width))
+                            saps.append(('vprn' ,i, vprn_des, j[1], inter_des, sap[1].replace('"', '') , ip, mac, qos_id, band_width))
 
     return saps

@@ -333,7 +333,8 @@ class SpecialLine(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     city = db.Column(db.String(64)) #地市
     host_name = db.Column(db.String(64)) #设备名
-    ies_id = db.Column(db.String(64)) #ies 编号
+    service = db.Column(db.String(64)) #业务名称
+    service_id = db.Column(db.String(64)) #业务编号
     ies_describe = db.Column(db.String(64)) #ies 描述
     gi_name = db.Column(db.String(64)) #group-interface 端口名称
     gi_describe = db.Column(db.String(64)) #group-interface 端口描述
@@ -359,6 +360,20 @@ class HostList(db.Model):
     version = db.Column(db.String(64)) #版本
     boot_time = db.Column(db.String(64)) #设备启动时间
     config_save_time = db.Column(db.String(64)) #设备配置保存时间
+    date_time = db.Column(db.Date, default = date.today())
+
+class ServiceStatistic(db.Model):
+    '''业务统计'''
+
+    __tablename__ = 'service_statistic'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    city = db.Column(db.String(64)) #地市
+    host_name = db.Column(db.String(64)) #设备名
+    port = db.Column(db.String(64)) #端口
+    sap = db.Column(db.String(64)) #sap/port
+    interface = db.Column(db.String(64)) #interface
+    service = db.Column(db.String(64)) #service
+    service_id = db.Column(db.String(64)) #service_id
     date_time = db.Column(db.Date, default = date.today())
 
 class User(UserMixin, db.Model):

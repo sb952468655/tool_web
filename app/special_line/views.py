@@ -69,15 +69,16 @@ def save_special_line(city, host_name, config):
         special_line = SpecialLine(
             city = city,
             host_name = host_name,
-            ies_id = item[0],
-            ies_describe = item[1],
-            gi_name = item[2],
-            gi_describe = item[3],
-            sap_name = item[4],
-            ip = item[5],
-            mac = item[6],
-            egress_id = item[7],
-            rate = item[8],
+            service = item[0],
+            service_id = item[1],
+            ies_describe = item[2],
+            gi_name = item[3],
+            gi_describe = item[4],
+            sap_name = item[5],
+            ip = item[6],
+            mac = item[7],
+            egress_id = item[8],
+            rate = item[9],
             date_time = today
         )
 

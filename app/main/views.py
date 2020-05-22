@@ -1118,6 +1118,12 @@ def download_excel(host_name, table_name):
                     temp = MdaDetail.query.filter_by(host_name = j, date_time = last.date_time).all()
                     mda_data += temp
 
+        for index, item in enumerate(mda_data):
+            if item.slot == ' ':
+                mda_data[index].slot = mda_data[index-1].slot.split('/')[0] + '/' + item.mda
+            else:
+                mda_data[index].slot = mda_data[index].slot.split('/')[0] + '/' + item.mda
+
         for i in card_data:
             data.append((
                 g_city_to_name[i.city],
