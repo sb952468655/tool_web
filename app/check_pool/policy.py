@@ -398,4 +398,4 @@ def policy_check(config):
         err = 'ludb和pppoe策略的主备一致性检查 -> 请进行确认\n\n' + err + '\n\n'
 
     # return err
-    return ('local-db-m/s 主备一致性检查', err, '')
+    return ('ludb-m/s 主备一致性检查', err, '')

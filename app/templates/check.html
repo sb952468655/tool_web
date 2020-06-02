@@ -14,6 +14,7 @@
         <div class="panel panel-default">
             <div class="panel-heading">{{ host_name.split('.')[0] }}</div>
             <div class="panel-body">
+                <pre class="pre-scrollable">说明：输出结果中：“+”，“-”、“？”、“+？”，“-？”、“error“，表示“需增加”、“需删除”、“需确认”、“需确认是否增加”、“需确认是否删除”、“错误提示“</pre><br><br>
                 {% for item in check_data %}
                     <h2>{{ item[0]}}</h2>
                     <pre class="pre-scrollable">{{ item[1]}}</pre><br><br>
