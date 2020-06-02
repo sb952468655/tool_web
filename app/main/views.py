@@ -30,7 +30,7 @@ sys.path.append('../')
 @login_required
 def index():
     session['action'] = 'report_port'
-    if current_user.username == 'nokia' or current_user.username == 'shenggonsi':
+    if current_user.username == 'nokia' or current_user.username == 'sgs':
         return redirect(url_for('main.city_list'))
     else:
         session['city'] = current_user.username

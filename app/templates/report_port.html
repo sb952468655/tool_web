@@ -56,7 +56,7 @@
             {% else %}
                 <li role="presentation" ><a href="{{ url_for('special_line.index', host_name = host_name) }}">专线统计</a></li>
             {% endif %}
-            {% if current_user.username != 'shenggonsi' %}
+            {% if current_user.username != 'sgs' %}
                 {% if current_user.username == 'nokia' %}
                     {% if action == 'install_base' %}
                         <li role="presentation" class="active"><a href="{{ url_for('main.install_base', host_name = host_name) }}">installbase统计</a></li>
