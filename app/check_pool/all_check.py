@@ -7,6 +7,9 @@ from .outside_pool import outside_pool_check
 from .subnet import subnet_check
 from .ipv6 import check4
 from .rule124 import ipv6_address_check
+from policy import policy_check
+from dhcp import dhcp_check
+from log_warn import check_log_warn
 from .common import *
 
 
@@ -40,6 +43,10 @@ def all_check(config):
     err.append(nat_inside_check(config))
     err.append(ies_1000_3000_outside_check(config))
     err.append(policy_check(config))
+
+    err.append(policy_check(config))
+    err.append(dhcp_check(config))
+    err.append(check_log_warn(config))
 
     return err
 
