@@ -1,5 +1,5 @@
 import re
-from config_7750 import generate_pat
+from .config_7750 import generate_pat
 def fc_check(config):
     err = ''
     p_egress = r'(?s)sap-egress 3010( name "3010")? create\n.*?\n {8}exit'
