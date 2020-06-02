@@ -58,7 +58,7 @@ def all_check(config):
     err.append(ftp_check(config))
     err.append(fc_check(config))
     err.append(admin_check(config))
-    err.append(jiou_check(config))
+    # err.append(jiou_check(config))
     err.append(global_check(config))
 
     return err
