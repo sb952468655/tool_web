@@ -41,7 +41,8 @@ def dhcp_check(config):
     else:
         err = 'Dhcp有关地址一致性检查 -> 请进行确认\n\n' + err + '\n\n'
 
-    return err
+    return ('Dhcp相关地址一致性检查', err, '')
+
 
 
 def is_sw(ip):
@@ -473,6 +474,5 @@ def check_static_route_entry(config):
                         err += 'static-route-entry {} preference 配置错误，请对该项人工检查复核！\n'.format(i[1])
                     break
 
-    # return err
-    return ('Dhcp相关地址一致性检查', err, '')
+    return err
 
