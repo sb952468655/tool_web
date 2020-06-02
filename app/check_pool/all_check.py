@@ -43,11 +43,11 @@ def all_check(config):
     # err.append(('检查outside pool 中的地址是否在黑洞路由中',outside_pool_check(config)))
 
 
-    err.append(ies_1000_check(config))
-    err.append(ies_3000_check(config))
-    err.append(nat_inside_check(config))
-    err.append(ies_1000_3000_outside_check(config))
-    err.append(policy_check(config))
+    # err.append(ies_1000_check(config))
+    # err.append(ies_3000_check(config))
+    # err.append(nat_inside_check(config))
+    # err.append(ies_1000_3000_outside_check(config))
+    # err.append(policy_check(config))
 
     err.append(policy_check(config))
     err.append(dhcp_check(config))
