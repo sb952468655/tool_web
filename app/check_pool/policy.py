@@ -2,7 +2,7 @@
 
 import re
 import difflib
-from config_7750 import *
+from .config_7750 import *
 
 group_inter_m = r'''                    ipv6
                         router-advertisements
