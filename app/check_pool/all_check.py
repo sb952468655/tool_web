@@ -334,31 +334,31 @@ def ies_1000_3000_outside_check(config):
     return (check_item, err, msg)
 
 
-def policy_check(config):
-    '''ies3000下面每个group-interface的"pppoe-policy-m"和 "ludb-m"要一致起来。
-    只有"pppoe-policy-m" "ludb-m"和"pppoe-policy-s" "ludb-s"这两种组合，不能混用'''
+# def policy_check(config):
+#     '''ies3000下面每个group-interface的"pppoe-policy-m"和 "ludb-m"要一致起来。
+#     只有"pppoe-policy-m" "ludb-m"和"pppoe-policy-s" "ludb-s"这两种组合，不能混用'''
 
-    err = ''
-    msg = ''
-    check_item = '''检查ies3000 group-interface中的pppoe-policy, user-db 是否正确'''
-    p_ies_3000 = r'(?s)(ies 3000( name ".*?")? customer \d{1,2} create\n.+?\n {8}exit)'
-    p_group_interface = PAT['group_interface']
+#     err = ''
+#     msg = ''
+#     check_item = '''检查ies3000 group-interface中的pppoe-policy, user-db 是否正确'''
+#     p_ies_3000 = r'(?s)(ies 3000( name ".*?")? customer \d{1,2} create\n.+?\n {8}exit)'
+#     p_group_interface = PAT['group_interface']
 
-    res_ies_3000 = re.findall(p_ies_3000, config)
-    if len(res_ies_3000) != 2:
-        err = '没有找到ies 3000，请检查\n'
-    else:
-        res_group_interface = re.findall(p_group_interface, res_ies_3000[1][0])
-        for i in res_group_interface:
-            if ('pppoe-policy-m' in i[0] and 'ludb-s' in i[0]) or ('pppoe-policy-s' in i[0] and 'ludb-m' in i[0]):
-                err += 'ies 3000 中的 group-interface "{}" pppoe-policy, user-db错误，请检查\n'.format(i[1])
-                msg += i[0] + '\n'
+#     res_ies_3000 = re.findall(p_ies_3000, config)
+#     if len(res_ies_3000) != 2:
+#         err = '没有找到ies 3000，请检查\n'
+#     else:
+#         res_group_interface = re.findall(p_group_interface, res_ies_3000[1][0])
+#         for i in res_group_interface:
+#             if ('pppoe-policy-m' in i[0] and 'ludb-s' in i[0]) or ('pppoe-policy-s' in i[0] and 'ludb-m' in i[0]):
+#                 err += 'ies 3000 中的 group-interface "{}" pppoe-policy, user-db错误，请检查\n'.format(i[1])
+#                 msg += i[0] + '\n'
 
 
-    if err == '':
-        err = '检查通过\n'
+#     if err == '':
+#         err = '检查通过\n'
 
-    return (check_item, err, msg)
+#     return (check_item, err, msg)
 
 
 
