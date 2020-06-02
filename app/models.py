@@ -411,6 +411,8 @@ class User(UserMixin, db.Model):
 
         #内部账号
         nokia = User(username='nokia', password='nokia2020')
+        #省公司
+        shenggonsi = User(username='shenggonsi', password='shenggonsi')
 
         db.session.add(changzhou)
         db.session.add(huaian)
@@ -426,6 +428,7 @@ class User(UserMixin, db.Model):
         db.session.add(yangzhou)
         db.session.add(zhenjiang)
         db.session.add(nokia)
+        db.session.add(shenggonsi)
 
         db.session.commit()
 
