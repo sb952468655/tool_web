@@ -5,11 +5,16 @@ from .address_pool_and_security import address_range_check, address_is_include_p
 from .address import prefix_list_include_black_hole, black_hole_address_range_check, inside_subnet_address_check
 from .outside_pool import outside_pool_check
 from .subnet import subnet_check
-from .ipv6 import check4
-from .rule124 import ipv6_address_check
-from policy import policy_check
-from dhcp import dhcp_check
-from log_warn import check_log_warn
+from .ipv6 import check4, ipv6_check
+from .rule124 import rule124
+from .policy import policy_check
+from .dhcp import dhcp_check
+from .log_warn import check_log_warn
+from .ftp import ftp_check
+from .fc import fc_check
+from .admin import admin_check
+from .jiou import jiou_check
+from .global1 import global_check
 from .common import *
 
 
@@ -47,6 +52,14 @@ def all_check(config):
     err.append(policy_check(config))
     err.append(dhcp_check(config))
     err.append(check_log_warn(config))
+
+    err.append(ipv6_check(config))
+    err.append(rule124(config))
+    err.append(ftp_check(config))
+    err.append(fc_check(config))
+    err.append(admin_check(config))
+    err.append(jiou_check(config))
+    err.append(global_check(config))
 
     return err
 

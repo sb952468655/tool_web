@@ -378,4 +378,4 @@ def rule124(config):
     else:
         err4 = '规则四检查 -> 错误\n\n' + err4
 
-    return err1 + '\n\n' + err2 + '\n\n' + err4
+    return ('ipv6配置规范检查', err1 + '\n\n' + err2 + '\n\n' + err4, '')

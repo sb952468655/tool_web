@@ -224,4 +224,5 @@ def ipv6_check(config):
     else:
         errs += 'ipv6地址一致性检查 -> 通过\n\n'
 
-    return errs
+    # return errs
+    return ('ipv6检查', errs, '')

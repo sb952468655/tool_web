@@ -253,8 +253,8 @@ def global_check(config):
         else:
             err += '没有找到 subscriber_mgmt_msap_iptv 配置\n'
     if err == '':
-        err = '全局校验 -> OK\n\n'
+        err = 'subscriber-mgmt配置与规范比对检查 -> OK\n\n'
     else:
-        err = '全局校验 -> ERROR\n\n' + err
+        err = 'subscriber-mgmt配置与规范比对检查 -> ERROR\n\n' + err
 
-    return err
+    return ('subscriber-mgmt配置与规范比对检查', err, '')

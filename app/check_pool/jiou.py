@@ -45,5 +45,5 @@ def jiou_check(config):
     else:
         err = '● iptv主备接口地址校验 -> ERROR\n\n' + err + '\n\n'
 
-    return err
+    return ('iptv主备接口地址校验', err, '')
 

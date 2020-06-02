@@ -1,14 +1,13 @@
 import re
-from .config_7750 import *
 
 def admin_check(config):
     err = ''
-    if 'no optimized-mode' not in config:
-        err += '没有配置 no optimized-mode\n'
-
     if 'no user "admin"' not in config:
-        err += 'Admin 检查 -> ERROR\n\nuser 账号是 admin\n\n'
-    else:
-        err += 'Admin 检查 -> OK\n\n'
+        err = '存在user admin账号\n'
 
-    return err
+    if err == '':
+        err = 'user admin检查 -> OK\n\n无 user admin账号\n\n'
+    else:
+        err = 'user admin检查 -> ERROR\n\n{}\n\n'.format(err)
+
+    return ('user admin检查', err, '')
