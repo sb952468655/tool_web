@@ -509,18 +509,16 @@ def mda_statistic():
 
     if host_name == 'all':
         mda_statistic_data = []
-        city_list = get_city_list()
-        for i in city_list:
-            host_list = get_host(i)
-            for j in host_list:
-                data = MdaStatistic.query.filter_by(host_name = j, date_time = search_date).all()
-                if data:
+        host_list = get_host(city)
+        for j in host_list:
+            data = MdaStatistic.query.filter_by(host_name = j, date_time = search_date).all()
+            if data:
+                mda_statistic_data += data
+            else:
+                last = MdaStatistic.query.filter_by(host_name = j).order_by(MdaStatistic.id.desc()).first()
+                if last:
+                    data = MdaStatistic.query.filter_by(host_name = j, date_time = last.date_time).all()
                     mda_statistic_data += data
-                else:
-                    last = MdaStatistic.query.filter_by(host_name = j).order_by(MdaStatistic.id.desc()).first()
-                    if last:
-                        data = MdaStatistic.query.filter_by(host_name = j, date_time = last.date_time).all()
-                        mda_statistic_data += data
     else:
         mda_statistic_data = MdaStatistic.query.filter_by(host_name = host_name, date_time = search_date).all()
         if not mda_statistic_data:
