@@ -1455,7 +1455,7 @@ def address_collect():
 
     host_data = [(index, host) for index, host in enumerate(host_list)]
     return render_template('report/address_collect_download.html',
-    host_data = host_data)
+    host_data = host_data, action='address_collect')
 
 
 @main.route('/address_mk_excel', methods=['POST'])

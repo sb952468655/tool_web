@@ -9,12 +9,10 @@
         <div class="form-group">
             <label>设备名称</label>
             <select class="form-control" name = "host_name">
-                {% if current_user.username == 'nokia' %}
-                    {% if host_name == 'all' %}
-                    <option selected value ="all">全部</option>
-                    {% else %}
-                    <option value ="all">全部</option>
-                    {% endif %}
+                {% if host_name == 'all' %}
+                <option selected value ="all">全部</option>
+                {% else %}
+                <option value ="all">全部</option>
                 {% endif %}
                 {% for i in host_list %}
                     {% if i == host_name %}
