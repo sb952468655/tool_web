@@ -370,6 +370,7 @@ class ServiceStatistic(db.Model):
     city = db.Column(db.String(64)) #地市
     host_name = db.Column(db.String(64)) #设备名
     port = db.Column(db.String(64)) #端口
+    lag = db.Column(db.String(64)) #lag
     sap = db.Column(db.String(64)) #sap/port
     interface = db.Column(db.String(64)) #interface
     service = db.Column(db.String(64)) #service

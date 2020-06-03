@@ -547,19 +547,53 @@ def get_service_statistic(config):
     '''获取业务类型统计数据'''
 
     port_lag = {}
-    p_lag_configuration = r'echo "LAG Configuration"\n#-{50}.*?\n#-{50}'
+    data = []
+    p_lag_configuration = r'(?s)echo "LAG Configuration"\n#-{50}.*?\n#-{50}'
+    p_router = r'(?s)echo "Router \(Network Side\) Configuration"\n#-{50}.*?\n#-{50}'
     p_lag = generate_pat(5, 'lag', 4)
     p_port = r'port (\d{1,2}/\d{1,2}/\d{1,2})'
+    p_router_inter = r'(?s)(interface "(.*?)".*?\n {8}exit)'
+
     res_lag_configuration = re.search(p_lag_configuration, config)
     if res_lag_configuration:
         res_lag = re.findall(p_lag, res_lag_configuration.group())
         for i in res_lag:
             res_port = re.findall(p_port, i[0])
-            port_lag[i[1]] = res_port
+            if res_port:
+                port_lag[i[1]] = res_port
 
     config_7750 = Config_7750(config)
     service = config_7750.get_child()
-    
+
+    #检查vpls
+    for i in service:
+        if i._type == 'vpls':
+            res_sap = i.get_sap()
+            for j in res_sap:
+                res_lag_x = re.search(r'lag-(\d{1,3})', j[1])
+                if res_lag_x and res_lag_x.group(1) in port_lag:
+                    for k in port_lag[res_lag_x.group(1)]:
+                        data.append((k, res_lag_x.group(1), j[1],'n/a', i._type, i.name))
+        elif i._type == 'vprn':
+            res_interface = i.get_interface()
+            for j in res_interface:
+                res_sap = j.get_sap()
+                for k in res_sap:
+                    res_lag_x = re.search(r'lag-(\d{1,3})', k)
+                    if res_lag_x and res_lag_x.group(1) in port_lag:
+                        for k in port_lag[res_lag_x.group(1)]:
+                            data.append((k, res_lag_x.group(1), k,j.name, i._type, i.name))
+
+    #检查基本配置
+    res_router = re.search(p_router, config)
+    if res_router:
+        res_inter = re.findall(p_router_inter, res_router.group())
+        for i in res_inter:
+            res_port = re.search(p_port, i[0])
+            if res_port:
+                data.append((res_port.group(1), 'n/a', res_port.group(1), i[1], 'base', 'n/a'))
+
+    return data
 def get_host_name(config):
     '''获取设备名称'''
 

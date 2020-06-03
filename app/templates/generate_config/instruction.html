@@ -1,0 +1,17 @@
+{% extends "generate_config/base.html" %}
+
+{% block model_content %}
+    <div class="page-header">
+        <h1>750脚本自动生成工具使用说明</h1>
+    </div>
+    <p>1、	模板为“内置模板”类型，不可修改，只能查看，不可修改、删除，或另存为“自定义”类型模板， 自定义类型模板可以进行修改、删除；</p>
+    <img src="{{ url_for('static', filename='img/2.png') }}" alt="">
+    <p>2、	需要将多个单独“模板“组合为一组模板是，可自定义模板组；自定义模板组时，可通过按”shift“键+鼠标点击方式，选择多个模板，生成自己使用的模板组，注意：10GE/GE 模板只能二选一、主用vpls/备用vpls只能二选一；</p>
+    <img src="{{ url_for('static', filename='img/1.png') }}" alt="">
+    <p>3、	脚本制作，可单独调用“模板“或调用自己定义的”模板组“</p>
+    <img src="{{ url_for('static', filename='img/3.png') }}" alt="">
+    <p>4、	制作好的脚本，可点击“保存“，进行下载。</p>
+    <img src="{{ url_for('static', filename='img/4.png') }}" alt="">
+{% endblock %}
+
+

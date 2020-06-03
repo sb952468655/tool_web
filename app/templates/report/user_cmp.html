@@ -41,7 +41,8 @@
             <tr>
                 <th>序号</th>
                 <th>采集日期</th>
-                <th>IES编号</th>
+                <th>Service</th>
+                <th>Service编号</th>
                 <th>IES描述</th>
                 <th>interface端口名称</th>
                 <th>interface端口描述</th>
@@ -57,7 +58,8 @@
                 <tr>
                     <th>{{ index + 1 }}</th>
                     <th>{{ item.date_time }}</th>
-                    <th>{{ item.ies_id }}</th>
+                    <th>{{ item.service }}</th>
+                    <th>{{ item.service_id }}</th>
                     <th>{{ item.ies_describe }}</th>
                     <th>{{ item.gi_name }}</th>
                     <th>{{ item.gi_describe }}</th>
@@ -75,7 +77,9 @@
         <thead>
             <tr>
                 <th>序号</th>
-                <th>IES编号</th>
+                <th>采集日期</th>
+                <th>Service</th>
+                <th>Service编号</th>
                 <th>IES描述</th>
                 <th>interface端口名称</th>
                 <th>interface端口描述</th>
@@ -84,14 +88,15 @@
                 <th>MAC地址</th>
                 <th>qos sap-egress编号</th>
                 <th>带宽值</th>
-                <th>采集日期</th>
             </tr>
         </thead>
         <tbody>
             {% for index, item in live_data %}
                 <tr>
                     <th>{{ index + 1 }}</th>
-                    <th>{{ item.ies_id }}</th>
+                    <th>{{ item.date_time }}</th>
+                    <th>{{ item.service }}</th>
+                    <th>{{ item.service_id }}</th>
                     <th>{{ item.ies_describe }}</th>
                     <th>{{ item.gi_name }}</th>
                     <th>{{ item.gi_describe }}</th>
@@ -100,7 +105,6 @@
                     <th>{{ item.mac }}</th>
                     <th>{{ item.egress_id }}</th>
                     <th>{{ item.rate }}</th>
-                    <th>{{ item.date_time }}</th>
                 </tr>
             {% endfor %}
         </tbody>

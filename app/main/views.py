@@ -529,11 +529,24 @@ def mda_statistic():
             host_name = host_list[0]
 
     if host_name == 'all':
-        mda_statistic_data = MdaStatistic.query.filter_by(date_time = search_date).all()
-        if not mda_statistic_data:
-            last = MdaStatistic.query.order_by(CardDetail.id.desc()).first()
-            if last:
-                mda_statistic_data = MdaStatistic.query.filter_by(date_time = last.date_time).all()
+        # mda_statistic_data = MdaStatistic.query.filter_by(date_time = search_date).all()
+        # if not mda_statistic_data:
+        #     last = MdaStatistic.query.order_by(CardDetail.id.desc()).first()
+        #     if last:
+        #         mda_statistic_data = MdaStatistic.query.filter_by(date_time = last.date_time).all()
+        mda_statistic_data = []
+        city_list = get_city_list()
+        for i in city_list:
+            host_list = get_host(i)
+            for j in host_list:
+                data = MdaStatistic.query.filter_by(host_name = j, date_time = search_date).all()
+                if data:
+                    mda_statistic_data += data
+                else:
+                    last = MdaStatistic.query.filter_by(host_name = j).order_by(MdaStatistic.id.desc()).first()
+                    if last:
+                        data = MdaStatistic.query.filter_by(host_name = j, date_time = last.date_time).all()
+                        mda_statistic_data += data
     else:
         mda_statistic_data = MdaStatistic.query.filter_by(host_name = host_name, date_time = search_date).all()
         if not mda_statistic_data:
@@ -684,7 +697,7 @@ def xunjian_all_host():
     for i in host_list:
         xunjian_data = XunJian.query.filter_by(host_name = i, date_time = date.today()).all()
         if not xunjian_data:
-            last = XunJian.query.filter_by(host_name = host_name).order_by(XunJian.id.desc()).first()
+            last = XunJian.query.order_by(XunJian.id.desc()).first()
             if last:
                 xunjian_data = XunJian.query.filter_by(host_name = i, date_time = last.date_time).all()
         warn_data.append((i, [item for item in xunjian_data if item.err]))
@@ -1525,6 +1538,73 @@ def address_mk_excel():
     url2 = unquote(url, encoding='utf-8')
     return redirect(url2)
 
+@main.route('/service_mk_excel', methods=['POST'])
+@login_required
+def service_mk_excel():
+    '''端口业务类型统计生成 excel 表格'''
+    
+
+    if not os.path.exists(os.path.join('app', 'static', 'service_statistic')):
+            os.makedirs(os.path.join('app', 'static', 'service_statistic'))
+
+    backup_data = request.form.to_dict()
+    city = session.get('city')
+    if not city:
+        return redirect(url_for('main.city_list'))
+    host_num = len(get_host(city))
+    if host_num == len(backup_data):
+        file_name = '端口业务统计-{}-{}.zip'.format(g_city_to_name.get(city), date.today().strftime('%Y%m%d'))
+    elif len(backup_data) == 1:
+        keys = list(backup_data.keys())
+        file_name = '端口业务统计-{}-{}.zip'.format(keys[0], date.today().strftime('%Y%m%d'))
+    else:
+        file_name = '端口业务统计-' + str(time.time()) + '.zip'
+    zip_name = os.path.join('app', 'static', 'service_statistic', file_name)
+    zip = zipfile.ZipFile(zip_name, 'w', zipfile.ZIP_DEFLATED )
+    #获取选中的设备名称
+    for host_name, _ in request.form.to_dict().items():
+        save_path = os.path.join('app','static', 'service_statistic', '{}-{}-端口业务统计.xlsx'.format(host_name, date.today().strftime('%Y%m%d')))
+        if not os.path.exists(save_path):
+            excel = openpyxl.Workbook()
+            sheet = excel.active
+            sheet['A1'] = '设备名'
+            sheet['B1'] = '端口'
+            sheet['C1'] = 'lag-id'
+            sheet['D1'] = 'sap/port'
+            sheet['E1'] = 'interface'
+            sheet['F1'] = 'service'
+            sheet['G1'] = 'service id'
+            sheet['H1'] = '采集日期'
+
+            sheet.column_dimensions['A'].width = 40.0
+            sheet.column_dimensions['D'].width = 15.0
+            sheet.column_dimensions['H'].width = 15.0
+            cur_row = 2
+
+            service_statistic_data = []
+            last = ServiceStatistic.query.filter_by(host_name=host_name).order_by(ServiceStatistic.id.desc()).first()
+            if last:
+                service_statistic_data = ServiceStatistic.query.filter_by(host_name=host_name, date_time = last.date_time).all()
+            for item in service_statistic_data:
+                sheet['A'+ str(cur_row)] = item.host_name
+                sheet['B'+ str(cur_row)] = item.port
+                sheet['C'+ str(cur_row)] = item.lag
+                sheet['D'+ str(cur_row)] = item.sap
+                sheet['E'+ str(cur_row)] = item.interface
+                sheet['F'+ str(cur_row)] = item.service
+                sheet['G'+ str(cur_row)] = item.service_id
+                sheet['H'+ str(cur_row)] = item.date_time
+
+                cur_row += 1
+            
+            excel.save(save_path)
+        zip.write(save_path, '{}-{}-端口业务统计.xlsx'.format(host_name, date.today().strftime('%Y%m%d')))
+
+    zip.close()
+    url = url_for('static', filename = 'service_statistic/{}'.format(file_name))
+    url2 = unquote(url, encoding='utf-8')
+    return redirect(url2)
+
 
 @main.route('/config_backup')
 @login_required
@@ -1664,6 +1744,22 @@ def load_statistic_host():
     return render_template('statistic_host.html',
         load_statistic_host_data = load_statistic_host_data, 
         action = 'load_statistic_host')
+
+@main.route('/service_statistic')
+@login_required
+def service_statistic():
+    '''端口业务类型统计'''
+
+    city = session.get('city')
+    if not city:
+        return redirect(url_for('main.city_list'))
+    host_list = get_host(session.get('city'))
+
+
+    host_list = [(index, item) for index, item in enumerate(host_list) ]
+    return render_template('report/service_statistic.html', host_list = host_list, action='service_statistic')
+
+
 
 @main.route('/install_base')
 @login_required
@@ -2110,6 +2206,13 @@ def download_model_data():
     url = url_for('static', filename = 'config.log')
     url2 = unquote(url, encoding='utf-8')
     return redirect(url2)
+
+@main.route('/generate_config_instruction')
+@login_required
+def generate_config_instruction():
+    '''脚本自动生成工具使用说明'''
+
+    return render_template('generate_config/instruction.html')
 
 
 @main.route('/report_port_search/<report_name>', methods=['GET', 'POST'])
@@ -2690,6 +2793,8 @@ def save_db():
                 save_load_statistic_host(i, j, today_log)
                 # t_load_statistic_host = threading.Thread(target=save_load_statistic_host, args=(i, j, today_log))
                 # t_load_statistic_host.start()
+                #端口业务类型统计
+                save_service_statistic(i, j, today_log)
                 #地址采集
                 save_address_collect(i, j, today_log)
                 # t_address_collect = threading.Thread(target=save_address_collect, args=(i, j, today_log))
@@ -3120,6 +3225,38 @@ def save_load_statistic_host(city, host_name, config):
     db.session.commit()
     db.session.close()
 
+def save_service_statistic(city, host_name, config):
+    '''业务统计入库'''
+
+    today_data_count = ServiceStatistic.query.filter_by(host_name = host_name, date_time = date.today()).count()
+
+    if today_data_count:
+        logging.info('service_statistic host: {} today is saved'.format(host_name))
+        return
+
+    service_statistic_host_data = get_service_statistic(config)
+    if service_statistic_host_data:
+        logging.info('host: {} {} begin save'.format(host_name, 'service_statistic'))
+
+    today = date.today()
+    for item in service_statistic_host_data:
+
+        #存入数据库
+        service_statistic = ServiceStatistic(
+            city = city,
+            host_name = host_name,
+            port = item[0],
+            lag = item[1],
+            sap = item[2],
+            interface = item[3],
+            service = item[4],
+            service_id = item[5],
+            date_time = today
+        )
+
+        db.session.add(service_statistic)
+    db.session.commit()
+    db.session.close()
 def save_address_collect(city, host_name, config):
     '''地址采集数据入库'''
 

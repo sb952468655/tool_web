@@ -27,6 +27,11 @@
             {% else %}
                 <li role="presentation" ><a href="{{ url_for('main.model_select') }}">脚本制作</a></li>
             {% endif %}
+            {% if request.path.startswith('/generate_config_instruction') %} 
+                <li role="presentation" class="active"><a href="{{ url_for('main.generate_config_instruction') }}">使用说明</a></li>
+            {% else %}
+                <li role="presentation" ><a href="{{ url_for('main.generate_config_instruction') }}">使用说明</a></li>
+            {% endif %}
         </ul>
     </div>
     <div class="col-md-6">

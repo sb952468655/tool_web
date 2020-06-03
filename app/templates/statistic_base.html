@@ -22,9 +22,9 @@
                 <li role="presentation" ><a href="{{ url_for('main.load_statistic_host', host_name = host_name ) }}">按设备统计用户数量</a></li>
             {% endif %}
             {% if action == 'service_statistic' %}
-                <li role="presentation" class="active"><a href="{{ url_for('main.load_statistic_host', host_name = host_name ) }}">按端口统计业务类型</a></li>
+                <li role="presentation" class="active"><a href="{{ url_for('main.service_statistic') }}">按端口统计业务类型</a></li>
             {% else %}
-                <li role="presentation" ><a href="{{ url_for('main.load_statistic_host', host_name = host_name ) }}">按端口统计业务类型</a></li>
+                <li role="presentation" ><a href="{{ url_for('main.service_statistic') }}">按端口统计业务类型</a></li>
             {% endif %}
         </ul>
     </div>
@@ -37,11 +37,4 @@
         {% endblock %}
     </div>
 
-{% endblock %}
-
-{% block scripts %}
-{{ super() }}
-<style>
-    td { word-wrap:break-word; }
-</style>
 {% endblock %}
