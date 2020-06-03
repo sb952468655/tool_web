@@ -18,7 +18,7 @@
 
 {% block report_content %}
     <form class="form-inline" method="post" action="{{ url_for('main.all_card_statistic') }}">
-        {% if current_user.username == 'nokia' %}
+        {% if current_user.username == 'nokia' or current_user.username == 'sgs' %}
         <div class="form-group">
             <label>地市选择</label>
             <select class="form-control" name = "city">

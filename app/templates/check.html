@@ -12,7 +12,7 @@
     <div class="col-md-12">
         <a class="btn btn-default" href="{{ url_for('main.check_excel', host_name = host_name) }}" role="button" style="margin : 0px 0px 15px 0px;">生成表格</a>
         <div class="panel panel-default">
-            <div class="panel-heading">{{ host_name.split('.')[0] }}</div>
+            <div class="panel-heading"><h2>{{ host_name }}</h2></div>
             <div class="panel-body">
                 <pre class="pre-scrollable">说明：输出结果中：“+”，“-”、“？”、“+？”，“-？”、“error“，表示“需增加”、“需删除”、“需确认”、“需确认是否增加”、“需确认是否删除”、“错误提示“</pre><br><br>
                 {% for item in check_data %}

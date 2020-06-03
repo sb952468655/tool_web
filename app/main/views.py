@@ -72,14 +72,14 @@ def report_port():
             host_name = host_list[0]
 
     if host_name == 'all':
-        pageination = CardPort1.query.filter_by(date_time = search_date).paginate(
+        pageination = CardPort1.query.filter_by(city=city, date_time = search_date).paginate(
             page, per_page = current_app.config['FLASKY_POSTS_PER_PAGE'],
             error_out = False
         )
         if not pageination.items:
-            last = CardPort1.query.order_by(CardPort1.id.desc()).first()
+            last = CardPort1.query.filter_by(city=city).order_by(CardPort1.id.desc()).first()
             if last:
-                pageination = CardPort1.query.filter_by(date_time = last.date_time).paginate(
+                pageination = CardPort1.query.filter_by(city=city, date_time = last.date_time).paginate(
                     page, per_page = current_app.config['FLASKY_POSTS_PER_PAGE'],
                     error_out = False
                 )
@@ -193,9 +193,9 @@ def card_detail():
             host_name = host_list[0]
 
     if host_name == 'all':
-        card_detail_data = CardDetail.query.filter_by(date_time = search_date).all()
+        card_detail_data = CardDetail.query.filter_by(city=city, date_time = search_date).all()
         if not card_detail_data:
-            last = CardDetail.query.order_by(CardDetail.id.desc()).first()
+            last = CardDetail.query.filter_by(city=city).order_by(CardDetail.id.desc()).first()
             if last:
                 card_detail_data = CardDetail.query.filter_by(date_time = last.date_time).all()
     else:
@@ -230,11 +230,11 @@ def card_statistic():
             host_name = host_list[0]
 
     if host_name == 'all':
-        card_statistic_data = CardStatistic.query.filter_by(date_time = search_date).all()
+        card_statistic_data = CardStatistic.query.filter_by(city=city, date_time = search_date).all()
         if not card_statistic_data:
-            last = CardStatistic.query.order_by(CardStatistic.id.desc()).first()
+            last = CardStatistic.query.filter_by(city=city).order_by(CardStatistic.id.desc()).first()
             if last:
-                card_statistic_data = CardStatistic.query.filter_by(date_time = last.date_time).all()
+                card_statistic_data = CardStatistic.query.filter_by(city=city, date_time = last.date_time).all()
     else:
         card_statistic_data = CardStatistic.query.filter_by(host_name = host_name, date_time = search_date).all()
         if not card_statistic_data:
@@ -383,16 +383,6 @@ def all_card_detail():
                 city = session.get('city')
 
     if city == 'all':
-        # card_data = CardDetail.query.filter_by(date_time = search_date).all()
-        # mda_data = MdaDetail.query.filter_by(date_time = search_date).all()
-        # if not card_data:
-        #     last = CardDetail.query.order_by(CardDetail.id.desc()).first()
-        #     if last:
-        #         card_data = CardDetail.query.filter_by(date_time = last.date_time).all()
-        # if not mda_data:
-        #     last = MdaDetail.query.order_by(MdaDetail.id.desc()).first()
-        #     if last:
-        #         mda_data = MdaDetail.query.filter_by(date_time = last.date_time).all()
 
         card_data = []
         mda_data = []
@@ -418,17 +408,6 @@ def all_card_detail():
                         data = MdaDetail.query.filter_by(host_name = j, date_time = last.date_time).all()
                         mda_data += data
     else:
-        # card_data = CardDetail.query.filter_by(city = city, date_time = search_date).all()
-        # mda_data = MdaDetail.query.filter_by(city = city, date_time = search_date).all()
-
-        # if not card_data:
-        #     last = CardDetail.query.filter_by(city = city).order_by(CardDetail.id.desc()).first()
-        #     if last:
-        #         card_data = CardDetail.query.filter_by(city = city, date_time = last.date_time).all()
-        # if not mda_data:
-        #     last = MdaDetail.query.filter_by(city = city).order_by(MdaDetail.id.desc()).first()
-        #     if last:
-        #         mda_data = MdaDetail.query.filter_by(city = city, date_time = last.date_time).all()
 
         card_data = []
         mda_data = []
@@ -492,11 +471,11 @@ def mda_detail():
             host_name = host_list[0]
 
     if host_name == 'all':
-        mda_detail_data = MdaDetail.query.filter_by(date_time = search_date).all()
+        mda_detail_data = MdaDetail.query.filter_by(city=city, date_time = search_date).all()
         if not mda_detail_data:
-            last = MdaDetail.query.order_by(MdaDetail.id.desc()).first()
+            last = MdaDetail.query.filter_by(city=city).order_by(MdaDetail.id.desc()).first()
             if last:
-                mda_detail_data = MdaDetail.query.filter_by(date_time = last.date_time).all()
+                mda_detail_data = MdaDetail.query.filter_by(city=city, date_time = last.date_time).all()
     else:
         mda_detail_data = MdaDetail.query.filter_by(host_name = host_name, date_time = search_date).all()
         if not mda_detail_data:
@@ -529,11 +508,6 @@ def mda_statistic():
             host_name = host_list[0]
 
     if host_name == 'all':
-        # mda_statistic_data = MdaStatistic.query.filter_by(date_time = search_date).all()
-        # if not mda_statistic_data:
-        #     last = MdaStatistic.query.order_by(CardDetail.id.desc()).first()
-        #     if last:
-        #         mda_statistic_data = MdaStatistic.query.filter_by(date_time = last.date_time).all()
         mda_statistic_data = []
         city_list = get_city_list()
         for i in city_list:
@@ -560,7 +534,7 @@ def mda_statistic():
 @main.route('/port_statistic', methods=['GET', 'POST'])
 @login_required
 def port_statistic():
-    '''port统计'''
+    '''端口统计'''
 
     search_date = date.today()
     city = session.get('city')
@@ -579,11 +553,11 @@ def port_statistic():
             host_name = host_list[0]
 
     if host_name == 'all':
-        port_statistic_data = PortStatistic.query.filter_by(date_time = search_date).all()
+        port_statistic_data = PortStatistic.query.filter_by(city=city, date_time = search_date).all()
         if not port_statistic_data:
-            last = PortStatistic.query.order_by(PortStatistic.id.desc()).first()
+            last = PortStatistic.query.filter_by(city=city).order_by(PortStatistic.id.desc()).first()
             if last:
-                port_statistic_data = PortStatistic.query.filter_by(date_time = last.date_time).all()
+                port_statistic_data = PortStatistic.query.filter_by(city=city, date_time = last.date_time).all()
     else:
         port_statistic_data = PortStatistic.query.filter_by(host_name = host_name, date_time = search_date).all()
         if not port_statistic_data:
@@ -638,12 +612,11 @@ def check_excel(host_name):
     sheet.column_dimensions['C'].width = 70.0
     cur_row = 2
     for item in check_res:
-        for item2 in item[1]:
-            sheet['A'+ str(cur_row)] = host_name.split('.')[0]
-            sheet['B'+ str(cur_row)] = item2
-            sheet['C'+ str(cur_row)] = item[0]
+        sheet['A'+ str(cur_row)] = host_name.split('.')[0]
+        sheet['B'+ str(cur_row)] = item[1]
+        sheet['C'+ str(cur_row)] = item[0]
 
-            cur_row += 1
+        cur_row += 1
     
     file_name = '{}_配置检查.xlsx'.format(host_name.split('.')[0])
     excel.save(os.path.join('app','static', file_name))
@@ -1734,11 +1707,6 @@ def load_statistic_host():
         data = LoadStatisticHost.query.filter_by(host_name = i).order_by(LoadStatisticHost.id.desc()).first()
         if data:
             load_statistic_host_data.append(data)
-    # load_statistic_host_data = LoadStatisticHost.query.filter_by(city = city, date_time = date.today()).all()
-    # if not load_statistic_host_data:
-    #     last = LoadStatisticHost.query.filter_by(city = city).order_by(LoadStatisticHost.id.desc()).first()
-    #     if last:
-    #         load_statistic_host_data = LoadStatisticHost.query.filter_by(city = city, date_time = last.date_time).all()
 
     load_statistic_host_data = [(index, item) for index, item in enumerate(load_statistic_host_data) ]
     return render_template('statistic_host.html',

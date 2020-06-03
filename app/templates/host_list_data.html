@@ -25,7 +25,9 @@
                 <th>采集日期</th>
                 <th>设备名</th>
                 <th>设备IP</th>
+                {% if current_user.username == 'nokia' %}
                 <th>版本</th>
+                {% endif %}
                 <th>设备启动时间</th>
                 <th>设备配置保存时间</th>
             </tr>
@@ -37,7 +39,9 @@
                     <th>{{ item.date_time }}</th>
                     <th>{{ item.host_name }}</th>
                     <th>{{ item.host_ip }}</th>
+                    {% if current_user.username == 'nokia' %}
                     <th>{{ item.version }}</th>
+                    {% endif %}
                     <th>{{ item.boot_time }}</th>
                     <th>{{ item.config_save_time }}</th>
                 </tr>
