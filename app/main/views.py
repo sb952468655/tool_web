@@ -599,27 +599,34 @@ def check_excel(host_name):
         abort(404)
     check_res = all_check.all_check(config)
 
-    excel = openpyxl.Workbook()
-    sheet = excel.active
-    sheet['A1'] = '设备名'
-    sheet['B1'] = '错误信息'
-    sheet['C1'] = '检查项'
+    # excel = openpyxl.Workbook()
+    # sheet = excel.active
+    # sheet['A1'] = '设备名'
+    # sheet['B1'] = '错误信息'
+    # sheet['C1'] = '检查项'
 
-    sheet.column_dimensions['A'].width = 40.0
-    sheet.column_dimensions['B'].width = 110.0
-    sheet.column_dimensions['C'].width = 70.0
-    cur_row = 2
-    for item in check_res:
-        sheet['A'+ str(cur_row)] = host_name.split('.')[0]
-        sheet['B'+ str(cur_row)] = item[1]
-        sheet['C'+ str(cur_row)] = item[0]
+    # sheet.column_dimensions['A'].width = 40.0
+    # sheet.column_dimensions['B'].width = 110.0
+    # sheet.column_dimensions['C'].width = 70.0
+    # cur_row = 2
+    # for item in check_res:
+    #     sheet['A'+ str(cur_row)] = host_name.split('.')[0]
+    #     sheet['B'+ str(cur_row)] = item[1]
+    #     sheet['C'+ str(cur_row)] = item[0]
 
-        cur_row += 1
+    #     cur_row += 1
     
-    file_name = '{}_配置检查.xlsx'.format(host_name.split('.')[0])
-    excel.save(os.path.join('app','static', file_name))
+    file_name = '{}_配置检查'.format(host_name.split('.')[0])
+    # excel.save(os.path.join('app','static', file_name))
+    f = open(os.path.join('app','static', file_name), 'w')
+    for item in check_res:
+        f.write(item[0]+'\n\n'+item[1]+'\n\n')
+    f.close()
 
-    return redirect(url_for('static', filename=file_name))
+    url = url_for('static', filename = file_name)
+    url2 = unquote(url, encoding='utf-8')
+
+    return redirect(url2)
 
 
 @main.route('/xunjian/<host_name>')
