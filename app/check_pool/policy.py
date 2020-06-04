@@ -302,23 +302,26 @@ def policy_check(config):
                 sap_str = sap_str.replace('                ' + res_pppoe_user_db.group() + '\n', '')
             #固定配置检查
 
-            if '*.*' in j[0]:
+            if '*.*' in j[1]:
                 if sap_str != sap_any_s:
                     d = difflib.Differ()
                     diff = d.compare(sap_str.splitlines(), sap_any_s.splitlines())
                     diff_str = "\n".join(list(diff))
                     diff_str = '              sap {} capture-sap create\n'.format(j[1]) + diff_str
                     err += 'sap {} 下固定配置错误，请对该项人工检查复核！\n{}\n'.format(j[1], diff_str)
-            elif '.*' in j[0]:
-                if sap_str != sap_q_m:
-                    d = difflib.Differ()
-                    diff = d.compare(sap_str.splitlines(), sap_q_m.splitlines())
-                    diff_str = "\n".join(list(diff))
-                    diff_str = '              sap {} capture-sap create\n'.format(j[1]) + diff_str
-                    err += 'sap {} 下固定配置错误，请对该项人工检查复核！\n{}\n'.format(j[1], diff_str)
+            elif '.*' in j[1]:
+                # if sap_str != sap_q_m:
+                #     d = difflib.Differ()
+                #     diff = d.compare(sap_str.splitlines(), sap_q_m.splitlines())
+                #     diff_str = "\n".join(list(diff))
+                #     diff_str = '              sap {} capture-sap create\n'.format(j[1]) + diff_str
+                #     err += 'sap {} 下固定配置错误，请对该项人工检查复核！\n{}\n'.format(j[1], diff_str)
 
-    p_sap_all = r'(?s)sap lag-(\d{1,3}):.*? capture-sap create.*?\n {12}exit'
-    p_sap_q = r'(?s)(sap (lag-%lag_id%:\d{1,3}\.\*) capture-sap create.*?\n {12}exit)'
+                if 'cpu-protection 32 mac-monitoring' not in j[0]:
+                    err += 'sap {} 缺少 cpu-protection 32 mac-monitoring配置\n'.format(j[1])
+                if 'pppoe-python-policy "qu-port"' not in j[0]:
+                    err += 'sap {} 缺少 pppoe-python-policy "qu-port"配置\n'.format(j[1])
+
     p_sap_any = r'(?s)(sap (lag-%lag_id%:\*\.\*) capture-sap create.*?\n {12}exit)'
     p_ies_3000 = r'(?s)(ies 3000( name ".*?")? customer \d{1,2} create\n.+?\n {8}exit)'
     p_lag_config = r'(?s)echo "LAG Configuration"\n#-{50}.*?\n#-{50}'

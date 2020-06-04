@@ -1,4 +1,5 @@
 import os, datetime, logging, re
+from datetime import timedelta
 import openpyxl
 from openpyxl.styles import Alignment, PatternFill
 from flask import current_app
@@ -108,8 +109,8 @@ def get_log_from_date(city, host, date):
     
     for i in logs:
         res = re.search(p_log_datetime, i)
-        real_date_time = datetime.datetime(int(res.group(1)), int(res.group(2)), int(res.group(3)), \
-            int(res.group(4)), int(res.group(5)), int(res.group(6))) + datetime.timedelta(hours=8)
+        real_date_time = datetime(int(res.group(1)), int(res.group(2)), int(res.group(3)), \
+            int(res.group(4)), int(res.group(5)), int(res.group(6))) + timedelta(hours=8)
 
         real_date_str = real_date_time.strftime('%Y-%m-%d')
         if real_date_str == date:
@@ -156,10 +157,10 @@ def is_today_log(log_name):
     p_log_datetime = r'(\d{4})(\d{2})(\d{2})-(\d{2})(\d{2})(\d{2})'
     res = re.search(p_log_datetime, log_name)
     if res:
-        real_date_time = datetime.datetime(int(res.group(1)), int(res.group(2)), int(res.group(3)), \
-            int(res.group(4)), int(res.group(5)), int(res.group(6))) + datetime.timedelta(hours=8) + datetime.timedelta(days=1)
+        real_date_time = datetime(int(res.group(1)), int(res.group(2)), int(res.group(3)), \
+            int(res.group(4)), int(res.group(5)), int(res.group(6))) + timedelta(hours=8) + timedelta(days=1)
 
-        today_time = datetime.datetime.now()
+        today_time = datetime.now()
     else:
         return False
 
@@ -175,12 +176,12 @@ def is_yesday_log(log_name):
     p_log_datetime = r'(\d{4})(\d{2})(\d{2})-(\d{2})(\d{2})(\d{2})'
     res = re.search(p_log_datetime, log_name)
     if res:
-        real_date_time = datetime.datetime(int(res.group(1)), int(res.group(2)), int(res.group(3)), \
+        real_date_time = datetime(int(res.group(1)), int(res.group(2)), int(res.group(3)), \
             int(res.group(4)), int(res.group(5)), int(res.group(6))) + datetime.timedelta(hours=8) + datetime.timedelta(days=2)
     else:
         return False
 
-    today_time = datetime.datetime.now()
+    today_time = datetime.now()
 
     if today_time.strftime('%y/%m/%d') == real_date_time.strftime('%y/%m/%d'):
         return True
