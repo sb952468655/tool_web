@@ -1,8 +1,11 @@
 import os, datetime, logging, re
 import openpyxl
 from openpyxl.styles import Alignment, PatternFill
+from flask import current_app
 from .config import g_log_path
 from .ftp import myFtp
+from ..models import *
+from .. import db
 
 def get_host(city):
     '''获取设备列表'''
@@ -208,3 +211,33 @@ def make_excel(file_name, labels, data):
         cur_row += 1
     
     excel.save(file_name)
+
+def get_last_data(model_obj, host_name='', city='', search_date=''):
+    '''获取数据表最新的数据'''
+
+    data = []
+    host_list = []
+    if host_name:
+        host_list.append(host_name)
+    elif city:
+        host_list = get_host(city)
+    
+    if host_list:
+        for i in host_list:
+            temp = model_obj.query.filter_by(host_name = i, date_time = search_date).all()
+            if not temp:
+                last = model_obj.query.filter_by(host_name=i).order_by(model_obj.id.desc()).first()
+                if last:
+                    data += model_obj.query.filter_by(host_name = i, date_time = last.date_time).all()
+            else:
+                data += temp
+    else:
+        temp = model_obj.query.filter_by(date_time = search_date).all()
+        if not temp:
+            last = model_obj.query.order_by(model_obj.id.desc()).first()
+            if last:
+                data = model_obj.query.filter_by(date_time = last.date_time).all()
+        else:
+            data = temp
+
+    return data
