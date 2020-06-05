@@ -177,7 +177,7 @@ def is_yesday_log(log_name):
     res = re.search(p_log_datetime, log_name)
     if res:
         real_date_time = datetime(int(res.group(1)), int(res.group(2)), int(res.group(3)), \
-            int(res.group(4)), int(res.group(5)), int(res.group(6))) + datetime.timedelta(hours=8) + datetime.timedelta(days=2)
+            int(res.group(4)), int(res.group(5)), int(res.group(6))) + timedelta(hours=8) + timedelta(days=2)
     else:
         return False
 
