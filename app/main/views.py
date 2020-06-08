@@ -163,12 +163,8 @@ def host_list_data():
             host_list_data.append(data)
         else:
             data = HostList.query.filter_by(host_name = i).order_by(HostList.id.desc()).first()
-            host_list_data.append(data)
-    # host_list_data = HostList.query.filter_by(city = city, date_time = search_date).all()
-    # if not host_list_data:
-    #     last = HostList.query.filter_by(city = city).order_by(HostList.id.desc()).first()
-    #     if last:
-    #         host_list_data = HostList.query.filter_by(city = city, date_time = last.date_time).all()
+            if data:
+                host_list_data.append(data)
     host_list_data = [(index, item) for index, item in enumerate(host_list_data) ]
     return render_template('host_list_data.html', host_list_data = host_list_data ,action='host_list_data')
 
