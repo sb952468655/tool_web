@@ -581,8 +581,8 @@ def get_service_statistic(config):
                 for k in res_sap:
                     res_lag_x = re.search(r'lag-(\d{1,3})', k)
                     if res_lag_x and res_lag_x.group(1) in port_lag:
-                        for k in port_lag[res_lag_x.group(1)]:
-                            data.append((k, res_lag_x.group(1), k,j.name, i._type, i.name))
+                        for o in port_lag[res_lag_x.group(1)]:
+                            data.append((o, res_lag_x.group(1), k,j.name, i._type, i.name))
 
     #检查基本配置
     res_router = re.search(p_router, config)
