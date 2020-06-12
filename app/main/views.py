@@ -1413,23 +1413,27 @@ def service_mk_excel():
             cur_row = 2
 
             service_statistic_data = []
-            last = ServiceStatistic.query.filter_by(host_name=host_name).order_by(ServiceStatistic.id.desc()).first()
-            if last:
-                service_statistic_data = ServiceStatistic.query.filter_by(host_name=host_name, date_time = last.date_time).all()
+            # last = ServiceStatistic.query.filter_by(host_name=host_name).order_by(ServiceStatistic.id.desc()).first()
+            # if last:
+            #     service_statistic_data = ServiceStatistic.query.filter_by(host_name=host_name, date_time = last.date_time).all()
+            config = get_log(city, host_name)
+            if not config:
+                continue
+            service_statistic_data = get_service_statistic(config)
             for item in service_statistic_data:
-                sheet['A'+ str(cur_row)] = item.host_name
-                sheet['B'+ str(cur_row)] = item.port
-                sheet['C'+ str(cur_row)] = item.lag
-                sheet['D'+ str(cur_row)] = item.sap
-                sheet['E'+ str(cur_row)] = item.interface
-                sheet['F'+ str(cur_row)] = item.service
-                sheet['G'+ str(cur_row)] = item.service_id
-                sheet['H'+ str(cur_row)] = item.date_time
+                sheet['A'+ str(cur_row)] = host_name
+                sheet['B'+ str(cur_row)] = item[0]
+                sheet['C'+ str(cur_row)] = item[1]
+                sheet['D'+ str(cur_row)] = item[2]
+                sheet['E'+ str(cur_row)] = item[3]
+                sheet['F'+ str(cur_row)] = item[4]
+                sheet['G'+ str(cur_row)] = item[5]
+                sheet['H'+ str(cur_row)] = datetime.today().strftime('%Y%m%d')
 
                 cur_row += 1
             
             excel.save(save_path)
-        zip.write(save_path, '{}-{}-端口业务统计.xlsx'.format(host_name, date.today().strftime('%Y%m%d')))
+        zip.write(save_path, '{}-{}-端口业务统计.xlsx'.format(host_name, date.today().strftime('%Y-%m-%d')))
 
     zip.close()
     url = url_for('static', filename = 'service_statistic/{}'.format(file_name))
@@ -2620,7 +2624,7 @@ def save_db():
                 # t_load_statistic_host = threading.Thread(target=save_load_statistic_host, args=(i, j, today_log))
                 # t_load_statistic_host.start()
                 #端口业务类型统计
-                save_service_statistic(i, j, today_log)
+                # save_service_statistic(i, j, today_log)
                 #地址采集
                 save_address_collect(i, j, today_log)
                 # t_address_collect = threading.Thread(target=save_address_collect, args=(i, j, today_log))
