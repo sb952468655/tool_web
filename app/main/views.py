@@ -1428,7 +1428,7 @@ def service_mk_excel():
                 sheet['E'+ str(cur_row)] = item[3]
                 sheet['F'+ str(cur_row)] = item[4]
                 sheet['G'+ str(cur_row)] = item[5]
-                sheet['H'+ str(cur_row)] = datetime.today().strftime('%Y%m%d')
+                sheet['H'+ str(cur_row)] = datetime.today().strftime('%Y-%m-%d')
 
                 cur_row += 1
             
