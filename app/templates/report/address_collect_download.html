@@ -7,6 +7,10 @@
 <div class="row">
     <div class="col-md-6">
         <form action="{{ url_for('main.address_mk_excel') }}" method="post">
+            {% if host_data %}
+                <a class="btn btn-default selectAll">全选</a>
+                <button type="submit" class="btn btn-default">下载</button>
+            {% endif %}
             <table class="table table-striped table-condensed" >
                 <tbody>
                     {% for index, item in host_data %}
@@ -24,7 +28,7 @@
                 </tbody>
             </table>
             {% if host_data %}
-                <a id="selectAll" class="btn btn-default">全选</a>
+                <a class="btn btn-default selectAll">全选</a>
                 <button type="submit" class="btn btn-default">下载</button>
             {% endif %}
         </form>
@@ -32,13 +36,20 @@
 </div>
 
 {% endblock %}
+
 {% block scripts %}
 {{ super() }}
 <script>
-    $(function() {
-    $("#selectAll").click(function(){ 
-        $("input").attr("checked","true");
+  $(function() {
+    $(".selectAll").click(function(){ 
+        $("input").each(function(){
+            if ($(this).prop("checked")) {
+                $(this).prop("checked",false);
+            } else {
+                $(this).prop("checked",true);
+            }
+        });
     })
-    });
+  });
 </script>
 {% endblock %}
