@@ -574,7 +574,7 @@ def get_service_statistic(config):
                 if res_lag_x and res_lag_x.group(1) in port_lag:
                     for k in port_lag[res_lag_x.group(1)]:
                         data.append((k, res_lag_x.group(1), j[1],'n/a', i._type, i.name))
-        elif i._type == 'vprn':
+        elif i._type == 'vprn' or i._type == 'ies':
             res_interface = i.get_interface()
             for j in res_interface:
                 res_sap = j.get_sap()
@@ -582,7 +582,18 @@ def get_service_statistic(config):
                     res_lag_x = re.search(r'lag-(\d{1,3})', k)
                     if res_lag_x and res_lag_x.group(1) in port_lag:
                         for o in port_lag[res_lag_x.group(1)]:
-                            data.append((o, res_lag_x.group(1), k,j.name, i._type, i.name))
+                            data.append(( o, res_lag_x.group(1), k,j.name, i._type, i.name))
+
+            res_sub_inter = i.get_subscriber_interface()
+            for j in res_sub_inter:
+                res_group_inter = j.get_child()
+                for k in res_group_inter:
+                    res_sap = k.get_sap()
+                    for o in res_sap:
+                        res_lag_x = re.search(r'lag-(\d{1,3})', o)
+                        if res_lag_x and res_lag_x.group(1) in port_lag:
+                            for p in port_lag[res_lag_x.group(1)]:
+                                data.append((p, res_lag_x.group(1), o,k.name, i._type, i.name))
 
     #检查基本配置
     res_router = re.search(p_router, config)
