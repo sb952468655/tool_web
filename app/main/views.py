@@ -1416,7 +1416,7 @@ def service_mk_excel():
             # last = ServiceStatistic.query.filter_by(host_name=host_name).order_by(ServiceStatistic.id.desc()).first()
             # if last:
             #     service_statistic_data = ServiceStatistic.query.filter_by(host_name=host_name, date_time = last.date_time).all()
-            config = get_log(city, host_name)
+            config = get_log_first(city, host_name)
             if not config:
                 continue
             service_statistic_data = get_service_statistic(config)

@@ -88,6 +88,7 @@ def get_log_first(city, host):
 
     logs = get_host_logs(city, host)
     log_str = ''
+    logs.reverse()
     for log in logs:
         try:
             log_str = open(os.path.join(g_log_path, city, host, log)).read()
