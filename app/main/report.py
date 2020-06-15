@@ -553,14 +553,31 @@ def get_service_statistic(config):
     p_lag = generate_pat(5, 'lag', 4)
     p_port = r'port (\d{1,2}/\d{1,2}/\d{1,2})'
     p_router_inter = r'(?s)(interface "(.*?)".*?\n {8}exit)'
+    p_port_configuration = r'(?s)echo "Port Configuration"\n#-{50}.*?\n#-{50}'
+    p_description = r'description "(.*?)"'
+
+    res_port_configuration = re.search(p_port_configuration, config)
+    if not res_port_configuration:
+        print('没有找到Port Configuration')
+        return []
 
     res_lag_configuration = re.search(p_lag_configuration, config)
     if res_lag_configuration:
         res_lag = re.findall(p_lag, res_lag_configuration.group())
         for i in res_lag:
+            port_data = []
             res_port = re.findall(p_port, i[0])
-            if res_port:
-                port_lag[i[1]] = res_port
+            for j in res_port:
+                p_port_config = r'(?s) port %s.*?\n {4}exit' % j
+                description = ''
+                res_port_config = re.search(p_port_config, res_port_configuration.group())
+                if res_port_config:
+                    res_description = re.search(p_description, res_port_config.group())
+                    if res_description:
+                        description = res_description.group(1)
+                port_data.append((j, description))
+
+            port_lag[i[1]] = port_data
 
     config_7750 = Config_7750(config)
     service = config_7750.get_child()
@@ -573,7 +590,7 @@ def get_service_statistic(config):
                 res_lag_x = re.search(r'lag-(\d{1,3})', j[1])
                 if res_lag_x and res_lag_x.group(1) in port_lag:
                     for k in port_lag[res_lag_x.group(1)]:
-                        data.append((k, res_lag_x.group(1), j[1],'n/a', i._type, i.name))
+                        data.append((k[0], k[1], res_lag_x.group(1), j[1],'n/a', i._type, i.name))
         elif i._type == 'vprn' or i._type == 'ies':
             res_interface = i.get_interface()
             for j in res_interface:
@@ -582,7 +599,7 @@ def get_service_statistic(config):
                     res_lag_x = re.search(r'lag-(\d{1,3})', k)
                     if res_lag_x and res_lag_x.group(1) in port_lag:
                         for o in port_lag[res_lag_x.group(1)]:
-                            data.append(( o, res_lag_x.group(1), k,j.name, i._type, i.name))
+                            data.append(( o[0], o[1], res_lag_x.group(1), k,j.name, i._type, i.name))
 
             res_sub_inter = i.get_subscriber_interface()
             for j in res_sub_inter:
@@ -593,7 +610,7 @@ def get_service_statistic(config):
                         res_lag_x = re.search(r'lag-(\d{1,3})', o)
                         if res_lag_x and res_lag_x.group(1) in port_lag:
                             for p in port_lag[res_lag_x.group(1)]:
-                                data.append((p, res_lag_x.group(1), o,k.name, i._type, i.name))
+                                data.append((p[0], p[1], res_lag_x.group(1), o,k.name, i._type, i.name))
 
     #检查基本配置
     res_router = re.search(p_router, config)
@@ -602,7 +619,14 @@ def get_service_statistic(config):
         for i in res_inter:
             res_port = re.search(p_port, i[0])
             if res_port:
-                data.append((res_port.group(1), 'n/a', res_port.group(1), i[1], 'base', 'n/a'))
+                description = ''
+                p_port_config = r'(?s) port %s.*?\n {4}exit' % res_port.group(1)
+                res_port_config = re.search(p_port_config, res_port_configuration.group())
+                if res_port_config:
+                    res_description = re.search(p_description, res_port_config.group())
+                    if res_description:
+                        description = res_description.group(1)
+                data.append((res_port.group(1), description, 'n/a', res_port.group(1), i[1], 'base', 'n/a'))
 
     return data
 def get_host_name(config):

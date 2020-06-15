@@ -1400,16 +1400,17 @@ def service_mk_excel():
             sheet = excel.active
             sheet['A1'] = '设备名'
             sheet['B1'] = '端口'
-            sheet['C1'] = 'lag-id'
-            sheet['D1'] = 'sap/port'
-            sheet['E1'] = 'interface'
-            sheet['F1'] = 'service'
-            sheet['G1'] = 'service id'
-            sheet['H1'] = '采集日期'
+            sheet['C1'] = '端口描述'
+            sheet['D1'] = 'lag-id'
+            sheet['E1'] = 'sap/port'
+            sheet['F1'] = 'interface'
+            sheet['G1'] = 'service'
+            sheet['H1'] = 'service id'
+            sheet['I1'] = '采集日期'
 
             sheet.column_dimensions['A'].width = 40.0
-            sheet.column_dimensions['D'].width = 15.0
-            sheet.column_dimensions['H'].width = 15.0
+            sheet.column_dimensions['E'].width = 15.0
+            sheet.column_dimensions['I'].width = 15.0
             cur_row = 2
 
             service_statistic_data = []
@@ -1428,7 +1429,8 @@ def service_mk_excel():
                 sheet['E'+ str(cur_row)] = item[3]
                 sheet['F'+ str(cur_row)] = item[4]
                 sheet['G'+ str(cur_row)] = item[5]
-                sheet['H'+ str(cur_row)] = datetime.today().strftime('%Y-%m-%d')
+                sheet['H'+ str(cur_row)] = item[6]
+                sheet['I'+ str(cur_row)] = datetime.today().strftime('%Y-%m-%d')
 
                 cur_row += 1
             
