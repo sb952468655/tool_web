@@ -10,6 +10,10 @@ class CaseUploadForm(FlaskForm):
     upload_file = FileField('文件上传', validators=[FileRequired(), FileAllowed(['doc','docx','pdf'])])
     submit = SubmitField('提交')
 
+class ConfigForm(FlaskForm):
+    upload_file = FileField('上传检查', validators=[FileRequired(), FileAllowed(['log','txt'])])
+    submit = SubmitField('提交')
+
 class ModelForm(FlaskForm):
     id = HiddenField('模板id', validators=[DataRequired()])
     name = StringField('模板名称', validators=[DataRequired()])

@@ -23,7 +23,7 @@ from ..models import *
 from .report import *
 from .common import get_log, get_log_first, get_host, get_today_log_name, get_city_list, get_host_logs, get_log_from_date, make_excel, get_last_data
 from ..special_line.views import save_special_line
-from .forms import CaseUploadForm, ModelForm, ModelListCreateForm, ModelSelectForm
+from .forms import CaseUploadForm, ModelForm, ModelListCreateForm, ModelSelectForm, ConfigForm
 sys.path.append('../')
 
 @main.route('/')
@@ -456,6 +456,27 @@ def check_config(host_name):
 
     session['host_name'] = host_name
     return render_template('check.html', check_data=check_res, host_name=host_name)
+
+@main.route('/upload_check', methods=['GET', 'POST'])
+@login_required
+def upload_check():
+    '''配置上传检查'''
+
+    if not os.path.exists(os.path.join('app', 'static', 'config')):
+        os.makedirs(os.path.join('app', 'static', 'config'))
+        
+    form = ConfigForm()
+    if form.validate_on_submit():
+        f = form.upload_file.data
+        save_path = os.path.join('app', 'static', 'config', f.filename)
+        f.save(save_path)
+        config = open(save_path).read()
+        check_res = all_check.all_check(config)
+
+        host_name = get_host_name(config)
+        return render_template('check.html', check_data=check_res, host_name=host_name)
+
+    return render_template('host_list_base.html', form=form)
 
 @main.route('/check_excel/<host_name>')
 @login_required
@@ -1265,13 +1286,13 @@ def host_list(action):
 
     session['city_name'] = g_city_to_name.get(city)
     
-    
+    form = ConfigForm()
     host_data = get_host(city)
     host_data = [(index, host) for index, host in enumerate(host_data)]
     if action == 'config_backup':
         return redirect(url_for('main.config_backup'))
 
-    return render_template('host_list_base.html', host_data = host_data,  action = action)
+    return render_template('host_list_base.html', host_data = host_data,  action = action, form=form)
 
 
 @main.route('/address_collect', methods=['GET', 'POST'])
