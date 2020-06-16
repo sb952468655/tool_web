@@ -37,6 +37,9 @@
         {% if action == 'load_statistic' %}
         <a class="btn btn-default btn-sm" href="{{ url_for('main.load_statistic_search', load_name = 'load_statistic') }}">搜索</a>
         {% endif %}
+        {% if action == 'check_config' %}
+        {{ wtf.quick_form(form,url_for('main.upload_check')) }}
+        {% endif %}
 
         <table class="table table-striped table-condensed" >
             <thead>
