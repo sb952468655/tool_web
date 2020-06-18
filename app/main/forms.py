@@ -14,6 +14,10 @@ class ConfigForm(FlaskForm):
     upload_file = FileField('上传检查', validators=[FileRequired(), FileAllowed(['log','txt'])])
     submit = SubmitField('提交')
 
+class PortServiceForm(FlaskForm):
+    upload_file = FileField('导入配置', validators=[FileRequired(), FileAllowed(['log','txt'])])
+    submit = SubmitField('提交')
+
 class ModelForm(FlaskForm):
     id = HiddenField('模板id', validators=[DataRequired()])
     name = StringField('模板名称', validators=[DataRequired()])

@@ -23,7 +23,7 @@ from ..models import *
 from .report import *
 from .common import get_log, get_log_first, get_host, get_today_log_name, get_city_list, get_host_logs, get_log_from_date, make_excel, get_last_data
 from ..special_line.views import save_special_line
-from .forms import CaseUploadForm, ModelForm, ModelListCreateForm, ModelSelectForm, ConfigForm
+from .forms import CaseUploadForm, ModelForm, ModelListCreateForm, ModelSelectForm, ConfigForm, PortServiceForm
 sys.path.append('../')
 
 @main.route('/')
@@ -1394,10 +1394,9 @@ def address_mk_excel():
 @login_required
 def service_mk_excel():
     '''端口业务类型统计生成 excel 表格'''
-    
 
     if not os.path.exists(os.path.join('app', 'static', 'service_statistic')):
-            os.makedirs(os.path.join('app', 'static', 'service_statistic'))
+        os.makedirs(os.path.join('app', 'static', 'service_statistic'))
 
     backup_data = request.form.to_dict()
     city = session.get('city')
@@ -1463,6 +1462,66 @@ def service_mk_excel():
     url2 = unquote(url, encoding='utf-8')
     return redirect(url2)
 
+@main.route('/upload_service_statistic', methods=['POST'])
+@login_required
+def upload_service_statistic():
+    '''根据上传文件统计端口业务类型 生成 excel 表格'''
+
+    if not os.path.exists(os.path.join('app', 'static', 'config')):
+        os.makedirs(os.path.join('app', 'static', 'config'))
+        
+    form = PortServiceForm()
+    if form.validate_on_submit():
+        f = form.upload_file.data
+        save_path = os.path.join('app', 'static', 'config', f.filename)
+        f.save(save_path)
+        try:
+            config = open(save_path).read()
+            host_name = get_host_name(config)
+        except:
+            flash('配置异常，请检查！')
+            return redirect(url_for('main.service_statistic'))
+        file_name = '{}-{}-端口业务统计.xlsx'.format(host_name, date.today().strftime('%Y%m%d'))
+        save_path = os.path.join('app','static', 'service_statistic', file_name)
+        excel = openpyxl.Workbook()
+        sheet = excel.active
+        sheet['A1'] = '设备名'
+        sheet['B1'] = '端口'
+        sheet['C1'] = '端口描述'
+        sheet['D1'] = 'lag-id'
+        sheet['E1'] = 'sap/port'
+        sheet['F1'] = 'interface'
+        sheet['G1'] = 'service'
+        sheet['H1'] = 'service id'
+        sheet['I1'] = '采集日期'
+
+        sheet.column_dimensions['A'].width = 40.0
+        sheet.column_dimensions['E'].width = 15.0
+        sheet.column_dimensions['I'].width = 15.0
+        cur_row = 2
+
+        service_statistic_data = []
+        service_statistic_data = get_service_statistic(config)
+        for item in service_statistic_data:
+            sheet['A'+ str(cur_row)] = host_name
+            sheet['B'+ str(cur_row)] = item[0]
+            sheet['C'+ str(cur_row)] = item[1]
+            sheet['D'+ str(cur_row)] = item[2]
+            sheet['E'+ str(cur_row)] = item[3]
+            sheet['F'+ str(cur_row)] = item[4]
+            sheet['G'+ str(cur_row)] = item[5]
+            sheet['H'+ str(cur_row)] = item[6]
+            sheet['I'+ str(cur_row)] = datetime.today().strftime('%Y-%m-%d')
+
+            cur_row += 1
+        
+        excel.save(save_path)
+
+        url = url_for('static', filename = 'service_statistic/{}'.format(file_name))
+        url2 = unquote(url, encoding='utf-8')
+        return redirect(url2)
+    else:
+        return redirect(url_for('main.service_statistic'))
 
 @main.route('/config_backup')
 @login_required
@@ -1610,7 +1669,8 @@ def service_statistic():
 
 
     host_list = [(index, item) for index, item in enumerate(host_list) ]
-    return render_template('report/service_statistic.html', host_list = host_list, action='service_statistic')
+    form = PortServiceForm()
+    return render_template('report/service_statistic.html', host_list = host_list, action='service_statistic', form = form)
 
 
 

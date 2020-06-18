@@ -5,6 +5,12 @@
 {% block data_content %}
 <div class="row">
     <div class="col-md-6">
+        <div class="panel panel-default">
+            <div class="panel-heading">上传统计</div>
+            <div class="panel-body">
+                {{ wtf.quick_form(form, url_for('main.upload_service_statistic')) }}
+            </div>
+        </div>
         <form action="{{ url_for('main.service_mk_excel') }}" method="post">
             {% if host_list %}
                 <a class="btn btn-default selectAll">全选</a>
