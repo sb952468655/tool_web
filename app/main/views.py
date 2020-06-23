@@ -1695,11 +1695,19 @@ def install_base():
 def net_flow():
     '''重要网络流量统计'''
 
-    net_flow_data = NetFlow.query.filter_by(date_time = date.today()).all()
-    if not net_flow_data:
-        last = NetFlow.query.order_by(NetFlow.id.desc()).first()
-        if last:
-            net_flow_data = NetFlow.query.filter_by(date_time = last.date_time).all()
+    net_flow_data = []
+    search_date = date.today()
+    city_list = get_city_list()
+    for i in city_list:
+        host_list = get_host(i)
+        for j in host_list:
+            temp = NetFlow.query.filter_by(site_name = j, date_time = search_date).all()
+            if not temp:
+                last = NetFlow.query.filter_by(site_name=j).order_by(NetFlow.id.desc()).first()
+                if last:
+                    net_flow_data += NetFlow.query.filter_by(site_name = j, date_time = last.date_time).all()
+            else:
+                net_flow_data += temp
 
     return render_template('report/net_flow.html',
         data = net_flow_data,
