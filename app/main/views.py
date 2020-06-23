@@ -2646,7 +2646,6 @@ def xunjian_search(xunjian_name):
 
         if city and host_name and date_str:
             log_str = get_log_from_date(city, host_name, date_str)
-        
 
         return render_template('search/xunjian_log.html', 
             log_str = log_str,
