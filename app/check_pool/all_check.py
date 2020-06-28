@@ -351,9 +351,9 @@ def vpls_no_shutdown_check(config):
                 err += 'vpls {} shutdown\n'.format(i[1])
 
     if err == '':
-        err = 'Vpls no shutdown 检查 -> OK\n\n'
+        err = 'Vpls no shutdown 检查 -> OK\n\n请人工核实该vpls是否还有pppoe业务需求'
     else:
-        err = 'Vpls no shutdown 检查 -> ERROR\n\n' + err + '\n\n'
+        err = 'Vpls no shutdown 检查 -> ERROR\n\n' + err + '\n\n“请人工核实该vpls是否还有pppoe业务需求'
 
 
     return (check_item, err, msg)
