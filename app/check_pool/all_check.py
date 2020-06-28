@@ -60,6 +60,7 @@ def all_check(config):
     err.append(admin_check(config))
     # err.append(jiou_check(config))
     err.append(global_check(config))
+    err.append(vpls_no_shutdown_check(config))
 
     return err
 
@@ -333,32 +334,29 @@ def ies_1000_3000_outside_check(config):
 
     return (check_item, err, msg)
 
+def vpls_no_shutdown_check(config):
+    '''检查vpls 是否no shutdown'''
 
-# def policy_check(config):
-#     '''ies3000下面每个group-interface的"pppoe-policy-m"和 "ludb-m"要一致起来。
-#     只有"pppoe-policy-m" "ludb-m"和"pppoe-policy-s" "ludb-s"这两种组合，不能混用'''
+    err = ''
+    msg = ''
+    check_item = '''Vpls no shutdown 检查'''
+    p_service_configuration = r'(?s)echo "Service Configuration"\n#-{50}.*?\n#-{50}'
+    p_vpls = r'(?s)(        vpls (\d{1,11})( name ".*?")? customer \d{1,3} create.*?\n {8}exit)'
 
-#     err = ''
-#     msg = ''
-#     check_item = '''检查ies3000 group-interface中的pppoe-policy, user-db 是否正确'''
-#     p_ies_3000 = r'(?s)(ies 3000( name ".*?")? customer \d{1,2} create\n.+?\n {8}exit)'
-#     p_group_interface = PAT['group_interface']
+    res_service_configuration = re.search(p_service_configuration, config)
+    if res_service_configuration:
+        res_vpls = re.findall(p_vpls, res_service_configuration.group())
+        for i in res_vpls:
+            if 'capture-sap' in i[0] and '\n            no shutdown' not in i[0]:
+                err += 'vpls {} shutdown\n'.format(i[1])
 
-#     res_ies_3000 = re.findall(p_ies_3000, config)
-#     if len(res_ies_3000) != 2:
-#         err = '没有找到ies 3000，请检查\n'
-#     else:
-#         res_group_interface = re.findall(p_group_interface, res_ies_3000[1][0])
-#         for i in res_group_interface:
-#             if ('pppoe-policy-m' in i[0] and 'ludb-s' in i[0]) or ('pppoe-policy-s' in i[0] and 'ludb-m' in i[0]):
-#                 err += 'ies 3000 中的 group-interface "{}" pppoe-policy, user-db错误，请检查\n'.format(i[1])
-#                 msg += i[0] + '\n'
+    if err == '':
+        err = 'Vpls no shutdown 检查 -> OK\n\n'
+    else:
+        err = 'Vpls no shutdown 检查 -> ERROR\n\n' + err + '\n\n'
 
 
-#     if err == '':
-#         err = '检查通过\n'
-
-#     return (check_item, err, msg)
+    return (check_item, err, msg)
 
 
 
