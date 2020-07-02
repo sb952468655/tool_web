@@ -244,3 +244,16 @@ def get_last_data(model_obj, host_name='', city='', search_date=''):
             data = temp
 
     return data
+
+def get_log_date(config):
+    '''获取log日期'''
+
+    time_str = ''
+    p_show_time = r'show time ?\n(.*?)\n'
+    res_show_time = re.search(p_show_time, config)
+    if res_show_time:
+        msg = res_show_time.group(1)
+        GMT_FORMAT = '%a %b %d %H:%M:%S GMT8 %Y'
+        time_str = datetime.strptime(msg, GMT_FORMAT).strftime('%Y-%m-%d')
+
+    return time_str

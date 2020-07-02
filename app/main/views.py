@@ -21,7 +21,7 @@ from .statistic import get_statistic_data, get_statistic_host_data
 from .. import db
 from ..models import *
 from .report import *
-from .common import get_log, get_log_first, get_host, get_today_log_name, get_city_list, get_host_logs, get_log_from_date, make_excel, get_last_data
+from .common import *
 from ..special_line.views import save_special_line
 from .forms import CaseUploadForm, ModelForm, ModelListCreateForm, ModelSelectForm, ConfigForm, PortServiceForm
 sys.path.append('../')
@@ -1536,7 +1536,14 @@ def config_backup():
     # today = date.today()
     date_str = date.today().strftime('%Y%m%d')
     for item in host_list:
-        if get_log(city, item) or get_log_first(city, item):
+        log1 = get_log(city, item)
+        log2 = get_log_first(city, item)
+        if log1:
+            log_str = log1
+        else:
+            log_str = log2
+        if log_str:
+            date_str = get_log_date(log_str)
             host_data.append((item, date_str))
     host_data = [(index, host) for index, host in enumerate(host_data)]
     return render_template('back_up/config_backup_host_list.html', host_data=host_data)
