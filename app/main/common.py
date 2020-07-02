@@ -253,7 +253,11 @@ def get_log_date(config):
     res_show_time = re.search(p_show_time, config)
     if res_show_time:
         msg = res_show_time.group(1)
-        GMT_FORMAT = '%a %b %d %H:%M:%S GMT8 %Y'
-        time_str = datetime.strptime(msg, GMT_FORMAT).strftime('%Y-%m-%d')
+        try:
+            GMT_FORMAT = '%a %b %d %H:%M:%S GMT8 %Y'
+            time_str = datetime.strptime(msg, GMT_FORMAT).strftime('%Y-%m-%d')
+        except:
+            GMT_FORMAT = '%a %b %d %H:%M:%S GMT08 %Y'
+            time_str = datetime.strptime(msg, GMT_FORMAT).strftime('%Y-%m-%d')
 
     return time_str
