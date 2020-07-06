@@ -1537,11 +1537,10 @@ def config_backup():
     date_str = date.today().strftime('%Y%m%d')
     for item in host_list:
         log1 = get_log(city, item)
-        log2 = get_log_first(city, item)
+        log1 = get_log_first(city, item)
         if log1:
             log_str = log1
-        else:
-            log_str = log2
+
         if log_str:
             date_str = get_log_date(log_str)
             host_data.append((item, date_str))
