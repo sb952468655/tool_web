@@ -25,9 +25,9 @@
         </div>
         {% if action == 'xunjian' %}
         <a class="btn btn-default btn-sm" href="{{ url_for('main.xj_report_all_host') }}">设备巡检报告</a>
-        <a class="btn btn-default btn-sm" href="{{ url_for('main.xj_report_summary') }}">报告汇总</a>
+        <a class="btn btn-default btn-sm" href="{{ url_for('main.xj_summary_download') }}">报告汇总</a>
         {% if current_user.username == 'nokia' %}
-        <a class="btn btn-default btn-sm" href="{{ url_for('main.xj_report_summary', city = 'all') }}">全省报告汇总</a>
+        <a class="btn btn-default btn-sm" href="{{ url_for('main.xj_summary_download', city = 'all') }}">全省报告汇总</a>
         {% endif %}
         <a class="btn btn-default btn-sm" href="{{ url_for('main.xunjian_search', xunjian_name = 'xunjian') }}">搜索</a>
         {% endif %}

@@ -1134,12 +1134,20 @@ def xj_report(city, host_name, type):
 
 @main.route('/xj_report_all_host')
 @login_required
-def xj_report_all_host():
+def xj_report_all_host(city=None):
     '''所有设备巡检，生成巡检报告'''
 
-    warn_data = []
-    city = session.get('city')
 
+    warn_data = []
+    if not city:
+        city = session.get('city')
+
+    today_obj = datetime.now()
+    today = '%d年%d月%d日' % (today_obj.year, today_obj.month, today_obj.day)
+    report_name = '%s移动巡检报告-%s.docx' % (g_city_to_name.get(city), today)
+    file_path = os.path.join('app', 'static', report_name)
+    if os.path.exists(file_path):
+        return redirect(url_for('static', filename = report_name))
     host_list = get_host(city)
     for i in host_list:
         xunjian_data = XunJian.query.filter_by(host_name = i, date_time = date.today()).all()
@@ -1159,8 +1167,6 @@ def xj_report_all_host():
     doc.add_paragraph('上海贝尔7750设备巡检报告', style='report-head')
     doc.add_paragraph()
     doc.add_paragraph()
-    today_obj = datetime.now()
-    today = '%d年%d月%d日' % (today_obj.year, today_obj.month, today_obj.day)
     doc.add_paragraph(today, style='report-date')
     doc.add_page_break()
     doc.add_heading('巡检情况汇总', 4)
@@ -1205,7 +1211,7 @@ def xj_report_all_host():
                 style='report-normal')
             break
     
-    report_name = '%s移动巡检报告-%s.docx' % (g_city_to_name.get(city), today)
+    
     doc.save( os.path.join('app', 'static', report_name))
 
     return redirect(url_for('static', filename = report_name))
@@ -1215,47 +1221,86 @@ def xj_report_all_host():
 def xj_report_summary():
     '''所有设备巡检报告汇总'''
 
-    is_all = request.args.get('city')
-    city = session.get('city')
-    xunjian_data = []
-    city_list = []
-    if is_all == 'all':
-        city_list = get_city_list()
-        file_name = '全省巡检报告汇总-{}.xlsx'.format(date.today().strftime('%Y-%m-%d'))
-    else:
-        city_list.append(city)
-        file_name = '巡检报告汇总-{}-{}.xlsx'.format(g_city_to_name[city], date.today().strftime('%Y-%m-%d'))
+    # is_all = request.args.get('city')
+    # city = session.get('city')
+    # xunjian_data = []
+    all_data = []
+    city_list = get_city_list()
+    all_city_report_name = '全省巡检报告汇总-{}.xlsx'.format(date.today().strftime('%Y-%m-%d'))
+    # if is_all == 'all':
+    #     city_list = get_city_list()
+    #     file_name = '全省巡检报告汇总-{}.xlsx'.format(date.today().strftime('%Y-%m-%d'))
+    # else:
+    #     city_list.append(city)
+    #     file_name = '巡检报告汇总-{}-{}.xlsx'.format(g_city_to_name[city], date.today().strftime('%Y-%m-%d'))
 
     for i in city_list:
+        city_data = []
         host_list = get_host(i)
         for j in host_list:
             last = XunJian.query.filter_by(host_name = j).order_by(XunJian.id.desc()).first()
             if last:
                 data = XunJian.query.filter_by(host_name = j, date_time = last.date_time).all()
-                xunjian_data += data
+                # xunjian_data += data
+                city_data += data
 
     # file_name = '报告汇总.xlsx'
-    labels = [
-        '设备名', '检查项', '检查结果', '检查日期'
-    ]
+        labels = [
+            '设备名', '检查项', '检查结果', '检查日期'
+        ]
 
-    data = []
-    for i in xunjian_data:
-        check_res = '正常'
-        if '正常' not in i.err:
-            check_res = '异常'
+        data = []
+        for k in city_data:
+            check_res = '正常'
+            if '正常' not in k.err:
+                check_res = '异常'
 
-        data.append((
-            i.host_name,
-            i.check_item,
-            check_res,
-            i.date_time.strftime('%Y-%m-%d')
-        ))
+            data.append((
+                k.host_name,
+                k.check_item,
+                check_res,
+                k.date_time.strftime('%Y-%m-%d')
+            ))
+            all_data.append((
+                k.host_name,
+                k.check_item,
+                check_res,
+                k.date_time.strftime('%Y-%m-%d')
+            ))
 
-    save_path = os.path.join('app','static', file_name)
-    if labels and data:
-        make_excel(save_path, labels, data)
-        return redirect(url_for('static', filename=file_name))
+        file_name = '巡检报告汇总-{}-{}.xlsx'.format(g_city_to_name[i], date.today().strftime('%Y-%m-%d'))
+        save_path = os.path.join('app','static', file_name)
+        if labels and data:
+            make_excel(save_path, labels, data)
+            # return redirect(url_for('static', filename=file_name))
+        # else:
+        #     abort(404)
+    #生成全省报告
+    save_path = os.path.join('app','static', all_city_report_name)
+    if all_data:
+        make_excel(save_path, labels, all_data)
+
+@main.route('/xj_summary_download')
+@login_required
+def xj_summary_download():
+    '''下载巡检报告汇总'''
+
+    is_all = request.args.get('city')
+    city = session.get('city')
+    url = ''
+    if is_all == 'all':
+        file_name = '全省巡检报告汇总-{}.xlsx'.format(date.today().strftime('%Y-%m-%d'))
+        file_path = os.path.join('app', 'static', file_name)
+        if os.path.exists(file_path):
+            url = url_for('static', filename = file_name)
+    else:
+        file_name = '巡检报告汇总-{}-{}.xlsx'.format(g_city_to_name[city], date.today().strftime('%Y-%m-%d'))
+        file_path = os.path.join('app', 'static', file_name)
+        if os.path.exists(file_path):
+            url = url_for('static', filename = file_name)
+
+    if url:
+        return redirect(url)
     else:
         abort(404)
 
@@ -2755,7 +2800,8 @@ def save_db():
                 save_xunjian(i, j, today_log, yesterday_log)
                 # t_xunjian = threading.Thread(target=save_xunjian, args=(i, j, today_log, yesterday_log))
                 # t_xunjian.start()
-                #配置检查
+                #巡检报告
+                xj_report_all_host(i)
             else:
                 if not today_log:
                     logging.info('host: {} not found today log'.format(j))
@@ -2767,6 +2813,8 @@ def save_db():
         # t_host_list.start()
     #installbase统计
     save_install_base()
+    #生成巡检报告
+    xj_report_summary()
     # t_install_base = threading.Thread(target=save_install_base)
     # t_install_base.start()
 
@@ -2839,6 +2887,8 @@ def save_port_detail(city, host_name, config):
                 dk = '10GE'
             elif item[-1].startswith('GIGE'):
                 dk = 'GE'
+            else:
+                dk = ''
             try:
                 if item[2] == 'Up' and item[3] == 'Yes' and item[4] == 'Up':
                     if ggl_data[i][7] and (float(ggl_data[i][5]) < float(ggl_data[i][8]) or float(ggl_data[i][5]) > float(ggl_data[i][7])):
