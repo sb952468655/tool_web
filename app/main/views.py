@@ -446,9 +446,7 @@ def check_config(host_name):
     if not city:
         return redirect(url_for('main.city_list'))
 
-    config = get_log(city, host_name)
-    if not config:
-        config = get_log_first(city, host_name)
+    config = get_log_first(city, host_name)
     if not config:
         abort(404)
 

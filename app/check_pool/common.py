@@ -254,5 +254,23 @@ def get_static_route(config):
     return [item[1] for item in res_static_route]
 
 
+def remove_right_space(text):
+    '''去掉每行右边空格'''
+
+    res = ''
+    for i in text.splitlines():
+        res += i.rstrip() + '\n'
+
+    return res
+
+def add_space(text, space):
+    '''在文本每行加空格'''
+    res = ''
+    lines = text.splitlines()
+    for i in lines:
+        res = res + '\n{}{}'.format(space, i)
+
+    return res
+
 
 

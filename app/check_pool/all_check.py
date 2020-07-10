@@ -7,7 +7,8 @@ from .outside_pool import outside_pool_check
 from .subnet import subnet_check
 from .ipv6 import check4, ipv6_check
 from .rule124 import rule124
-from .policy import policy_check
+from .policy import *
+from .dns import *
 from .dhcp import dhcp_check
 from .log_warn import check_log_warn
 from .ftp import ftp_check
@@ -61,6 +62,19 @@ def all_check(config):
     # err.append(jiou_check(config))
     err.append(global_check(config))
     err.append(vpls_no_shutdown_check(config))
+    err.append(ies_3000_check(config))
+    err.append(sap_check(config))
+    err.append(sap_q_check(config))
+    err.append(sap_q_cpu_check(config))
+    err.append(local_user_db_check(config))
+
+    err.append(sntp_check(config))
+    err.append(lacp_check(config))
+    err.append(dhcp_pool_check(config))
+    err.append(cms_rms_check(config))
+    err.append(ims_check(config))
+    err.append(fc_ef_check(config))
+
 
     return err
 
@@ -147,40 +161,6 @@ def ies_1000_check(config):
         print('not found ies 1000')
 
 
-    if err == '':
-        err = '检查通过\n'
-
-    return (check_item, err, msg)
-
-
-def ies_3000_check(config):
-    '''检查ies 3000 subscriber-interface "pppoe" 的地址是否与dhcp中地址一致'''
-
-    err = ''
-    msg = ''
-    check_item = '检查ies 3000 subscriber-interface "pppoe" 的地址是否与dhcp中地址一致'
-
-    p_ies_3000 = r'(?s)(ies 3000( name ".*?")? customer \d{1,2} create\n.+?\n {8}exit)'
-    p_sub_interface_pppoe = r'(?s)subscriber-interface "pppoe" create\n.+?\n {12}exit'
-
-    res_ies_3000 = re.findall(p_ies_3000, config)
-    if res_ies_3000:
-        temp = res_ies_3000[1][0]
-        res_sub_interface_pppoe = re.search(p_sub_interface_pppoe, res_ies_3000[1][0])
-        if not res_sub_interface_pppoe:
-            err += '没有找到subscriber-interface "pppoe" '
-            return err
-        temp = res_sub_interface_pppoe.group()
-        res_ies_3000_address = re.findall(PAT['address'], temp)
-        res_dhcp_address = get_pool_ip(config)
-        res_ies_3000_address = [ i.replace('.1/', '.0/') for i in res_ies_3000_address ]
-
-        if sorted(res_ies_3000_address) != sorted(res_dhcp_address):
-            diff = list(set(res_ies_3000_address) - set(res_dhcp_address)) + list(set(res_dhcp_address) - set(res_ies_3000_address))
-            err += 'ies 3000 subscriber-interface "pppoe" 的地址与dhcp中地址不一致，请检查'
-            msg = '不一致地址\n{}\n\n'.format('\n'.join(diff))
-    else:
-        err += '没有找到ies 3000\n'
     if err == '':
         err = '检查通过\n'
 
