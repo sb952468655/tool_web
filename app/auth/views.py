@@ -25,7 +25,8 @@ def login():
 def logout():
     logout_user()
     session.pop('city')
-    session.pop('city_name')
+    if session.get('city_name'):
+        session.pop('city_name')
     return redirect(url_for('main.index'))
 
 @auth.route('/change-password', methods=['GET', 'POST'])
