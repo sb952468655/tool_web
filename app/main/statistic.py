@@ -52,7 +52,7 @@ def get_statistic_data(config):
 
         utilization = ''
         if user_num and pool_num and user_num != '0' and pool_num != '0':
-            utilization = '%.2f' % ((int(user_num)/int(pool_num)) * 100) + ' %'
+            utilization = '%.2f' % ((int(user_num)/int(pool_num)) * 10) + ' %'
 
         #vprn 4015用户数，地址池利用率
         #获取4015对应lag的用户数
@@ -98,7 +98,7 @@ def get_statistic_data(config):
         res_stable_leases = re.search(p_stable_leases, config)
         lyl_4015 = ''
         if res_stable_leases and user_num_4015 and res_stable_leases.group(4) != '0' and user_num_4015 != '0':
-            lyl_4015 = '%.2f' % ((int(user_num_4015)/int(res_stable_leases.group(4))) * 100) + ' %'
+            lyl_4015 = '%.2f' % ((int(user_num_4015)/int(res_stable_leases.group(4))) * 10) + ' %'
         try:
             statistic_data.append(
                 [item[0], item[1], res_ip, port_type, res_utilization[i][0], res_utilization[i][1], user_num, utilization, user_num_4015, lyl_4015]
