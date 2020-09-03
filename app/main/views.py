@@ -1219,28 +1219,24 @@ def xj_report_all_host(city=None):
 def xj_report_summary():
     '''所有设备巡检报告汇总'''
 
-    # is_all = request.args.get('city')
-    # city = session.get('city')
-    # xunjian_data = []
+    logging.info('所有设备巡检报告汇总 开始')
     all_data = []
     city_list = get_city_list()
     all_city_report_name = '全省巡检报告汇总-{}.xlsx'.format(date.today().strftime('%Y-%m-%d'))
-    # if is_all == 'all':
-    #     city_list = get_city_list()
-    #     file_name = '全省巡检报告汇总-{}.xlsx'.format(date.today().strftime('%Y-%m-%d'))
-    # else:
-    #     city_list.append(city)
-    #     file_name = '巡检报告汇总-{}-{}.xlsx'.format(g_city_to_name[city], date.today().strftime('%Y-%m-%d'))
 
     for i in city_list:
         city_data = []
         host_list = get_host(i)
+        logging.info('city {} host_list {}'.format(i, host_list))
         for j in host_list:
             last = XunJian.query.filter_by(host_name = j).order_by(XunJian.id.desc()).first()
             if last:
+                logging.info('host: {} last data ok'.format(j))
                 data = XunJian.query.filter_by(host_name = j, date_time = last.date_time).all()
                 # xunjian_data += data
                 city_data += data
+            else:
+                logging.info('host: {} last data err')
 
     # file_name = '报告汇总.xlsx'
         labels = [
@@ -1276,7 +1272,10 @@ def xj_report_summary():
     #生成全省报告
     save_path = os.path.join('app','static', all_city_report_name)
     if all_data:
+        logging.info('xj_report_summary begin save')
         make_excel(save_path, labels, all_data)
+    else:
+        logging.info('xj_report_summary today not data')
 
 @main.route('/xj_summary_download')
 @login_required
