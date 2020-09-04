@@ -166,7 +166,7 @@ def get_card_detail(config):
     card_detial_data = []
     is_abnormal = '否'
     p_card = r'(?s)(Card \w{1,2}\n.*?\n    Memory capacity)'
-    p_slot_type_state = r'(\w{1,2}) {8,9}([\S]{4,20}) {20,40}(up|down) {2,4}(up|down)'
+    p_slot_type_state = r'(\w{1,2}) {8,9}([\S]{4,20}) {20,40}(up) {2,4}(up)'
     # p_operational_state = r'Operational state             : (up|down)\n'
     p_serial_number = r'Serial number                 : (.{11})\n'
     p_time_of_last_boot = r'Time of last boot             : (.*?)\n'
@@ -239,7 +239,7 @@ def get_card_statistic(config):
     card_statistic_data = []
 
     p_card_summary = r'(?s)(Card Summary\n={79}\n.*?\n=)'
-    p_card_type = r'\w{1,2} {8,9}([\S]{4,20}) *?(up|down)    (up|down)'
+    p_card_type = r'\w{1,2} {8,9}([\S]{4,20}) *?up    up'
 
 
     host_name = get_host_name(config)
@@ -251,7 +251,6 @@ def get_card_statistic(config):
     res_card_summary = re.search(p_card_summary, config)
     if res_card_summary:
         res_card_type = re.findall(p_card_type, res_card_summary.group())
-        res_card_type = [ i[0] for i in res_card_type ]
         card_type_unique = list(set(res_card_type))
         for item in card_type_unique:
             card_statistic_data.append((
