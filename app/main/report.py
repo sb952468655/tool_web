@@ -239,7 +239,7 @@ def get_card_statistic(config):
     card_statistic_data = []
 
     p_card_summary = r'(?s)(Card Summary\n={79}\n.*?\n=)'
-    p_card_type = r'\w{1,2} {8,9}([\S]{4,20}) *?up    up'
+    p_card_type = r'\w{1,2} {8,9}([\S]{4,20}) *?(up|down)    (up|down)'
 
 
     host_name = get_host_name(config)
@@ -251,6 +251,7 @@ def get_card_statistic(config):
     res_card_summary = re.search(p_card_summary, config)
     if res_card_summary:
         res_card_type = re.findall(p_card_type, res_card_summary.group())
+        res_card_type = [ i[0] for i in res_card_type ]
         card_type_unique = list(set(res_card_type))
         for item in card_type_unique:
             card_statistic_data.append((
