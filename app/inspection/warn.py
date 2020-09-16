@@ -1047,9 +1047,13 @@ def mobile_warn33(config):
     p_nat_pppoe= r'(?s)NAT Pool nat-pppoe\n={79}.*?='
     p_nat_iptv= r'(?s)NAT Pool nat-iptv\n={79}.*?='
     p_usage = r'Block usage \(%\)                       : (< )?(\d{1,3})'
+    p_port_nat_out_ip = r'(?s)(Port (\d{1,2}/\d{1,2}/nat-out-ip)\n-{79}\n.*?\n=)'
+    p_utilization = r'Utilization \(% of port capacity\) {17,19}([0-9\.]{4,6}) '
 
     res_nat_pppoe = re.search(p_nat_pppoe, config)
     res_nat_iptv = re.search(p_nat_iptv, config)
+    res_port_nat_out_ip = re.findall(p_port_nat_out_ip, config)
+
 
     if res_nat_pppoe:
         msg += res_nat_pppoe.group() + '\n'
@@ -1068,6 +1072,16 @@ def mobile_warn33(config):
             err += 'nat pool "nat-iptv" 地址利用率大于60%：{}\n'.format(res_usage.group())
         else:
             err += 'nat pool "nat-iptv" 地址利用率状态正常：{}\n'.format(res_usage.group())
+
+    for i in res_port_nat_out_ip:
+        res_utilization = re.search(p_utilization, i[0])
+        if res_utilization:
+            utilization = float(res_utilization.group(1))
+            if utilization > 50 and utilization < 70:
+                err += ' nat 端口{} 流量超过50%\n'.format(i[1])
+            elif utilization > 70:
+                err += ' nat 端口{} 流量超过70%\n'.format(i[1])
+
 
     return (msg, err, check_item)
 
