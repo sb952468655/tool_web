@@ -1081,6 +1081,8 @@ def mobile_warn33(config):
                 err += ' nat 端口{} 流量超过50%\n'.format(i[1])
             elif utilization > 70:
                 err += ' nat 端口{} 流量超过70%\n'.format(i[1])
+            else:
+                err += ' nat 端口流量正常：{}%\n'.format(utilization)
 
 
     return (msg, err, check_item)
