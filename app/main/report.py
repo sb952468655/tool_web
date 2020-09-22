@@ -628,6 +628,21 @@ def get_service_statistic(config):
                         description = res_description.group(1)
                 data.append((res_port.group(1), description, 'n/a', res_port.group(1), i[1], 'base', 'n/a'))
 
+
+def get_nat_port(config):
+    '''获取nat port 利用率'''
+
+    data = []
+    p_port_nat_out_ip = r'(?s)(Port (\d{1,2}/\d{1,2}/nat-out-ip)\n-{79}\n.*?\n=)'
+    p_utilization = r'Utilization \(% of port capacity\) {17,19}([0-9\.]{4,6}) '
+
+    res_port_nat_out_ip = re.findall(p_port_nat_out_ip, config)
+    for i in res_port_nat_out_ip:
+        res_utilization = re.search(p_utilization, i[0])
+        if res_utilization:
+            utilization = float(res_utilization.group(1))
+            data.append((i[1], str(utilization)+'%'))
+
     return data
 def get_host_name(config):
     '''获取设备名称'''

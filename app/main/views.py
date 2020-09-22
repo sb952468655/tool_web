@@ -407,6 +407,35 @@ def mda_statistic():
     mda_statistic_data = [(index, item) for index, item in enumerate(mda_statistic_data) ]
     return render_template('mda_statistic.html', host_name=host_name, host_list = host_list, mda_statistic_data = mda_statistic_data, action='mda_statistic')
 
+@main.route('/nat_port', methods=['GET', 'POST'])
+@login_required
+def nat_port():
+    '''nat port 统计'''
+
+    search_date = date.today()
+    city = session.get('city')
+    if not city:
+        return redirect(url_for('main.city_list'))
+    host_list = get_host(city)
+
+    if request.method == 'POST':
+        host_name = request.form.get('host_name')
+        form_date = request.form.get('date')
+        if form_date:
+            search_date = datetime.strptime(form_date,'%Y-%m-%d').date()
+    else:
+        host_name = request.args.get('host_name')
+        if not host_name:
+            host_name = host_list[0]
+
+    if host_name == 'all':
+        nat_port_data = get_last_data(NatPort, city=city, search_date=search_date)
+    else:
+        nat_port_data = get_last_data(NatPort, host_name, search_date=search_date)
+
+    nat_port_data = [(index, item) for index, item in enumerate(nat_port_data) ]
+    return render_template('report/nat_port.html', host_name=host_name, host_list = host_list, data = nat_port_data, action='nat_port')
+
 @main.route('/port_statistic', methods=['GET', 'POST'])
 @login_required
 def port_statistic():
@@ -1015,6 +1044,20 @@ def download_excel(host_name, table_name):
                 i.time_of_last_boot,
                 i.temperature,
                 i.temperature_threshold
+            ))
+    elif table_name == 'nat_port':
+        file_name = 'Nat Port 利用率统计表-{}.xlsx'.format(today_str)
+        labels = [
+            '设备名', 'Port', '利用率', '采集日期'
+        ]
+
+        nat_port_data = NatPort.query.filter_by(host_name = host_name, date_time = date.today()).all()
+        for i in nat_port_data:
+            data.append((
+                i.host_name,
+                i.port,
+                i.utilization,
+                i.date_time
             ))
 
     save_path = os.path.join('app','static', file_name)
@@ -2777,22 +2820,8 @@ def save_db():
                 # t_netflow.start()
                 #专线统计
                 save_special_line(i, j, today_log)
-                # t_special_line = threading.Thread(target=save_special_line, args=(i, j, today_log))
-                # t_special_line.start()
-
-                # t_port_detail.join()
-                # t_port_statistic.join()
-                # t_card_detail.join()
-                # t_card_statistic.join()
-                # t_mda_detail.join()
-                # t_mda_statistic.join()
-                # t_load_statistic.join()
-                # t_load_statistic_host.join()
-                # t_address_collect.join()
-                # t_zuxun.join()
-                # t_netflow.join()
-                # t_special_line.join()
-
+                #Nat Port 利用率统计
+                save_nat_port(i, j, today_log)
             if today_log and yesterday_log:
                 save_xunjian(i, j, today_log, yesterday_log)
                 # t_xunjian = threading.Thread(target=save_xunjian, args=(i, j, today_log, yesterday_log))
@@ -3358,13 +3387,13 @@ def save_netflow(city, host_name, config):
     today_data_count = NetFlow.query.filter_by(site_name = host_name, date_time = date.today()).count()
 
     if today_data_count:
-        logging.info('netflow host: {} today is saved'.format(host_name))
+        logging.info('host: {} today is saved'.format(host_name))
         # db.session.close()
         return
 
     res = get_netflow(config)
     if res:
-        logging.info('netflow host: {} {} begin save'.format(host_name, 'netflow'))
+        logging.info('host: {} {} begin save'.format(host_name, 'netflow'))
 
     today = date.today()
     netflow = NetFlow(
@@ -3383,6 +3412,34 @@ def save_netflow(city, host_name, config):
 
     db.session.add(netflow)
     db.session.commit()
+    db.session.close()
+
+def save_nat_port(city, host_name, config):
+    '''保存nat port 利用率'''
+
+    today_data_count = NatPort.query.filter_by(host_name = host_name, date_time = date.today()).count()
+
+    if today_data_count:
+        logging.info('nat port host: {} today is saved'.format(host_name))
+        # db.session.close()
+        return
+
+    res = get_nat_port(config)
+    if res:
+        logging.info('nat port host: {} begin save'.format(host_name))
+
+    today = date.today()
+    for i in res:
+        nat_port = NatPort(
+            city = city,
+            host_name = host_name,
+            port = i[0],
+            utilization = i[1],
+            date_time = today
+        )
+
+        db.session.add(nat_port)
+        db.session.commit()
     db.session.close()
 
 def save_install_base():

@@ -377,6 +377,17 @@ class ServiceStatistic(db.Model):
     service_id = db.Column(db.String(64)) #service_id
     date_time = db.Column(db.Date, default = date.today())
 
+class NatPort(db.Model):
+    '''Nat Port 流量表'''
+
+    __tablename__ = 'nat_port'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    city = db.Column(db.String(64)) #地市
+    host_name = db.Column(db.String(64)) #设备名
+    port = db.Column(db.String(64)) #端口
+    utilization = db.Column(db.String(64)) #利用率
+    date_time = db.Column(db.Date, default = date.today())
+
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
