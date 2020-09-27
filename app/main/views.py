@@ -818,19 +818,21 @@ def download_excel(host_name, table_name):
             '省份', '运营商', '业务类型', '网络类型', '设备类型', '设备型号', '版本', '数量', '备注'
         ]
 
-        install_base_data = InstallBase.query.filter_by(date_time = date.today()).all()
-        for i in install_base_data:
-            data.append((
-                i.province,
-                i.operator,
-                i.busines_type,
-                i.net_type,
-                i.host_type,
-                i.host_model,
-                i.version,
-                i.number,
-                i.note
-            ))
+        last = InstallBase.query.order_by(InstallBase.id.desc()).first()
+        if last:
+            install_base_data = InstallBase.query.filter_by(date_time = last.date_time).all()
+            for i in install_base_data:
+                data.append((
+                    i.province,
+                    i.operator,
+                    i.busines_type,
+                    i.net_type,
+                    i.host_type,
+                    i.host_model,
+                    i.version,
+                    i.number,
+                    i.note
+                ))
     elif table_name == 'net_flow':
         file_name = '重要网络流量统计-{} 江苏.xlsx'.format(date.today().strftime('%Y%m%d'))
         labels = [
