@@ -282,9 +282,9 @@ def all_card_statistic():
             data_set[i.card_type] = data_set[i.card_type] + int(i.card_num)
 
     data = []
-    date_str = ''
-    if mda_statistic_data:
-        date_str = mda_statistic_data[0].date_time
+    date_str = date.today().strftime('%Y-%m-%d')
+    # if mda_statistic_data:
+    #     date_str = mda_statistic_data[0].date_time
     for k, v in data_set.items():
         data.append((k,v))
     data = [(index, item) for index, item in enumerate(data) ]
