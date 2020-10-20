@@ -1666,9 +1666,7 @@ def backup_list():
     zip_name = os.path.join('app', 'static', 'backup', file_name)
     zip = zipfile.ZipFile(zip_name, 'w', zipfile.ZIP_DEFLATED )
     for city, name in select_host:
-        log_str = get_log(city, name)
-        if not log_str:
-            log_str = get_log_first(city, name)
+        log_str = get_log_first(city, name)
         if log_str:
             log_config_str = log_str[:log_str.index('# Finished')]
             back_up_log_path = os.path.join('app', 'static', 'backup', 'config备份-{}-{}.log'.format(name, date.today().strftime('%Y%m%d')))
