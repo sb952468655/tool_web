@@ -1623,7 +1623,7 @@ def config_backup():
     # today = date.today()
     date_str = date.today().strftime('%Y%m%d')
     for item in host_list:
-        log1 = get_log(city, item)
+        # log1 = get_log(city, item)
         log1 = get_log_first(city, item)
         if log1:
             log_str = log1
