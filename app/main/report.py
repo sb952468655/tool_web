@@ -11,10 +11,13 @@ def get_port(config):
     '''show port'''
 
     '''2/2/6         Down  No   Down    9212 9212    - netw null xcme   GIGE-LX  20KM'''
-    p_port = r'''(\d{1,2}/\d{1,2}/\d{1,2}) {6,9}(Up|Down) {2,4}(Yes|No) {2,3}(Up|Down) {4,6}(\d{4}) (\d{4}) {2,4}(-|\d{1,3}) (accs|netw) (null|qinq) (xgige|xcme) {2,3}((10GBASE-LR|10GBASE-ER|GIGE-LX|MDX GIGE-T |MDI GIGE-T )( {2}(\d{2}KM|\*))?)?'''
-    # p_port = r'''(\d{1,2}/\d{1,2}/\d{1,2}) {6,9}(Up|Down) {2,4}(Yes|No) {2,3}(Up|Down) {4,6}(\d{4}) (\d{4}) {2,4}(-|\d{1,3}) (accs|netw) (null|qinq) (xgige|xcme) {2,3}((10GBASE-（L|E）R|GIGE-LX|MDX GIGE-T |MDI GIGE-T )( {2}(\d{2}KM|\*))?)?'''
+    # p_port = r'''(\d{1,2}/\d{1,2}/\d{1,2}) {6,9}(Up|Down) {2,4}(Yes|No) {2,3}(Up|Down) {4,6}(\d{4}) (\d{4}) {2,4}(-|\d{1,3}) (accs|netw) (null|qinq|dotq) (xgige|xcme|cgige|vport) {2,3}((10GBASE-LR|10GBASE-ER|GIGE-LX|MDX GIGE-T |MDI GIGE-T |100GBASE-LR4\*)( {2}(\d{2}KM|\*))?)?'''
+    p_port = r'''(\d{1,2}/\d{1,2}/.*?) {1,9}(Up|Down) {2,4}(Yes|No) {2,3}(Up|Down|Link Up) {1,6}([0-9 ]{4}) ([0-9 ]{4}) {2,4}(-|\d{1,3}) (accs|netw) (null|qinq|dotq) (xgige|xcme|cgige|vport) {2,3}((10GBASE-LR|10GBASE-ER|GIGE-LX|MDX GIGE-T |MDI GIGE-T |100GBASE)( {2}(\d{2}KM|\*))?)?'''
+    p_port_2 = r'(\d{1,2}/\d{1,2}/.*?)\n {14}(Up|Down) {2,4}(Yes|No) {2,3}(Up|Down|Link Up) {1,6}([0-9 ]{4}) ([0-9 ]{4}) {2,4}(-|\d{1,3}) (accs|netw) (null|qinq|dotq) (xgige|xcme|cgige|vport) {2,3}((10GBASE-LR|10GBASE-ER|GIGE-LX|MDX GIGE-T |MDI GIGE-T |100GBASE)( {2}(\d{2}KM|\*))?)?'
     port_data = []
     res = re.findall(p_port, config)
+    res_2 = re.findall(p_port_2, config)
+    res = res + res_2
     device_name = get_device_name(config)
 
     for item in res:
@@ -42,12 +45,16 @@ def get_port_statistic(config):
     port_statistic_data = []
     ge_num = 0
     ge_10_num = 0
+    ge_100_num = 0
     ge_used_num = 0
     ge_free_num = 0
     ge_10_used_num = 0
     ge_10_free_num = 0
+    ge_100_used_num = 0
+    ge_100_free_num = 0
 
-    p_port = r'''(\d{1,2}/\d{1,2}/\d{1,2}) {6,9}(Up|Down) {2,4}(Yes|No) {2,3}(Up|Down) {4,6}(\d{4}) (\d{4}) {2,4}(-|\d{1,3}) (accs|netw|hybr) (null|qinq|dotq) (xgige|xcme) {2,3}((10GBASE-LR|10GBASE-ER|GIGE-LX|MDX GIGE-T |MDI GIGE-T )( {2}(\d{2}KM|\*))?)?'''
+    p_port = r'''(\d{1,2}/\d{1,2}/.*?) {1,9}(Up|Down) {2,4}(Yes|No) {2,3}(Up|Down|Link Up) {1,6}([0-9 ]{4}) ([0-9 ]{4}) {2,4}(-|\d{1,3}) (accs|netw) (null|qinq|dotq) (xgige|xcme|cgige|vport) {2,3}((10GBASE-LR|10GBASE-ER|GIGE-LX|MDX GIGE-T |MDI GIGE-T |100GBASE)( {2}(\d{2}KM|\*))?)?'''
+    p_port_2 = r'(\d{1,2}/\d{1,2}/.*?)\n {14}(Up|Down) {2,4}(Yes|No) {2,3}(Up|Down|Link Up) {1,6}([0-9 ]{4}) ([0-9 ]{4}) {2,4}(-|\d{1,3}) (accs|netw) (null|qinq|dotq) (xgige|xcme|cgige|vport) {2,3}((10GBASE-LR|10GBASE-ER|GIGE-LX|MDX GIGE-T |MDI GIGE-T |100GBASE)( {2}(\d{2}KM|\*))?)?'
     host_name = get_host_name(config)
     host_ip = get_ip(config)
 
@@ -55,8 +62,10 @@ def get_port_statistic(config):
         return port_statistic_data
 
     res_port = re.findall(p_port, config)
+    res_port_2 = re.findall(p_port_2, config)
+    res_port = res_port + res_port_2
     for item in res_port:
-        if item[10].startswith('10'):
+        if item[10].startswith('10GBASE'):
             ge_10_num += 1
             if item[1] == 'Up' and item[2] == 'Yes' and item[3] == 'Up':
                 ge_10_used_num += 1
@@ -68,7 +77,12 @@ def get_port_statistic(config):
                 ge_used_num += 1
             else:
                 ge_free_num += 1
-
+        elif item[10].startswith('100GBASE'):
+            ge_100_num += 1
+            if item[1] == 'Up' and item[2] == 'Yes' and item[3] == 'Up':
+                ge_100_used_num += 1
+            else:
+                ge_100_free_num += 1
 
     port_statistic_data.append((
         host_name,
@@ -86,6 +100,15 @@ def get_port_statistic(config):
         ge_num,
         ge_used_num,
         ge_free_num
+    ))
+
+    port_statistic_data.append((
+        host_name,
+        host_ip,
+        '100GE',
+        ge_100_num,
+        ge_100_used_num,
+        ge_100_free_num
     ))
 
     return port_statistic_data
