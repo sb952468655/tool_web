@@ -74,6 +74,7 @@ def all_check(config):
     err.append(cms_rms_check(config))
     err.append(ims_check(config))
     err.append(fc_ef_check(config))
+    err.append(interface_3100_check(config))
 
 
     return err
@@ -335,6 +336,41 @@ def vpls_no_shutdown_check(config):
     else:
         err = 'Vpls no shutdown 检查 -> ERROR\n\n' + err + '\n\n请人工核实该vpls是否还有pppoe业务需求'
 
+
+    return (check_item, err, msg)
+
+
+def interface_3100_check(config):
+    '''上行口interface必须配置3100'''
+
+    err = ''
+    msg = ''
+    check_item = '''interface filter 3100检查'''
+    p_isis_interface = r'(?s)Rtr Base ISIS Instance 0 Interfaces ?\n={79}.*?\n={79}'
+    p_interface_up = r'\n([^\s]+?) +?L\d{1,2} +?\d{1,4} +?Up +?[1-9]'
+    p_ip_filter = r'(?s)IP Filter\n={79}.*?\n={79}'
+    p_router_interface = r'- Router Interface ([^\s]+?) '
+
+    err = ''
+    interface_up = []
+    router_interface = []
+    res_isis_interface = re.search(p_isis_interface, config)
+    if res_isis_interface:
+        interface_up = re.findall(p_interface_up, res_isis_interface.group())
+
+    res_ip_filter = re.search(p_ip_filter, config)
+    if res_ip_filter:
+        router_interface = re.findall(p_router_interface, res_ip_filter.group())
+
+    for i in interface_up:
+        if i not in router_interface:
+            err += 'interface {} 没有配置filter 3100\n'.format(i)
+
+    if err == '':
+        err = 'interface filter 3100检查 -> OK\n\n'
+    else:
+        err = add_space(err, '  ')
+        err = 'interface filter 3100检查 -> ERROR\n\n' + err + '\n\n'
 
     return (check_item, err, msg)
 
