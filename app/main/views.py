@@ -742,9 +742,9 @@ def download_excel(host_name, table_name):
                     temp_data = CardStatistic.query.filter_by(host_name = j, date_time = last.date_time).all()
                     card_statistic_data += temp_data
         else:
-            last = CardStatistic.query.filter_by(host_name = j).order_by(CardStatistic.id.desc()).first()
+            last = CardStatistic.query.filter_by(host_name = host_name).order_by(CardStatistic.id.desc()).first()
             if last:
-                card_statistic_data = CardStatistic.query.filter_by(host_name = j, date_time = last.date_time).all()
+                card_statistic_data = CardStatistic.query.filter_by(host_name = host_name, date_time = last.date_time).all()
         # card_statistic_data = CardStatistic.query.filter_by(host_name = host_name, date_time = date.today()).all()
         for i in card_statistic_data:
             data.append((
